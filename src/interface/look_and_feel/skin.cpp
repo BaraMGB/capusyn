@@ -643,7 +643,9 @@ class SkinColorPicker : public Component, public Button::Listener, public Slider
         FileChooser open_box("Open Skin", File(), String("*.") + vital::kSkinExtension);
         if (open_box.browseForFileToOpen()) {
           if (!skin_->loadFromFile(open_box.getResult())) {
-            AlertWindow::showNativeDialogBox("Error opening skin", "Skin file is corrupted and won't load.", false);
+            AlertWindow::showMessageBox(MessageBoxIconType::WarningIcon,
+                                        "Error opening skin",
+                                        "Skin file is corrupted and won't load.");
             return;
           }
           setSliderValues();

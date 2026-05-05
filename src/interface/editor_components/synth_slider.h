@@ -23,11 +23,11 @@
 #include "open_gl_image_component.h"
 #include "open_gl_multi_quad.h"
 #include "synth_types.h"
+#include "synth_section.h"
 
 class FullInterface;
 class OpenGlSlider;
 class SynthGuiInterface;
-class SynthSection;
 
 class OpenGlSliderQuad : public OpenGlQuad {
   public:
@@ -469,4 +469,3 @@ class SynthSlider : public OpenGlSlider, public TextEditor::Listener {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SynthSlider)
 };
-

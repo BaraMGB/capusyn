@@ -21,6 +21,8 @@
 
 #include <set>
 
+using namespace juce::gl;
+
 class OverlayBackgroundRenderer : public OpenGlComponent {
   public:
     static constexpr int kNumVertices = 4;
@@ -192,4 +194,3 @@ class Overlay : public SynthSection {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Overlay)
 };
-

@@ -89,7 +89,11 @@ class ModulationButton : public PlainShapeComponent {
 
     void setForceEnableModulationSource();
     bool hasAnyModulation();
-    void setFontSize(float size) { font_size_ = size; }
+    void setFontSize(float size) {
+      font_size_ = size;
+      resized();
+      redrawImage(true);
+    }
     Rectangle<int> getModulationAmountBounds(int index, int total);
     Rectangle<int> getModulationAreaBounds();
     Rectangle<int> getMeterBounds();
@@ -118,4 +122,3 @@ class ModulationButton : public PlainShapeComponent {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ModulationButton)
 };
-

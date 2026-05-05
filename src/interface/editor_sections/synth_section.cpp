@@ -67,7 +67,7 @@ void SynthSection::paint(Graphics& g) { }
 void SynthSection::paintSidewaysHeadingText(Graphics& g) {
   int title_width = findValue(Skin::kTitleWidth);
   g.setColour(findColour(Skin::kHeadingText, true));
-  g.setFont(Fonts::instance()->proportional_light().withPointHeight(size_ratio_ * 14.0f));
+  g.setFont(Fonts::instance()->proportional_light().withHeight(size_ratio_ * 14.0f));
   g.saveState();
   g.setOrigin(Point<int>(0, getHeight()));
   g.addTransform(AffineTransform::rotation(-vital::kPi / 2.0f));
@@ -86,7 +86,7 @@ void SynthSection::paintHeadingText(Graphics& g) {
   }
 
   g.setColour(findColour(Skin::kHeadingText, true));
-  g.setFont(Fonts::instance()->proportional_light().withPointHeight(size_ratio_ * 14.0f));
+  g.setFont(Fonts::instance()->proportional_light().withHeight(size_ratio_ * 14.0f));
   g.drawText(TRANS(getName()), getTitleBounds(), Justification::centred, false);
 }
 
@@ -264,6 +264,11 @@ void SynthSection::setSizeRatio(float ratio) {
 
   for (auto& sub_section : sub_sections_)
     sub_section->setSizeRatio(ratio);
+
+  for (auto& open_gl_component : open_gl_components_) {
+    if (auto* image_component = dynamic_cast<OpenGlImageComponent*>(open_gl_component))
+      image_component->redrawImage(true);
+  }
 }
 
 void SynthSection::paintKnobShadows(Graphics& g) {
@@ -750,7 +755,7 @@ int SynthSection::getPixelMultiple() const {
 
 Font SynthSection::getLabelFont() {
   float height = findValue(Skin::kLabelHeight);
-  return Fonts::instance()->proportional_regular().withPointHeight(height);
+  return Fonts::instance()->proportional_regular().withHeight(height);
 }
 
 void SynthSection::setLabelFont(Graphics& g) {

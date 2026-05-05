@@ -145,6 +145,20 @@ DistortionFilterResponse::DistortionFilterResponse(const vital::output_map& mono
 
 DistortionFilterResponse::~DistortionFilterResponse() = default;
 
+void DistortionFilterResponse::mouseDown(const MouseEvent& e) {
+  last_mouse_position_ = e.getPosition();
+}
+
+void DistortionFilterResponse::mouseDrag(const MouseEvent& e) {
+  Point<int> delta = e.getPosition() - last_mouse_position_;
+  last_mouse_position_ = e.getPosition();
+
+  float cutoff_range = cutoff_slider_->getMaximum() - cutoff_slider_->getMinimum();
+  cutoff_slider_->setValue(cutoff_slider_->getValue() + delta.x * cutoff_range / getWidth());
+  float resonance_range = resonance_slider_->getMaximum() - resonance_slider_->getMinimum();
+  resonance_slider_->setValue(resonance_slider_->getValue() - delta.y * resonance_range / getHeight());
+}
+
 void DistortionFilterResponse::init(OpenGlWrapper& open_gl) {
   OpenGlLineRenderer::init(open_gl);
 
@@ -250,23 +264,23 @@ void DistortionFilterResponse::bind(OpenGLContext& open_gl_context) {
                                                    GL_FALSE, 2 * sizeof(float), nullptr);
   open_gl_context.extensions.glEnableVertexAttribArray(position->attributeID);
 
-  open_gl_context.extensions.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, response_buffer_);
+  glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, response_buffer_);
 }
 
 void DistortionFilterResponse::unbind(OpenGLContext& open_gl_context) {
   OpenGLShaderProgram::Attribute* position = response_shader_.position.get();
   open_gl_context.extensions.glDisableVertexAttribArray(position->attributeID);
   open_gl_context.extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
-  open_gl_context.extensions.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
+  glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 }
 
 void DistortionFilterResponse::renderLineResponse(OpenGlWrapper& open_gl) {
-  open_gl.context.extensions.glBeginTransformFeedback(GL_POINTS);
+  glBeginTransformFeedback(GL_POINTS);
   glDrawArrays(GL_POINTS, 0, kResolution);
-  open_gl.context.extensions.glEndTransformFeedback();
+  glEndTransformFeedback();
 
-  void* buffer = open_gl.context.extensions.glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
-                                                             kResolution * sizeof(float), GL_MAP_READ_BIT);
+  void* buffer = glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                                  kResolution * sizeof(float), GL_MAP_READ_BIT);
 
   float* response_data = (float*)buffer;
   float x_adjust = getWidth();
@@ -276,7 +290,7 @@ void DistortionFilterResponse::renderLineResponse(OpenGlWrapper& open_gl) {
     setYAt(i, y_adjust * (1.0 - response_data[i]));
   }
 
-  open_gl.context.extensions.glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+  glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
 }
 
 void DistortionFilterResponse::drawFilterResponse(OpenGlWrapper& open_gl, bool animate) {

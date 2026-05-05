@@ -87,7 +87,7 @@ class LfoSection : public SynthSection, public PresetSelector::Listener, public 
     void sliderValueChanged(Slider* changed_slider) override;
     void buttonClicked(Button* clicked_button) override;
 
-    void setPhase(float phase) override { phase_->setValue(phase); }
+    void setPhase(float phase) override;
     void lineEditorScrolled(const MouseEvent& e, const MouseWheelDetails& wheel) override;
     void togglePaintMode(bool enabled, bool temporary_switch) override;
     void importLfo() override;
@@ -138,4 +138,3 @@ class LfoSection : public SynthSection, public PresetSelector::Listener, public 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LfoSection)
 };
-

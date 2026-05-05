@@ -39,19 +39,8 @@ class DistortionFilterResponse : public OpenGlLineRenderer {
     void render(OpenGlWrapper& open_gl, bool animate) override;
     void destroy(OpenGlWrapper& open_gl) override;
 
-    void mouseDown(const MouseEvent& e) override {
-      last_mouse_position_ = e.getPosition();
-    }
-
-    void mouseDrag(const MouseEvent& e) override {
-      Point<int> delta = e.getPosition() - last_mouse_position_;
-      last_mouse_position_ = e.getPosition();
-
-      float cutoff_range = cutoff_slider_->getMaximum() - cutoff_slider_->getMinimum();
-      cutoff_slider_->setValue(cutoff_slider_->getValue() + delta.x * cutoff_range / getWidth());
-      float resonance_range = resonance_slider_->getMaximum() - resonance_slider_->getMinimum();
-      resonance_slider_->setValue(resonance_slider_->getValue() - delta.y * resonance_range / getHeight());
-    }
+    void mouseDown(const MouseEvent& e) override;
+    void mouseDrag(const MouseEvent& e) override;
 
     void setCutoffSlider(SynthSlider* slider) { cutoff_slider_ = slider; }
     void setResonanceSlider(SynthSlider* slider) { resonance_slider_ = slider; }
@@ -133,4 +122,3 @@ class DistortionSection : public SynthSection {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistortionSection)
 };
-

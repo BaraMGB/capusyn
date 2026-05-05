@@ -56,16 +56,10 @@ void OpenGlImageComponent::redrawImage(bool force) {
   paintToImage(g);
   image_.setImage(draw_image_.get());
 
-  float gl_width = vital::utils::nextPowerOfTwo(width);
-  float gl_height = vital::utils::nextPowerOfTwo(height);
-  float width_ratio = gl_width / width;
-  float height_ratio = gl_height / height;
-
-  float right = -1.0f + 2.0f * width_ratio;
-  float bottom = 1.0f - 2.0f * height_ratio;
-  image_.setTopRight(right, 1.0f);
-  image_.setBottomLeft(-1.0f, bottom);
-  image_.setBottomRight(right, bottom);
+  image_.setTopLeft(-1.0f, 1.0f);
+  image_.setTopRight(1.0f, 1.0f);
+  image_.setBottomLeft(-1.0f, -1.0f);
+  image_.setBottomRight(1.0f, -1.0f);
   image_.unlock();
 }
 

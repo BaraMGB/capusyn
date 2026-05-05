@@ -112,7 +112,7 @@ void PresetList::paintBackground(Graphics& g) {
   g.fillRect(getWidth() - date_width, 0, 1, title_width);
 
   g.setColour(findColour(Skin::kTextComponentText, true));
-  g.setFont(Fonts::instance()->proportional_regular().withPointHeight(title_width * 0.5f));
+  g.setFont(Fonts::instance()->proportional_regular().withHeight(title_width * 0.5f));
 
   Path star = Paths::star();
   float star_draw_width = title_width * 0.8f;
@@ -477,7 +477,7 @@ void PresetList::loadBrowserCache(int start_index, int end_index) {
   int date_x = image_width - date_width + text_padding;
 
   end_index = std::min(static_cast<int>(filtered_presets_.size()), end_index);
-  Font font = Fonts::instance()->proportional_light().withPointHeight(row_height * 0.5f);
+  Font font = Fonts::instance()->proportional_light().withHeight(row_height * 0.5f);
 
   Path star = Paths::star();
   float star_draw_width = row_height * 0.8f;
@@ -544,12 +544,8 @@ void PresetList::renderOpenGlComponents(OpenGlWrapper& open_gl, bool animate) {
   Rectangle<int> view_bounds(0, title_width, getWidth(), getHeight() - title_width);
   OpenGlComponent::setViewPort(this, view_bounds, open_gl);
 
-  float image_width = vital::utils::nextPowerOfTwo(getWidth());
-  float image_height = vital::utils::nextPowerOfTwo(row_height);
-  float width_ratio = image_width / getWidth();
-  float height_ratio = image_height / row_height;
-
-  float open_gl_row_height = height_ratio * 2.0f * row_height / view_height;
+  float width_ratio = 1.0f;
+  float open_gl_row_height = 2.0f * row_height / view_height;
   int cache_position = std::max(0, std::min(cache_position_, num_presets - kNumCachedRows));
   for (int i = 0; i < kNumCachedRows && i < num_presets; ++i) {
     int row = cache_position + i;
@@ -976,7 +972,7 @@ bool PresetBrowser::loadFromFile(File& preset) {
     int comments_font_size = kCommentsFontHeight * size_ratio_;
     if (comments_) {
       comments_->setText(comments);
-      comments_->setFont(Fonts::instance()->proportional_light().withPointHeight(comments_font_size));
+      comments_->setFont(Fonts::instance()->proportional_light().withHeight(comments_font_size));
       comments_->redoImage();
     }
     return true;
@@ -1018,7 +1014,7 @@ void PresetBrowser::loadPresetInfo() {
   int comments_font_size = kCommentsFontHeight * size_ratio_;
   if (comments_) {
     comments_->setText(comments);
-    comments_->setFont(Fonts::instance()->proportional_light().withPointHeight(comments_font_size));
+    comments_->setFont(Fonts::instance()->proportional_light().withHeight(comments_font_size));
     comments_->redoImage();
   }
 }

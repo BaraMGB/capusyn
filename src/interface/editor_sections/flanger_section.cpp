@@ -55,6 +55,20 @@ FlangerResponse::FlangerResponse(const vital::output_map& mono_modulations) : Op
 
 FlangerResponse::~FlangerResponse() { }
 
+void FlangerResponse::mouseDown(const MouseEvent& e) {
+  last_mouse_position_ = e.getPosition();
+}
+
+void FlangerResponse::mouseDrag(const MouseEvent& e) {
+  Point<int> delta = e.getPosition() - last_mouse_position_;
+  last_mouse_position_ = e.getPosition();
+
+  float center_range = center_slider_->getMaximum() - center_slider_->getMinimum();
+  center_slider_->setValue(center_slider_->getValue() + delta.x * center_range / getWidth());
+  float feedback_range = feedback_slider_->getMaximum() - feedback_slider_->getMinimum();
+  feedback_slider_->setValue(feedback_slider_->getValue() - delta.y * feedback_range / getHeight());
+}
+
 void FlangerResponse::init(OpenGlWrapper& open_gl) {
   if (parent_ == nullptr)
     parent_ = findParentComponentOfClass<SynthGuiInterface>();
@@ -159,25 +173,25 @@ void FlangerResponse::bind(OpenGLContext& open_gl_context) {
                                                    GL_FALSE, 2 * sizeof(float), nullptr);
   open_gl_context.extensions.glEnableVertexAttribArray(position->attributeID);
 
-  open_gl_context.extensions.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, response_buffer_);
+  glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, response_buffer_);
 }
 
 void FlangerResponse::unbind(OpenGLContext& open_gl_context) {
   OpenGLShaderProgram::Attribute* position = response_shader_.position.get();
   open_gl_context.extensions.glDisableVertexAttribArray(position->attributeID);
   open_gl_context.extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
-  open_gl_context.extensions.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
+  glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 }
 
 void FlangerResponse::renderLineResponse(OpenGlWrapper& open_gl, int index) {
   static constexpr float kMaxMidi = 128.0f;
 
-  open_gl.context.extensions.glBeginTransformFeedback(GL_POINTS);
+  glBeginTransformFeedback(GL_POINTS);
   glDrawArrays(GL_POINTS, 0, kResolution);
-  open_gl.context.extensions.glEndTransformFeedback();
+  glEndTransformFeedback();
 
-  void* buffer = open_gl.context.extensions.glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
-                                                             kResolution * sizeof(float), GL_MAP_READ_BIT);
+  void* buffer = glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                                  kResolution * sizeof(float), GL_MAP_READ_BIT);
   vital::poly_float midi = vital::utils::frequencyToMidiNote(flanger_frequency_->value());
   float offset = midi[index] * (getWidth() / kMaxMidi) - getWidth() * 1.5f;
   float* response_data = (float*)buffer;
@@ -188,7 +202,7 @@ void FlangerResponse::renderLineResponse(OpenGlWrapper& open_gl, int index) {
     setYAt(i, y_adjust * (1.0 - response_data[i]));
   }
 
-  open_gl.context.extensions.glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+  glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
 }
 
 void FlangerResponse::drawFilterResponse(OpenGlWrapper& open_gl, bool animate) {

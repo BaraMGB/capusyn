@@ -54,6 +54,15 @@ class OpenGlImage {
       position_vertices_[index + 1] = y;
       dirty_ = true;
     }
+
+    inline void setTextureCoordinate(float x, float y, int index) {
+      position_vertices_[index + 2] = x;
+      position_vertices_[index + 3] = y;
+      dirty_ = true;
+    }
+
+    void setTextureCoordinates(float right, float bottom);
+
     inline void setTopLeft(float x, float y) { setPosition(x, y, 0); }
     inline void setBottomLeft(float x, float y) { setPosition(x, y, 4); }
     inline void setBottomRight(float x, float y) { setPosition(x, y, 8); }
@@ -92,4 +101,3 @@ class OpenGlImage {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OpenGlImage)
 };
-

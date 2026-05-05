@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "futils.h"
 #include "processor.h"
 #include "synth_filter.h"
 
@@ -163,4 +164,3 @@ namespace vital {
       JUCE_LEAK_DETECTOR(PhaserFilter)
   };
 } // namespace vital
-

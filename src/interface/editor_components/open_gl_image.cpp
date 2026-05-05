@@ -46,6 +46,13 @@ OpenGlImage::OpenGlImage() : dirty_(true), image_(nullptr), image_width_(0), ima
 
 OpenGlImage::~OpenGlImage() { }
 
+void OpenGlImage::setTextureCoordinates(float right, float bottom) {
+  setTextureCoordinate(0.0f, 1.0f, 0);
+  setTextureCoordinate(0.0f, bottom, 4);
+  setTextureCoordinate(right, bottom, 8);
+  setTextureCoordinate(right, 1.0f, 12);
+}
+
 void OpenGlImage::init(OpenGlWrapper& open_gl) {
   open_gl.context.extensions.glGenBuffers(1, &vertex_buffer_);
   open_gl.context.extensions.glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
@@ -73,6 +80,9 @@ void OpenGlImage::drawImage(OpenGlWrapper& open_gl) {
   mutex_.lock();
   if (image_) {
     texture_.loadImage(*image_);
+    float right = image_width_ / (1.0f * texture_.getWidth());
+    float bottom = 1.0f - image_height_ / (1.0f * texture_.getHeight());
+    setTextureCoordinates(right, bottom);
     image_ = nullptr;
   }
   mutex_.unlock();

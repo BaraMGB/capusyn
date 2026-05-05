@@ -16,22 +16,23 @@
 
 #include "fonts.h"
 
-Fonts::Fonts() :
-    proportional_regular_(Typeface::createSystemTypefaceFor(
-        BinaryData::LatoRegular_ttf, BinaryData::LatoRegular_ttfSize)),
-    proportional_light_(Typeface::createSystemTypefaceFor(
-        BinaryData::LatoLight_ttf, BinaryData::LatoLight_ttfSize)),
-    proportional_title_(Typeface::createSystemTypefaceFor(
-        BinaryData::MontserratLight_otf, BinaryData::MontserratLight_otfSize)),
-    proportional_title_regular_(Typeface::createSystemTypefaceFor(
-        BinaryData::MontserratRegular_ttf, BinaryData::MontserratRegular_ttfSize)),
-    monospace_(Typeface::createSystemTypefaceFor(
-        BinaryData::DroidSansMono_ttf, BinaryData::DroidSansMono_ttfSize)) {
+namespace {
+Font createLegacyEmbeddedFont(const void* data, int size) {
+  auto typeface = Typeface::createSystemTypefaceFor(data, static_cast<size_t>(size));
+  return Font(FontOptions(typeface).withMetricsKind(TypefaceMetricsKind::legacy));
+}
+}
 
-  Array<int> glyphs;
-  Array<float> x_offsets;
-  proportional_regular_.getGlyphPositions("test", glyphs, x_offsets);
-  proportional_light_.getGlyphPositions("test", glyphs, x_offsets);
-  proportional_title_.getGlyphPositions("test", glyphs, x_offsets);
-  monospace_.getGlyphPositions("test", glyphs, x_offsets);
+Fonts::Fonts() :
+    proportional_regular_(createLegacyEmbeddedFont(BinaryData::LatoRegular_ttf,
+                                                   BinaryData::LatoRegular_ttfSize)),
+    proportional_light_(createLegacyEmbeddedFont(BinaryData::LatoLight_ttf,
+                                                 BinaryData::LatoLight_ttfSize)),
+    proportional_title_(createLegacyEmbeddedFont(BinaryData::MontserratLight_otf,
+                                                 BinaryData::MontserratLight_otfSize)),
+    proportional_title_regular_(createLegacyEmbeddedFont(BinaryData::MontserratRegular_ttf,
+                                                         BinaryData::MontserratRegular_ttfSize)),
+    monospace_(createLegacyEmbeddedFont(BinaryData::DroidSansMono_ttf,
+                                        BinaryData::DroidSansMono_ttfSize)) {
+
 }

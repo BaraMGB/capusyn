@@ -21,6 +21,7 @@
 #include "synth_section.h"
 
 class SynthButton;
+class TabSelector;
 
 class ReverbSection : public SynthSection, public EqualizerResponse::Listener {
   public:
@@ -58,4 +59,3 @@ class ReverbSection : public SynthSection, public EqualizerResponse::Listener {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReverbSection)
 };
-

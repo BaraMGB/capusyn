@@ -19,7 +19,8 @@
 #include "sound_engine.h"
 #include "load_save.h"
 
-SynthPlugin::SynthPlugin() {
+SynthPlugin::SynthPlugin() :
+    AudioProcessor(BusesProperties().withOutput("Output", AudioChannelSet::stereo(), true)) {
   last_seconds_time_ = 0.0;
 
   int num_params = vital::Parameters::getNumParameters();
@@ -92,6 +93,14 @@ bool SynthPlugin::isInputChannelStereoPair(int index) const {
 
 bool SynthPlugin::isOutputChannelStereoPair(int index) const {
   return true;
+}
+
+bool SynthPlugin::isBusesLayoutSupported(const BusesLayout& layouts) const {
+  if (layouts.getMainInputChannelSet() != AudioChannelSet::disabled())
+    return false;
+
+  AudioChannelSet output = layouts.getMainOutputChannelSet();
+  return output == AudioChannelSet::mono() || output == AudioChannelSet::stereo();
 }
 
 bool SynthPlugin::acceptsMidi() const {

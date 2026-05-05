@@ -31,8 +31,14 @@ class TabSelector : public Slider {
     void mouseDown(const MouseEvent& e) override;
     void mouseDrag(const MouseEvent& e) override;
     void mouseUp(const MouseEvent& e) override;
-    void setNames(std::vector<std::string> names) { names_ = names; }
-    void setFontHeightPercent(float percent) { font_height_percent_ = percent; }
+    void setNames(std::vector<std::string> names) {
+      names_ = std::move(names);
+      redoImage();
+    }
+    void setFontHeightPercent(float percent) {
+      font_height_percent_ = percent;
+      redoImage();
+    }
     float getFontHeightPercent() { return font_height_percent_; }
 
     void setActive(bool active) { active_ = active; }
@@ -56,4 +62,3 @@ class TabSelector : public Slider {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TabSelector)
 };
-

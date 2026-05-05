@@ -51,6 +51,7 @@ class SynthPlugin : public SynthBase, public AudioProcessor, public ValueBridge:
     const String getOutputChannelName(int channel_index) const override;
     bool isInputChannelStereoPair(int index) const override;
     bool isOutputChannelStereoPair(int index) const override;
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -79,4 +80,3 @@ class SynthPlugin : public SynthBase, public AudioProcessor, public ValueBridge:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SynthPlugin)
 };
-

@@ -21,6 +21,8 @@
 #include "skin.h"
 #include "synth_module.h"
 
+using namespace juce::gl;
+
 class SynthSection;
 class OpenGlCorners;
 
@@ -111,4 +113,3 @@ class OpenGlComponent : public Component {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OpenGlComponent)
 };
-

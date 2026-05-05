@@ -22,7 +22,10 @@
 #if HEADLESS
 
 class FullInterface { };
+
+#if !defined(JUCE_AUDIO_DEVICES_H_INCLUDED)
 class AudioDeviceManager { };
+#endif
 
 #endif
 
@@ -76,4 +79,3 @@ class SynthGuiInterface {
   
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SynthGuiInterface)
 };
-

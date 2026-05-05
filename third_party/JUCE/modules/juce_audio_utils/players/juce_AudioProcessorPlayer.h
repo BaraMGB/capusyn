@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-6-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -92,7 +101,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void audioDeviceIOCallback (const float**, int, float**, int, int) override;
+    void audioDeviceIOCallbackWithContext (const float* const*, int, float* const*, int, int, const AudioIODeviceCallbackContext&) override;
     /** @internal */
     void audioDeviceAboutToStart (AudioIODevice*) override;
     /** @internal */
@@ -101,6 +110,27 @@ public:
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage&) override;
 
 private:
+    struct NumChannels
+    {
+        NumChannels() = default;
+        NumChannels (int numIns, int numOuts) : ins (numIns), outs (numOuts) {}
+
+        explicit NumChannels (const AudioProcessor::BusesLayout& layout)
+            : ins (layout.getNumChannels (true, 0)), outs (layout.getNumChannels (false, 0)) {}
+
+        AudioProcessor::BusesLayout toLayout() const
+        {
+            return { { AudioChannelSet::canonicalChannelSet (ins) },
+                     { AudioChannelSet::canonicalChannelSet (outs) } };
+        }
+
+        int ins = 0, outs = 0;
+    };
+
+    //==============================================================================
+    NumChannels findMostSuitableLayout (const AudioProcessor&) const;
+    void resizeChannels();
+
     //==============================================================================
     AudioProcessor* processor = nullptr;
     CriticalSection lock;
@@ -108,14 +138,18 @@ private:
     int blockSize = 0;
     bool isPrepared = false, isDoublePrecision = false;
 
-    int numInputChans = 0, numOutputChans = 0;
-    HeapBlock<float*> channels;
+    NumChannels deviceChannels, defaultProcessorChannels, actualProcessorChannels;
+    std::vector<float*> channels;
     AudioBuffer<float> tempBuffer;
     AudioBuffer<double> conversionBuffer;
 
     MidiBuffer incomingMidi;
     MidiMessageCollector messageCollector;
     MidiOutput* midiOutput = nullptr;
+    uint64_t sampleCount = 0;
+
+    AudioIODevice* currentDevice = nullptr;
+    AudioWorkgroup currentWorkgroup;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer)
 };

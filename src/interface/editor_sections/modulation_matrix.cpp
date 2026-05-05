@@ -737,8 +737,8 @@ void ModulationMatrix::paintBackground(Graphics& g) {
   g.fillRect(destination_x, 0, 1, title_width);
 
   g.setColour(findColour(Skin::kTextComponentText, true));
-  Font regular = Fonts::instance()->proportional_light().withPointHeight(title_width * 0.4f);
-  Font sorted = Fonts::instance()->proportional_regular().withPointHeight(title_width * 0.4f);
+  Font regular = Fonts::instance()->proportional_light().withHeight(title_width * 0.4f);
+  Font sorted = Fonts::instance()->proportional_regular().withHeight(title_width * 0.4f);
   g.setFont(sort_column_ == kNumber ? sorted : regular);
   g.drawText("#", 0, 0, row_height, title_width, Justification::centred);
   g.setFont(sort_column_ == kSource ? sorted : regular);
@@ -1122,11 +1122,9 @@ void ModulationMatrix::renderOpenGlComponents(OpenGlWrapper& open_gl, bool anima
   OpenGlComponent::setViewPort(&viewport_, open_gl);
   ScopedLock open_gl_lock(open_gl_critical_section_);
 
-  float image_width = vital::utils::nextPowerOfTwo(background_.getImageWidth());
-  float image_height = vital::utils::nextPowerOfTwo(background_.getImageHeight());
   int mult = getPixelMultiple();
-  float width_ratio = image_width / (mult * viewport_.getWidth());
-  float height_ratio = image_height / (mult * viewport_.getHeight());
+  float width_ratio = background_.getImageWidth() / (1.0f * mult * viewport_.getWidth());
+  float height_ratio = background_.getImageHeight() / (1.0f * mult * viewport_.getHeight());
     
   float y_offset = (2.0f * viewport_.getViewPositionY()) / viewport_.getHeight();
 

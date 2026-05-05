@@ -63,6 +63,8 @@ namespace vital {
     sample_delay_ = kMinDelay;
   }
 
+  Reverb::~Reverb() = default;
+
   void Reverb::setupBuffersForSampleRate(int sample_rate) {
     int buffer_scale = getBufferScale(sample_rate);
     int max_feedback_size = buffer_scale * (1 << (kBaseFeedbackBits + kMaxSizePower));

@@ -217,11 +217,9 @@ void EffectsInterface::renderOpenGlComponents(OpenGlWrapper& open_gl, bool anima
 
   OpenGlComponent::setViewPort(&viewport_, open_gl);
 
-  float image_width = vital::utils::nextPowerOfTwo(background_.getImageWidth());
-  float image_height = vital::utils::nextPowerOfTwo(background_.getImageHeight());
   int mult = getPixelMultiple();
-  float width_ratio = image_width / (container_->getWidth() * mult);
-  float height_ratio = image_height / (viewport_.getHeight() * mult);
+  float width_ratio = background_.getImageWidth() / (1.0f * container_->getWidth() * mult);
+  float height_ratio = background_.getImageHeight() / (1.0f * viewport_.getHeight() * mult);
   float y_offset = (2.0f * viewport_.getViewPositionY()) / getHeight();
 
   background_.setTopLeft(-1.0f, 1.0f + y_offset);

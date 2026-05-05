@@ -86,7 +86,7 @@ void ContentList::paintBackground(Graphics& g) {
   g.fillRect(selected_width + name_width, 0, 1, title_width);
 
   g.setColour(findColour(Skin::kTextComponentText, true));
-  g.setFont(Fonts::instance()->proportional_regular().withPointHeight(title_width * 0.5f));
+  g.setFont(Fonts::instance()->proportional_regular().withHeight(title_width * 0.5f));
 
   String name = getName() + " Name";
   g.drawText(name, selected_width + text_padding, 0, name_width, title_width, Justification::centredLeft);
@@ -325,7 +325,7 @@ void ContentList::loadBrowserCache(int start_index, int end_index) {
   int date_x = image_width - date_width + text_padding;
 
   end_index = std::min(static_cast<int>(contents_.size()), end_index);
-  Font font = Fonts::instance()->proportional_light().withPointHeight(row_height * 0.5f);
+  Font font = Fonts::instance()->proportional_light().withHeight(row_height * 0.5f);
 
   Path icon;
   icon.addRoundedRectangle(0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f);
@@ -387,13 +387,9 @@ void ContentList::renderOpenGlComponents(OpenGlWrapper& open_gl, bool animate) {
   Rectangle<int> view_bounds(0, title_width, getWidth(), getHeight() - title_width);
   OpenGlComponent::setViewPort(this, view_bounds, open_gl);
 
-  float image_width = vital::utils::nextPowerOfTwo(getWidth());
-  float image_height = vital::utils::nextPowerOfTwo(row_height);
-  float width_ratio = image_width / getWidth();
-  float height_ratio = image_height / row_height;
-
   float open_gl_row_height = 2.0f * row_height / view_height;
-  float open_gl_image_height = height_ratio * open_gl_row_height;
+  float width_ratio = 1.0f;
+  float open_gl_image_height = open_gl_row_height;
   int cache_position = std::max(0, std::min(cache_position_, num_contents - kNumCachedRows));
   int num_selected = 0;
   for (int i = 0; i < kNumCachedRows && i < num_contents; ++i) {

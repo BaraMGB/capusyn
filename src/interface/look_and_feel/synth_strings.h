@@ -17,6 +17,8 @@
 #pragma once
 
 #include <string>
+
+#include "operators.h"
 #include "synth_constants.h"
 
 namespace strings {

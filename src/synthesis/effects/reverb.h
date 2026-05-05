@@ -62,7 +62,7 @@ namespace vital {
       };
 
       Reverb();
-      virtual ~Reverb() { }
+      virtual ~Reverb();
 
       void process(int num_samples) override;
       void processWithInput(const poly_float* audio_in, int num_samples) override;
@@ -144,4 +144,3 @@ namespace vital {
       JUCE_LEAK_DETECTOR(Reverb)
   };
 } // namespace vital
-

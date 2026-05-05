@@ -21,6 +21,7 @@
 #include "paths.h"
 #include "lfo_editor.h"
 #include "modulation_button.h"
+#include "synth_slider.h"
 #include "synth_strings.h"
 #include "tempo_selector.h"
 #include "text_selector.h"
@@ -192,6 +193,10 @@ LfoSection::LfoSection(String name, std::string value_prepend, LineGenerator* lf
 }
 
 LfoSection::~LfoSection() = default;
+
+void LfoSection::setPhase(float phase) {
+  phase_->setValue(phase);
+}
 
 void LfoSection::paintBackground(Graphics& g) {
   if (getWidth() <= 0)

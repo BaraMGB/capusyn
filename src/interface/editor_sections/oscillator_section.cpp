@@ -469,7 +469,7 @@ OscillatorSection::OscillatorSection(Authentication* auth,
 #if !defined(NO_TEXT_ENTRY)
   ttwt_ = std::make_unique<OpenGlTextEditor>("ttwt");
   ttwt_->addListener(this);
-  ttwt_->setFont(Fonts::instance()->proportional_light().withPointHeight(16.0f));
+  ttwt_->setFont(Fonts::instance()->proportional_light().withHeight(16.0f));
   ttwt_->setMultiLine(false, false);
   ttwt_->setJustification(Justification::centred);
   addChildComponent(ttwt_.get());
@@ -731,7 +731,7 @@ void OscillatorSection::resized() {
     int ttwt_x = wavetable_->getX() + widget_margin;
     int ttwt_width = wavetable_->getWidth() - 2 * widget_margin;
     ttwt_->setBounds(ttwt_x, ttwt_y, ttwt_width, ttwt_height);
-    ttwt_->setFont(Fonts::instance()->proportional_light().withPointHeight(ttwt_height * 0.6f));
+    ttwt_->setFont(Fonts::instance()->proportional_light().withHeight(ttwt_height * 0.6f));
     ttwt_settings_->setBounds(ttwt_->getRight() - settings_width, ttwt_->getBottom(), settings_width, ttwt_height / 2);
 
     ttwt_error_text_->setTextSize(label_text_height);
@@ -1183,4 +1183,3 @@ void OscillatorSection::notifyDestinationChange() {
   if (parent)
     parent->getSynth()->valueChangedInternal(destination_control_name_, current_destination_);
 }
-

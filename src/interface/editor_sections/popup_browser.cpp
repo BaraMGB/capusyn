@@ -98,7 +98,7 @@ void PopupDisplay::setContent(const std::string& text, Rectangle<int> bounds,
 
   int height = kHeight * size_ratio_;
   int mult = getPixelMultiple();
-  Font font = Fonts::instance()->proportional_light().withPointHeight(height * 0.5f * mult);
+  Font font = Fonts::instance()->proportional_light().withHeight(height * 0.5f * mult);
   int padding = height / 4;
   int buffer = padding * 2 + 2;
   int width = (font.getStringWidth(text) / getPixelMultiple()) + buffer;
@@ -293,10 +293,8 @@ void PopupList::renderOpenGlComponents(OpenGlWrapper& open_gl, bool animate) {
   Rectangle<int> view_bounds(getLocalBounds());
   OpenGlComponent::setViewPort(this, view_bounds, open_gl);
 
-  float image_width = vital::utils::nextPowerOfTwo(getWidth());
-  float image_height = vital::utils::nextPowerOfTwo(rows_.getImageHeight());
-  float width_ratio = image_width / getWidth();
-  float height_ratio = image_height / (getPixelMultiple() * getHeight());
+  float width_ratio = rows_.getImageWidth() / (1.0f * getPixelMultiple() * getWidth());
+  float height_ratio = rows_.getImageHeight() / (1.0f * getPixelMultiple() * getHeight());
   float y_offset = 2.0f * getViewPosition() / getHeight();
 
   rows_.setTopLeft(-1.0f, 1.0f + y_offset);
@@ -784,7 +782,7 @@ void SelectionList::loadBrowserCache(int start_index, int end_index) {
   int name_width = image_width - name_x;
 
   end_index = std::min(static_cast<int>(filtered_selections_.size()), end_index);
-  Font font = Fonts::instance()->proportional_light().withPointHeight(row_height * 0.55f);
+  Font font = Fonts::instance()->proportional_light().withHeight(row_height * 0.55f);
 
   Path star = Paths::star();
   Path folder = Paths::folder();
@@ -871,12 +869,8 @@ void SelectionList::renderOpenGlComponents(OpenGlWrapper& open_gl, bool animate)
   Rectangle<int> view_bounds(getLocalBounds());
   OpenGlComponent::setViewPort(this, view_bounds, open_gl);
 
-  float image_width = vital::utils::nextPowerOfTwo(getWidth());
-  float image_height = vital::utils::nextPowerOfTwo(row_height);
-  float width_ratio = image_width / getWidth();
-  float height_ratio = image_height / row_height;
-
-  float open_gl_row_height = height_ratio * 2.0f * row_height / view_height;
+  float width_ratio = 1.0f;
+  float open_gl_row_height = 2.0f * row_height / view_height;
   int cache_position = std::max(0, std::min(cache_position_, num_presets - kNumCachedRows));
   for (int i = 0; i < kNumCachedRows && i < num_presets; ++i) {
     int row = cache_position + i;

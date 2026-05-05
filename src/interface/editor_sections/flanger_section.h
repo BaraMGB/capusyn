@@ -40,19 +40,8 @@ class FlangerResponse : public OpenGlLineRenderer {
     void render(OpenGlWrapper& open_gl, bool animate) override;
     void destroy(OpenGlWrapper& open_gl) override;
 
-    void mouseDown(const MouseEvent& e) override {
-      last_mouse_position_ = e.getPosition();
-    }
-
-    void mouseDrag(const MouseEvent& e) override {
-      Point<int> delta = e.getPosition() - last_mouse_position_;
-      last_mouse_position_ = e.getPosition();
-
-      float center_range = center_slider_->getMaximum() - center_slider_->getMinimum();
-      center_slider_->setValue(center_slider_->getValue() + delta.x * center_range / getWidth());
-      float feedback_range = feedback_slider_->getMaximum() - feedback_slider_->getMinimum();
-      feedback_slider_->setValue(feedback_slider_->getValue() - delta.y * feedback_range / getHeight());
-    }
+    void mouseDown(const MouseEvent& e) override;
+    void mouseDrag(const MouseEvent& e) override;
 
     void setCenterSlider(SynthSlider* slider) { center_slider_ = slider; }
     void setFeedbackSlider(SynthSlider* slider) { feedback_slider_ = slider; }
@@ -132,4 +121,3 @@ class FlangerSection : public SynthSection {
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FlangerSection)
 };
-
