@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "wave_line_source.h"
@@ -23,7 +23,7 @@
 #include "wavetable_component_factory.h"
 
 WaveLineSource::WaveLineSourceKeyframe::WaveLineSourceKeyframe() :
-    line_generator_(vital::WaveFrame::kWaveformSize) {
+    line_generator_(capusyn::WaveFrame::kWaveformSize) {
   pull_power_ = 0.0f;
 }
 
@@ -44,10 +44,10 @@ void WaveLineSource::WaveLineSourceKeyframe::interpolate(const WavetableKeyframe
                                                          float t) {
   const WaveLineSourceKeyframe* from = dynamic_cast<const WaveLineSourceKeyframe*>(from_keyframe);
   const WaveLineSourceKeyframe* to = dynamic_cast<const WaveLineSourceKeyframe*>(to_keyframe);
-  VITAL_ASSERT(from->getNumPoints() == to->getNumPoints());
+  CAPUSYN_ASSERT(from->getNumPoints() == to->getNumPoints());
 
   float relative_power = from->getPullPower() - to->getPullPower();
-  float adjusted_t = vital::futils::powerScale(t, relative_power);
+  float adjusted_t = capusyn::futils::powerScale(t, relative_power);
 
   const LineGenerator* from_generator = from->getLineGenerator();
   const LineGenerator* to_generator = to->getLineGenerator();
@@ -66,10 +66,10 @@ void WaveLineSource::WaveLineSourceKeyframe::interpolate(const WavetableKeyframe
   }
 }
 
-void WaveLineSource::WaveLineSourceKeyframe::render(vital::WaveFrame* wave_frame) {
+void WaveLineSource::WaveLineSourceKeyframe::render(capusyn::WaveFrame* wave_frame) {
   line_generator_.render();
-  memcpy(wave_frame->time_domain, line_generator_.getBuffer(), vital::WaveFrame::kWaveformSize * sizeof(float));
-  for (int i = 0; i < vital::WaveFrame::kWaveformSize; ++i)
+  memcpy(wave_frame->time_domain, line_generator_.getBuffer(), capusyn::WaveFrame::kWaveformSize * sizeof(float));
+  for (int i = 0; i < capusyn::WaveFrame::kWaveformSize; ++i)
     wave_frame->time_domain[i] = wave_frame->time_domain[i] * 2.0f - 1.0f;
   wave_frame->toFrequencyDomain();
 }
@@ -96,7 +96,7 @@ WavetableKeyframe* WaveLineSource::createKeyframe(int position) {
   return keyframe;
 }
 
-void WaveLineSource::render(vital::WaveFrame* wave_frame, float position) {
+void WaveLineSource::render(capusyn::WaveFrame* wave_frame, float position) {
   interpolate(&compute_frame_, position);
   compute_frame_.render(wave_frame);
 }

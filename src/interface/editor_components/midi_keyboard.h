@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -28,13 +28,13 @@ class MidiKeyboard : public OpenGlComponent {
 
     static constexpr int kNumWhiteKeys = 75;
     static constexpr int kNumWhiteKeysPerOctave = 7;
-    static constexpr int kNumBlackKeys = vital::kMidiSize - kNumWhiteKeys;
-    static constexpr int kNumBlackKeysPerOctave = vital::kNotesPerOctave - kNumWhiteKeysPerOctave;
+    static constexpr int kNumBlackKeys = capusyn::kMidiSize - kNumWhiteKeys;
+    static constexpr int kNumBlackKeysPerOctave = capusyn::kNotesPerOctave - kNumWhiteKeysPerOctave;
     static constexpr float kBlackKeyHeightRatio = 0.7f;
     static constexpr float kBlackKeyWidthRatio = 0.8f;
 
     force_inline static bool isWhiteKey(int midi) {
-      return kWhiteKeys[midi % vital::kNotesPerOctave];
+      return kWhiteKeys[midi % capusyn::kNotesPerOctave];
     }
 
     MidiKeyboard(MidiKeyboardState& state);

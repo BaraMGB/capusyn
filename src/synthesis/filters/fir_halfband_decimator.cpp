@@ -1,23 +1,23 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "fir_halfband_decimator.h"
 #include "poly_utils.h"
 
-namespace vital {
+namespace capusyn {
   FirHalfbandDecimator::FirHalfbandDecimator() : Processor(kNumInputs, 1) {
     static const mono_float coefficients[kNumTaps] = {
       0.000088228877315364f,
@@ -73,8 +73,8 @@ namespace vital {
   void FirHalfbandDecimator::process(int num_samples) {
     const poly_float* audio = input(kAudio)->source->buffer;
     int output_buffer_size = num_samples;
-    VITAL_ASSERT(output_buffer_size > kNumTaps / 2);
-    VITAL_ASSERT(input(kAudio)->source->buffer_size >= 2 * output_buffer_size);
+    CAPUSYN_ASSERT(output_buffer_size > kNumTaps / 2);
+    CAPUSYN_ASSERT(input(kAudio)->source->buffer_size >= 2 * output_buffer_size);
 
     poly_float* audio_out = output()->buffer;
     for (int memory_start = 0; memory_start < kNumTaps / 2 - 1; ++memory_start) {
@@ -117,4 +117,4 @@ namespace vital {
     for (int i = 0; i < kNumTaps / 2 - 1; ++i)
       memory_[i] = 0.0f;
   }
-} // namespace vital
+} // namespace capusyn

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -21,7 +21,7 @@
 
 #include <cmath>
 
-namespace vital {
+namespace capusyn {
 
   namespace utils {
     constexpr mono_float kPhaseEncodingMultiplier = 0.9f;
@@ -93,11 +93,11 @@ namespace vital {
     force_inline poly_float cos(poly_float value) { return map<cosf>(value); }
 
     force_inline poly_float sqrt(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_sqrt_ps(value.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_sqrt_ps(value.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return map<sqrtf>(value);
     #endif
     }
@@ -152,11 +152,11 @@ namespace vital {
     }
 
     force_inline poly_float toPolyFloatFromUnaligned(const mono_float* unaligned) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_loadu_ps(unaligned);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_loadu_ps(unaligned);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vld1q_f32(unaligned);
     #endif
     }
@@ -256,51 +256,51 @@ namespace vital {
     }
 
     force_inline poly_float swapStereo(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_ps(value.value, value.value, _MM_SHUFFLE(2, 3, 0, 1));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_ps(value.value, value.value, _MM_SHUFFLE(2, 3, 0, 1));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vrev64q_f32(value.value);
     #endif
     }
 
     force_inline poly_int swapStereo(poly_int value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_epi32(value.value, _MM_SHUFFLE(2, 3, 0, 1));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_epi32(value.value, _MM_SHUFFLE(2, 3, 0, 1));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vrev64q_u32(value.value);
     #endif
     }
 
     force_inline poly_float swapVoices(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_ps(value.value, value.value, _MM_SHUFFLE(1, 0, 3, 2));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_ps(value.value, value.value, _MM_SHUFFLE(1, 0, 3, 2));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vextq_f32(value.value, value.value, 2);
     #endif
     }
 
     force_inline poly_int swapVoices(poly_int value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_epi32(value.value, value.value, _MM_SHUFFLE(1, 0, 3, 2));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_epi32(value.value, _MM_SHUFFLE(1, 0, 3, 2));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vextq_u32(value.value, value.value, 2);
     #endif
     }
 
     force_inline poly_float swapInner(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_ps(value.value, value.value, _MM_SHUFFLE(3, 1, 2, 0));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_ps(value.value, value.value, _MM_SHUFFLE(3, 1, 2, 0));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       float32x4_t rotated = vextq_f32(value.value, value.value, 2);
       float32x4x2_t zipped = vzipq_f32(value.value, rotated);
       return zipped.val[0];
@@ -308,31 +308,31 @@ namespace vital {
     }
 
     force_inline poly_float reverse(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_ps(value.value, value.value, _MM_SHUFFLE(0, 1, 2, 3));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_ps(value.value, value.value, _MM_SHUFFLE(0, 1, 2, 3));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return swapVoices(swapStereo(value));
     #endif
     }
 
     force_inline poly_float consolidateAudio(poly_float one, poly_float two) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_unpacklo_ps(one.value, two.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_unpacklo_ps(one.value, two.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vzipq_f32(one.value, two.value).val[0];
     #endif
     }
 
     force_inline poly_float compactFirstVoices(poly_float one, poly_float two) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_shuffle_ps(one.value, two.value, _MM_SHUFFLE(1, 0, 1, 0));
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_shuffle_ps(one.value, two.value, _MM_SHUFFLE(1, 0, 1, 0));
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vcombine_f32(vget_low_f32(one.value), vget_low_f32(two.value));
     #endif
     }
@@ -485,25 +485,25 @@ namespace vital {
     }
 
     force_inline poly_float toFloat(poly_int integers) {
-      VITAL_ASSERT(poly_float::kSize == poly_int::kSize);
+      CAPUSYN_ASSERT(poly_float::kSize == poly_int::kSize);
 
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_cvtepi32_ps(integers.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_cvtepi32_ps(integers.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vcvtq_f32_s32(vreinterpretq_s32_u32(integers.value));
     #endif
     }
 
     force_inline poly_int toInt(poly_float floats) {
-      VITAL_ASSERT(poly_float::kSize == poly_int::kSize);
+      CAPUSYN_ASSERT(poly_float::kSize == poly_int::kSize);
 
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_cvtps_epi32(floats.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_cvtps_epi32(floats.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vreinterpretq_u32_s32(vcvtq_s32_f32(floats.value));
     #endif
     }
@@ -543,43 +543,43 @@ namespace vital {
     }
 
     force_inline poly_float reinterpretToFloat(poly_int value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_castsi256_ps(value.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_castsi128_ps(value.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vreinterpretq_f32_u32(value.value);
     #endif
     }
 
     force_inline poly_int reinterpretToInt(poly_float value) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_castps_si256(value.value);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_castps_si128(value.value);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vreinterpretq_u32_f32(value.value);
     #endif
     }
 
     template<size_t shift>
     force_inline poly_int shiftRight(poly_int integer) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_srli_epi32(integers.value, shift);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_srli_epi32(integer.value, shift);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vshrq_n_u32(integer.value, shift);
     #endif
     }
 
     template<size_t shift>
     force_inline poly_int shiftLeft(poly_int integer) {
-    #if VITAL_AVX2
+    #if CAPUSYN_AVX2
       return _mm256_slli_epi32(integers.value, shift);
-    #elif VITAL_SSE2
+    #elif CAPUSYN_SSE2
       return _mm_slli_epi32(integer.value, shift);
-    #elif VITAL_NEON
+    #elif CAPUSYN_NEON
       return vshlq_n_u32(integer.value, shift);
     #endif
     }
@@ -683,5 +683,5 @@ namespace vital {
       return { phase, voice };
     }
   } // namespace utils
-} // namespace vital
+} // namespace capusyn
 

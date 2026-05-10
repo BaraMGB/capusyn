@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -25,7 +25,7 @@
 #include <map>
 #include <list>
 
-namespace vital {
+namespace capusyn {
 
   struct VoiceState {
     VoiceState() : event(kInvalid), midi_note(0), tuned_note(0.0f), last_note(0.0f), velocity(0.0f),
@@ -183,17 +183,17 @@ namespace vital {
 
       force_inline void shiftVoiceEvent(int num_samples) {
         event_sample_ -= num_samples;
-        VITAL_ASSERT(event_sample_ >= 0);
+        CAPUSYN_ASSERT(event_sample_ >= 0);
       }
 
       force_inline void shiftAftertouchEvent(int num_samples) {
         aftertouch_sample_ -= num_samples;
-        VITAL_ASSERT(aftertouch_sample_ >= 0);
+        CAPUSYN_ASSERT(aftertouch_sample_ >= 0);
       }
 
       force_inline void shiftSlideEvent(int num_samples) {
         slide_sample_ -= num_samples;
-        VITAL_ASSERT(slide_sample_ >= 0);
+        CAPUSYN_ASSERT(slide_sample_ >= 0);
       }
 
       force_inline void clearAftertouchEvent() {
@@ -276,7 +276,7 @@ namespace vital {
       virtual ~VoiceHandler();
 
       virtual Processor* clone() const override {
-        VITAL_ASSERT(false);
+        CAPUSYN_ASSERT(false);
         return nullptr;
       }
 
@@ -316,7 +316,7 @@ namespace vital {
       poly_mask getCurrentVoiceMask();
 
       force_inline void setModWheel(mono_float value, int channel = 0) {
-        VITAL_ASSERT(channel < kNumMidiChannels && channel >= 0);
+        CAPUSYN_ASSERT(channel < kNumMidiChannels && channel >= 0);
         mod_wheel_values_[channel] = value;
       }
 
@@ -326,7 +326,7 @@ namespace vital {
       }
 
       force_inline void setPitchWheel(mono_float value, int channel = 0) {
-        VITAL_ASSERT(channel < kNumMidiChannels && channel >= 0);
+        CAPUSYN_ASSERT(channel < kNumMidiChannels && channel >= 0);
         pitch_wheel_values_[channel] = value;
         for (Voice* voice : active_voices_) {
           if (voice->state().channel == channel && voice->held())
@@ -335,9 +335,9 @@ namespace vital {
       }
 
       force_inline void setZonedPitchWheel(mono_float value, int from_channel, int to_channel) {
-        VITAL_ASSERT(from_channel < kNumMidiChannels && from_channel >= 0);
-        VITAL_ASSERT(to_channel < kNumMidiChannels && to_channel >= 0);
-        VITAL_ASSERT(to_channel >= from_channel);
+        CAPUSYN_ASSERT(from_channel < kNumMidiChannels && from_channel >= 0);
+        CAPUSYN_ASSERT(to_channel < kNumMidiChannels && to_channel >= 0);
+        CAPUSYN_ASSERT(to_channel >= from_channel);
         for (int i = from_channel; i <= to_channel; ++i)
           zoned_pitch_wheel_values_[i] = value;
       }
@@ -487,5 +487,5 @@ namespace vital {
 
       JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VoiceHandler)
   };
-} // namespace vital
+} // namespace capusyn
 

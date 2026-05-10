@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -111,7 +111,7 @@ class ModulationMatrixRow : public SynthSection {
     void repaintBackground() override { }
 
     void setGuiParent(SynthGuiInterface* parent) { parent_ = parent; }
-    void setConnection(vital::ModulationConnection* connection) { connection_ = connection; }
+    void setConnection(capusyn::ModulationConnection* connection) { connection_ = connection; }
 
     void paintBackground(Graphics& g) override;
     void sliderValueChanged(Slider* changed_slider) override;
@@ -145,7 +145,7 @@ class ModulationMatrixRow : public SynthSection {
     std::vector<Listener*> listeners_;
 
     int index_;
-    vital::ModulationConnection* connection_;
+    capusyn::ModulationConnection* connection_;
     SynthGuiInterface* parent_;
 
     std::unique_ptr<ModulationSelector> source_;
@@ -191,7 +191,7 @@ class ModulationMatrix : public SynthSection, public ModulationViewport::Listene
         virtual void modulationsScrolled() = 0;
     };
 
-    ModulationMatrix(const vital::output_map& sources, const vital::output_map& destinations);
+    ModulationMatrix(const capusyn::output_map& sources, const capusyn::output_map& destinations);
     virtual ~ModulationMatrix();
 
     void paintBackground(Graphics& g) override;
@@ -207,7 +207,7 @@ class ModulationMatrix : public SynthSection, public ModulationViewport::Listene
     void parentHierarchyChanged() override;
     void sliderValueChanged(Slider* changed_slider) override;
     void buttonClicked(Button* button) override;
-    void setAllValues(vital::control_map& controls) override;
+    void setAllValues(capusyn::control_map& controls) override;
 
     void initOpenGlComponents(OpenGlWrapper& open_gl) override;
     void renderOpenGlComponents(OpenGlWrapper& open_gl, bool animate) override;
@@ -272,8 +272,8 @@ class ModulationMatrix : public SynthSection, public ModulationViewport::Listene
     std::unique_ptr<OpenGlScrollBar> scroll_bar_;
 
     CriticalSection open_gl_critical_section_;
-    std::unique_ptr<ModulationMatrixRow> rows_[vital::kMaxModulationConnections];
-    std::unique_ptr<LineMapEditor> map_editors_[vital::kMaxModulationConnections];
+    std::unique_ptr<ModulationMatrixRow> rows_[capusyn::kMaxModulationConnections];
+    std::unique_ptr<LineMapEditor> map_editors_[capusyn::kMaxModulationConnections];
     std::vector<String> source_strings_;
     std::vector<String> destination_strings_;
     std::unique_ptr<ModulationMeterReadouts> readouts_;

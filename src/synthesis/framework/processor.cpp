@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "processor.h"
@@ -19,7 +19,7 @@
 #include "feedback.h"
 #include "processor_router.h"
 
-namespace vital {
+namespace capusyn {
 
   const Output Processor::null_source_(kMaxBufferSize, kMaxOversample);
 
@@ -82,9 +82,9 @@ namespace vital {
   }
 
   void Processor::plug(const Output* source, unsigned int input_index) {
-    VITAL_ASSERT(input_index < inputs_->size());
-    VITAL_ASSERT(source);
-    VITAL_ASSERT(inputs_->at(input_index));
+    CAPUSYN_ASSERT(input_index < inputs_->size());
+    CAPUSYN_ASSERT(source);
+    CAPUSYN_ASSERT(inputs_->at(input_index));
 
     inputs_->at(input_index)->source = source;
 
@@ -129,8 +129,8 @@ namespace vital {
   }
 
   void Processor::useInput(Input* input, int index) {
-    VITAL_ASSERT(index < inputs_->size());
-    VITAL_ASSERT(input);
+    CAPUSYN_ASSERT(index < inputs_->size());
+    CAPUSYN_ASSERT(input);
 
     inputs_->at(index) = input;
     numInputsChanged();
@@ -141,8 +141,8 @@ namespace vital {
   }
 
   void Processor::useOutput(Output* output, int index) {
-    VITAL_ASSERT(index < outputs_->size());
-    VITAL_ASSERT(output);
+    CAPUSYN_ASSERT(index < outputs_->size());
+    CAPUSYN_ASSERT(output);
 
     outputs_->at(index) = output;
   }
@@ -253,4 +253,4 @@ namespace vital {
     registerInput(input.get());
     return input.get();
   }
-} // namespace vital
+} // namespace capusyn

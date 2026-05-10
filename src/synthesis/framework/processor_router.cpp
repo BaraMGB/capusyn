@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "processor_router.h"
@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace vital {
+namespace capusyn {
 
   ProcessorRouter::ProcessorRouter(int num_inputs, int num_outputs, bool control_rate) :
       Processor(num_inputs, num_outputs, control_rate),
@@ -78,9 +78,9 @@ namespace vital {
       if (processor->enabled()) {
         int processor_samples = normal_samples * processor->getOversampleAmount();
 
-        VITAL_ASSERT(processor->checkInputAndOutputSize(processor_samples));
+        CAPUSYN_ASSERT(processor->checkInputAndOutputSize(processor_samples));
         processor->process(processor_samples);
-        VITAL_ASSERT(utils::isFinite(processor->output()->buffer, processor->isControlRate() ? 0 : processor_samples));
+        CAPUSYN_ASSERT(utils::isFinite(processor->output()->buffer, processor->isControlRate() ? 0 : processor_samples));
       }
     }
 
@@ -130,7 +130,7 @@ namespace vital {
   }
 
   void ProcessorRouter::addProcessor(Processor* processor) {
-    VITAL_ASSERT(processor->router() == nullptr);
+    CAPUSYN_ASSERT(processor->router() == nullptr);
     global_order_->ensureSpace();
     global_reorder_->ensureCapacity(global_order_->capacity());
     local_order_.ensureSpace();
@@ -138,7 +138,7 @@ namespace vital {
   }
 
   void ProcessorRouter::addProcessorRealTime(Processor* processor) {
-    VITAL_ASSERT(processor->router() == nullptr);
+    CAPUSYN_ASSERT(processor->router() == nullptr);
     (*global_changes_)++;
     local_changes_++;
 
@@ -163,14 +163,14 @@ namespace vital {
     for (int i = 0; i < processor->numInputs(); ++i)
       disconnect(processor, processor->input(i)->source);
 
-    VITAL_ASSERT(processor->router() == this);
+    CAPUSYN_ASSERT(processor->router() == this);
     (*global_changes_)++;
     local_changes_++;
     global_order_->remove(processor);
     local_order_.remove(processor);
 
     Processor* old_processor = processors_[processor].second.release();
-    VITAL_ASSERT(old_processor == processor);
+    CAPUSYN_ASSERT(old_processor == processor);
     UNUSED(old_processor);
     processor->router(nullptr);
     processors_.erase(processor);
@@ -300,11 +300,11 @@ namespace vital {
     local_changes_++;
 
     auto pos = std::find(global_feedback_order_->begin(), global_feedback_order_->end(), feedback);
-    VITAL_ASSERT(pos != global_feedback_order_->end());
+    CAPUSYN_ASSERT(pos != global_feedback_order_->end());
     global_feedback_order_->erase(pos, pos + 1);
 
     auto local_pos = std::find(local_feedback_order_.begin(), local_feedback_order_.end(), feedback);
-    VITAL_ASSERT(local_pos != local_feedback_order_.end());
+    CAPUSYN_ASSERT(local_pos != local_feedback_order_.end());
     local_feedback_order_.erase(local_pos, local_pos + 1);
 
     feedback_processors_.erase(feedback);
@@ -425,4 +425,4 @@ namespace vital {
 
     dependencies_->removeAll(context);
   }
-} // namespace vital
+} // namespace capusyn

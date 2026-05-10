@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -23,7 +23,7 @@
 
 #include "poly_utils.h"
 
-namespace vital {
+namespace capusyn {
 
   template<size_t kChannels>
   class MemoryTemplate {
@@ -61,7 +61,7 @@ namespace vital {
           buffers_[i][offset_ + size_] = val;
         }
 
-        VITAL_ASSERT(utils::isFinite(sample));
+        CAPUSYN_ASSERT(utils::isFinite(sample));
       }
 
       void clearMemory(int num, poly_mask clear_mask) {
@@ -120,8 +120,8 @@ namespace vital {
       Memory(Memory& other) : MemoryTemplate(other) { }
 
       force_inline poly_float get(poly_float past) const {
-        VITAL_ASSERT(poly_float::lessThan(past, kMinPeriod).sum() == 0);
-        VITAL_ASSERT(poly_float::greaterThan(past, getMaxPeriod()).sum() == 0);
+        CAPUSYN_ASSERT(poly_float::lessThan(past, kMinPeriod).sum() == 0);
+        CAPUSYN_ASSERT(poly_float::greaterThan(past, getMaxPeriod()).sum() == 0);
         poly_int past_index = utils::toInt(past);
         poly_float t = utils::toFloat(past_index) - past + 1.0f;
         matrix interpolation_matrix = utils::getCatmullInterpolationMatrix(t);
@@ -139,8 +139,8 @@ namespace vital {
       StereoMemory(StereoMemory& other) : MemoryTemplate(other) { }
 
       force_inline poly_float get(poly_float past) const {
-        VITAL_ASSERT(poly_float::lessThan(past, 2.0f).anyMask() == 0);
-        VITAL_ASSERT(poly_float::greaterThan(past, getMaxPeriod()).anyMask() == 0);
+        CAPUSYN_ASSERT(poly_float::lessThan(past, 2.0f).anyMask() == 0);
+        CAPUSYN_ASSERT(poly_float::greaterThan(past, getMaxPeriod()).anyMask() == 0);
         poly_int past_index = utils::toInt(past);
         poly_float t = utils::toFloat(past_index) - past + 1.0f;
         matrix interpolation_matrix = utils::getCatmullInterpolationMatrix(t);
@@ -152,5 +152,5 @@ namespace vital {
         return interpolation_matrix.multiplyAndSumRows(value_matrix);
       }
   };
-} // namespace vital
+} // namespace capusyn
 

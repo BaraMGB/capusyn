@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -50,22 +50,22 @@ class OpenGlLineRenderer : public OpenGlComponent {
     force_inline void setBoostLeft(int index, float val) {
       boost_left_[index] = val;
       dirty_ = true;
-      VITAL_ASSERT(num_points_ > index);
+      CAPUSYN_ASSERT(num_points_ > index);
     }
     force_inline void setBoostRight(int index, float val) {
       boost_right_[index] = val;
       dirty_ = true;
-      VITAL_ASSERT(num_points_ > index);
+      CAPUSYN_ASSERT(num_points_ > index);
     }
     force_inline void setYAt(int index, float val) {
       y_[index] = val;
       dirty_ = true;
-      VITAL_ASSERT(num_points_ > index);
+      CAPUSYN_ASSERT(num_points_ > index);
     }
     force_inline void setXAt(int index, float val) {
       x_[index] = val;
       dirty_ = true;
-      VITAL_ASSERT(num_points_ > index);
+      CAPUSYN_ASSERT(num_points_ > index);
     }
 
     void setFillVertices(bool left);
@@ -88,8 +88,8 @@ class OpenGlLineRenderer : public OpenGlComponent {
     void boostLeftRange(float start, float end, int buffer_vertices, float min);
     void boostRightRange(float start, float end, int buffer_vertices, float min);
     void boostRange(float* boosts, float start, float end, int buffer_vertices, float min);
-    void boostRange(vital::poly_float start, vital::poly_float end, int buffer_vertices, vital::poly_float min);
-    void decayBoosts(vital::poly_float mult);
+    void boostRange(capusyn::poly_float start, capusyn::poly_float end, int buffer_vertices, capusyn::poly_float min);
+    void decayBoosts(capusyn::poly_float mult);
     void enableBackwardBoost(bool enable) { enable_backward_boost_ = enable; }
 
     force_inline int numPoints() const { return num_points_; }

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "compressor_editor.h"
@@ -27,13 +27,13 @@ namespace {
     return 2.0f * t - 1.0f;
   }
 
-  vital::poly_float getOpenGlYForDb(vital::poly_float db) {
-    vital::poly_float t = (db - CompressorEditor::kMinDb) / (CompressorEditor::kMaxDb - CompressorEditor::kMinDb);
-    return vital::utils::clamp(t * 2.0f - 1.0f, -1.0f, 1.0f);
+  capusyn::poly_float getOpenGlYForDb(capusyn::poly_float db) {
+    capusyn::poly_float t = (db - CompressorEditor::kMinDb) / (CompressorEditor::kMaxDb - CompressorEditor::kMinDb);
+    return capusyn::utils::clamp(t * 2.0f - 1.0f, -1.0f, 1.0f);
   }
 
-  vital::poly_float getOpenGlYForMagnitude(vital::poly_float magnitude) {
-    vital::poly_float db = vital::utils::magnitudeToDb(vital::utils::max(0.0001f, magnitude));
+  capusyn::poly_float getOpenGlYForMagnitude(capusyn::poly_float magnitude) {
+    capusyn::poly_float db = capusyn::utils::magnitudeToDb(capusyn::utils::max(0.0001f, magnitude));
     return getOpenGlYForDb(db);
   }
 
@@ -421,23 +421,23 @@ void CompressorEditor::renderCompressor(OpenGlWrapper& open_gl, bool animate) {
     return;
   }
 
-  vital::poly_float low_rms = vital::utils::sqrt(low_input_ms_->value());
-  vital::poly_float low_input_y = getOpenGlYForMagnitude(low_rms);
+  capusyn::poly_float low_rms = capusyn::utils::sqrt(low_input_ms_->value());
+  capusyn::poly_float low_input_y = getOpenGlYForMagnitude(low_rms);
 
-  vital::poly_float scaled_low_rms = vital::utils::sqrt(low_output_ms_->value());
-  vital::poly_float low_output_y = getOpenGlYForMagnitude(scaled_low_rms);
+  capusyn::poly_float scaled_low_rms = capusyn::utils::sqrt(low_output_ms_->value());
+  capusyn::poly_float low_output_y = getOpenGlYForMagnitude(scaled_low_rms);
 
-  vital::poly_float band_rms = vital::utils::sqrt(band_input_ms_->value());
-  vital::poly_float band_input_y = getOpenGlYForMagnitude(band_rms);
+  capusyn::poly_float band_rms = capusyn::utils::sqrt(band_input_ms_->value());
+  capusyn::poly_float band_input_y = getOpenGlYForMagnitude(band_rms);
 
-  vital::poly_float scaled_band_rms = vital::utils::sqrt(band_output_ms_->value());
-  vital::poly_float band_output_y = getOpenGlYForMagnitude(scaled_band_rms);
+  capusyn::poly_float scaled_band_rms = capusyn::utils::sqrt(band_output_ms_->value());
+  capusyn::poly_float band_output_y = getOpenGlYForMagnitude(scaled_band_rms);
 
-  vital::poly_float high_rms = vital::utils::sqrt(high_input_ms_->value());
-  vital::poly_float high_input_y = getOpenGlYForMagnitude(high_rms);
+  capusyn::poly_float high_rms = capusyn::utils::sqrt(high_input_ms_->value());
+  capusyn::poly_float high_input_y = getOpenGlYForMagnitude(high_rms);
 
-  vital::poly_float scaled_high_rms = vital::utils::sqrt(high_output_ms_->value());
-  vital::poly_float high_output_y = getOpenGlYForMagnitude(scaled_high_rms);
+  capusyn::poly_float scaled_high_rms = capusyn::utils::sqrt(high_output_ms_->value());
+  capusyn::poly_float high_output_y = getOpenGlYForMagnitude(scaled_high_rms);
 
   int width = getWidth();
   float active_area = 1.0f - 4.0f * kCompressorAreaBuffer;
@@ -517,7 +517,7 @@ void CompressorEditor::destroy(OpenGlWrapper& open_gl) {
   ratio_lines_.destroy(open_gl);  
 }
 
-void CompressorEditor::setAllValues(vital::control_map& controls) {
+void CompressorEditor::setAllValues(capusyn::control_map& controls) {
   low_upper_threshold_ = controls["compressor_low_upper_threshold"]->value();
   band_upper_threshold_ = controls["compressor_band_upper_threshold"]->value();
   high_upper_threshold_ = controls["compressor_high_upper_threshold"]->value();
@@ -534,7 +534,7 @@ void CompressorEditor::setAllValues(vital::control_map& controls) {
 
 void CompressorEditor::setLowUpperThreshold(float db, bool clamp) {
   low_upper_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
 
   if (clamp)
@@ -548,7 +548,7 @@ void CompressorEditor::setLowUpperThreshold(float db, bool clamp) {
 
 void CompressorEditor::setBandUpperThreshold(float db, bool clamp) {
   band_upper_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
   
   if (clamp)
@@ -562,7 +562,7 @@ void CompressorEditor::setBandUpperThreshold(float db, bool clamp) {
 
 void CompressorEditor::setHighUpperThreshold(float db, bool clamp) {
   high_upper_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
   
   if (clamp)
@@ -576,7 +576,7 @@ void CompressorEditor::setHighUpperThreshold(float db, bool clamp) {
 
 void CompressorEditor::setLowLowerThreshold(float db, bool clamp) {
   low_lower_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
 
   if (clamp)
@@ -590,7 +590,7 @@ void CompressorEditor::setLowLowerThreshold(float db, bool clamp) {
 
 void CompressorEditor::setBandLowerThreshold(float db, bool clamp) {
   band_lower_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
 
   if (clamp)
@@ -604,7 +604,7 @@ void CompressorEditor::setBandLowerThreshold(float db, bool clamp) {
 
 void CompressorEditor::setHighLowerThreshold(float db, bool clamp ) {
   high_lower_threshold_ = db;
-  db = vital::utils::clamp(db, kMinEditDb, kMaxEditDb);
+  db = capusyn::utils::clamp(db, kMinEditDb, kMaxEditDb);
   SynthBase* synth = parent_->getSynth();
 
   if (clamp)
@@ -619,42 +619,42 @@ void CompressorEditor::setHighLowerThreshold(float db, bool clamp ) {
 void CompressorEditor::setLowUpperRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  low_upper_ratio_ = vital::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
+  low_upper_ratio_ = capusyn::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
   synth->valueChangedInternal("compressor_low_upper_ratio", ratio);
 }
 
 void CompressorEditor::setBandUpperRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  band_upper_ratio_ = vital::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
+  band_upper_ratio_ = capusyn::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
   synth->valueChangedInternal("compressor_band_upper_ratio", ratio);
 }
 
 void CompressorEditor::setHighUpperRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  high_upper_ratio_ = vital::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
+  high_upper_ratio_ = capusyn::utils::clamp(ratio, kMinUpperRatio, kMaxUpperRatio);
   synth->valueChangedInternal("compressor_high_upper_ratio", ratio);
 }
 
 void CompressorEditor::setLowLowerRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  low_lower_ratio_ = vital::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
+  low_lower_ratio_ = capusyn::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
   synth->valueChangedInternal("compressor_low_lower_ratio", ratio);
 }
 
 void CompressorEditor::setBandLowerRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  band_lower_ratio_ = vital::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
+  band_lower_ratio_ = capusyn::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
   synth->valueChangedInternal("compressor_band_lower_ratio", ratio);
 }
 
 void CompressorEditor::setHighLowerRatio(float ratio) {
   SynthBase* synth = parent_->getSynth();
 
-  high_lower_ratio_ = vital::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
+  high_lower_ratio_ = capusyn::utils::clamp(ratio, kMinLowerRatio, kMaxLowerRatio);
   synth->valueChangedInternal("compressor_high_lower_ratio", ratio);
 }
 
@@ -699,15 +699,15 @@ void CompressorEditor::parentHierarchyChanged() {
 }
 
 float CompressorEditor::getYForDb(float db) {
-  return getHeight() * (1.0f - getOpenGlYForDb(vital::utils::clamp(db, kMinDb, kMaxDb))) * 0.5f;
+  return getHeight() * (1.0f - getOpenGlYForDb(capusyn::utils::clamp(db, kMinDb, kMaxDb))) * 0.5f;
 }
 
 float CompressorEditor::getCompressedDb(float input_db, float upper_threshold, float upper_ratio,
                                         float lower_threshold, float lower_ratio) {
   if (input_db < lower_threshold)
-    return vital::utils::interpolate(input_db, lower_threshold, lower_ratio);
+    return capusyn::utils::interpolate(input_db, lower_threshold, lower_ratio);
   if (input_db > upper_threshold)
-    return vital::utils::interpolate(input_db, upper_threshold, upper_ratio);
+    return capusyn::utils::interpolate(input_db, upper_threshold, upper_ratio);
   return input_db;
 }
 

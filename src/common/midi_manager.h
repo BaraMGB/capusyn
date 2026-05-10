@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -43,14 +43,14 @@ class MidiMessageCollector {
 
 class SynthBase;
 
-namespace vital {
+namespace capusyn {
   class SoundEngine;
   struct ValueDetails;
-} // namespace vital
+} // namespace capusyn
 
 class MidiManager : public MidiInputCallback {
   public:
-    typedef std::map<int, std::map<std::string, const vital::ValueDetails*>> midi_map;
+    typedef std::map<int, std::map<std::string, const capusyn::ValueDetails*>> midi_map;
 
     enum MidiMainType {
       kNoteOff = 0x80,
@@ -80,9 +80,9 @@ class MidiManager : public MidiInputCallback {
     class Listener {
       public:
         virtual ~Listener() { }
-        virtual void valueChangedThroughMidi(const std::string& name, vital::mono_float value) = 0;
-        virtual void pitchWheelMidiChanged(vital::mono_float value) = 0;
-        virtual void modWheelMidiChanged(vital::mono_float value) = 0;
+        virtual void valueChangedThroughMidi(const std::string& name, capusyn::mono_float value) = 0;
+        virtual void pitchWheelMidiChanged(capusyn::mono_float value) = 0;
+        virtual void modWheelMidiChanged(capusyn::mono_float value) = 0;
         virtual void presetChangedThroughMidi(File preset) = 0;
     };
 
@@ -93,7 +93,7 @@ class MidiManager : public MidiInputCallback {
     void armMidiLearn(std::string name);
     void cancelMidiLearn();
     void clearMidiLearn(const std::string& name);
-    void midiInput(int control, vital::mono_float value);
+    void midiInput(int control, capusyn::mono_float value);
     void processMidiMessage(const MidiMessage &midi_message, int sample_position = 0);
     bool isMidiMapped(const std::string& name) const;
 
@@ -143,7 +143,7 @@ class MidiManager : public MidiInputCallback {
     void readMpeMessage(const MidiMessage& message);
 
     SynthBase* synth_;
-    vital::SoundEngine* engine_;
+    capusyn::SoundEngine* engine_;
     MidiKeyboardState* keyboard_state_;
     MidiMessageCollector midi_collector_;
     std::map<std::string, String>* gui_state_;
@@ -152,13 +152,13 @@ class MidiManager : public MidiInputCallback {
     int current_folder_;
     int current_preset_;
 
-    const vital::ValueDetails* armed_value_;
+    const capusyn::ValueDetails* armed_value_;
     midi_map midi_learn_map_;
 
-    int msb_pressure_values_[vital::kNumMidiChannels];
-    int lsb_pressure_values_[vital::kNumMidiChannels];
-    int msb_slide_values_[vital::kNumMidiChannels];
-    int lsb_slide_values_[vital::kNumMidiChannels];
+    int msb_pressure_values_[capusyn::kNumMidiChannels];
+    int lsb_pressure_values_[capusyn::kNumMidiChannels];
+    int msb_slide_values_[capusyn::kNumMidiChannels];
+    int lsb_slide_values_[capusyn::kNumMidiChannels];
 
     bool mpe_enabled_;
     MPEZoneLayout mpe_zone_layout_;

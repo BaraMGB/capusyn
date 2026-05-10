@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -50,7 +50,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     void setFragmentShader(Shaders::FragmentShader shader) { fragment_shader_ = shader; }
 
     void setNumQuads(int num_quads) {
-      VITAL_ASSERT(num_quads <= max_quads_);
+      CAPUSYN_ASSERT(num_quads <= max_quads_);
       num_quads_ = num_quads;
       dirty_ = true;
     }
@@ -117,7 +117,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setRotatedCoordinates(int i, float x, float y, float w, float h) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad;
 
       data_[index + 4] = x;
@@ -131,7 +131,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setCoordinates(int i, float x, float y, float w, float h) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad;
 
       data_[index + 4] = x;
@@ -145,7 +145,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setShaderValue(int i, float shader_value, int value_index = 0) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad + 6 + value_index;
       data_[index] = shader_value;
       data_[kNumFloatsPerVertex + index] = shader_value;
@@ -170,7 +170,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setQuadHorizontal(int i, float x, float w) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad;
       data_[index] = x;
       data_[kNumFloatsPerVertex + index] = x;
@@ -181,7 +181,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setQuadVertical(int i, float y, float h) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad;
       data_[index + 1] = y;
       data_[kNumFloatsPerVertex + index + 1] = y + h;
@@ -192,7 +192,7 @@ class OpenGlMultiQuad : public OpenGlComponent {
     }
 
     void setQuad(int i, float x, float y, float w, float h) {
-      VITAL_ASSERT(i < max_quads_);
+      CAPUSYN_ASSERT(i < max_quads_);
       int index = i * kNumFloatsPerQuad;
       data_[index] = x;
       data_[index + 1] = y;

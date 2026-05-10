@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "distortion.h"
@@ -20,7 +20,7 @@
 
 #include <climits>
 
-namespace vital {
+namespace capusyn {
 
   namespace {
     force_inline poly_float linearFold(poly_float value, poly_float drive) {
@@ -104,7 +104,7 @@ namespace vital {
       poly_float current_drive = scale(drive[i]);
       poly_float sample = audio_in[i];
       audio_out[i] = distort(sample, current_drive);
-      VITAL_ASSERT(utils::isContained(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isContained(audio_out[i]));
     }
   }
 
@@ -131,7 +131,7 @@ namespace vital {
   }
 
   void Distortion::processWithInput(const poly_float* audio_in, int num_samples) {
-    VITAL_ASSERT(checkInputAndOutputSize(num_samples));
+    CAPUSYN_ASSERT(checkInputAndOutputSize(num_samples));
 
     int type = static_cast<int>(input(kType)->at(0)[0]);
     poly_float* audio_out = output(kAudioOut)->buffer;
@@ -174,7 +174,7 @@ namespace vital {
   }
 
   void Distortion::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
     processWithInput(input(kAudio)->source->buffer, num_samples);
   }
-} // namespace vital
+} // namespace capusyn

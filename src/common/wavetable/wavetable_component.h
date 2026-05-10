@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -23,9 +23,9 @@
 
 using json = nlohmann::json;
 
-namespace vital {
+namespace capusyn {
   class WaveFrame;
-} // namespace vital
+} // namespace capusyn
 
 class WavetableComponent {
   public:
@@ -40,7 +40,7 @@ class WavetableComponent {
     virtual ~WavetableComponent() { }
 
     virtual WavetableKeyframe* createKeyframe(int position) = 0;
-    virtual void render(vital::WaveFrame* wave_frame, float position) = 0;
+    virtual void render(capusyn::WaveFrame* wave_frame, float position) = 0;
     virtual WavetableComponentFactory::ComponentType getType() = 0;
     virtual json stateToJson();
     virtual void jsonToState(json data);

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -20,7 +20,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace vital {
+namespace capusyn {
 
   template<class T>
   class CircularQueue {
@@ -138,7 +138,7 @@ namespace vital {
       }
 
       force_inline T& at(std::size_t index) {
-        VITAL_ASSERT(index >= 0 && index < size());
+        CAPUSYN_ASSERT(index >= 0 && index < size());
         return data_[(start_ + static_cast<int>(index)) % capacity_];
       }
 
@@ -153,11 +153,11 @@ namespace vital {
       force_inline void push_back(T entry) {
         data_[end_] = std::move(entry);
         end_ = (end_ + 1) % capacity_;
-        VITAL_ASSERT(end_ != start_);
+        CAPUSYN_ASSERT(end_ != start_);
       }
 
       force_inline T pop_back() {
-        VITAL_ASSERT(end_ != start_);
+        CAPUSYN_ASSERT(end_ != start_);
         end_ = (end_ - 1 + capacity_) % capacity_;
         return data_[end_];
       }
@@ -165,18 +165,18 @@ namespace vital {
       force_inline void push_front(T entry) {
         start_ = (start_ - 1 + capacity_) % capacity_;
         data_[start_] = entry;
-        VITAL_ASSERT(end_ != start_);
+        CAPUSYN_ASSERT(end_ != start_);
       }
 
       force_inline T pop_front() {
-        VITAL_ASSERT(end_ != start_);
+        CAPUSYN_ASSERT(end_ != start_);
         int last = start_;
         start_ = (start_ + 1) % capacity_;
         return data_[last];
       }
 
       force_inline void removeAt(int index) {
-        VITAL_ASSERT(end_ != start_);
+        CAPUSYN_ASSERT(end_ != start_);
         int i = (index + start_) % capacity_;
         end_ = (end_ - 1 + capacity_) % capacity_;
         while (i != end_) {
@@ -264,7 +264,7 @@ namespace vital {
       }
 
       force_inline int size() const {
-        VITAL_ASSERT(capacity_ > 0);
+        CAPUSYN_ASSERT(capacity_ > 0);
         return (end_ - start_ + capacity_) % capacity_;
       }
 
@@ -286,5 +286,5 @@ namespace vital {
       int start_;
       int end_;
   };
-} // namespace vital
+} // namespace capusyn
 

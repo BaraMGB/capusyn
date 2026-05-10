@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "voice_section.h"
@@ -102,14 +102,14 @@ void VoiceSection::resized() {
   SynthSection::resized();
 }
 
-void VoiceSection::setAllValues(vital::control_map& controls) {
+void VoiceSection::setAllValues(capusyn::control_map& controls) {
   SynthSection::setAllValues(controls);
   int stereo_mode = controls["stereo_mode"]->value();
   stereo_mode_text_->setText(strings::kStereoModeNames[stereo_mode]);
 }
 
 void VoiceSection::buttonClicked(Button* clicked_button) {
-  int num_modes = vital::StereoEncoder::kNumStereoModes;
+  int num_modes = capusyn::StereoEncoder::kNumStereoModes;
   if (clicked_button == stereo_mode_type_selector_.get()) {
     PopupItems options;
 

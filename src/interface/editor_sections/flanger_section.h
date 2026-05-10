@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -33,7 +33,7 @@ class FlangerResponse : public OpenGlLineRenderer {
     static constexpr int kDefaultVisualSampleRate = 200000;
     static constexpr int kCombAlternatePeriod = 2;
 
-    FlangerResponse(const vital::output_map& mono_modulations);
+    FlangerResponse(const capusyn::output_map& mono_modulations);
     virtual ~FlangerResponse();
 
     void init(OpenGlWrapper& open_gl) override;
@@ -63,7 +63,7 @@ class FlangerResponse : public OpenGlLineRenderer {
     };
 
     void drawFilterResponse(OpenGlWrapper& open_gl, bool animate);
-    vital::poly_float getOutputTotal(vital::Output* output, vital::poly_float default_value);
+    capusyn::poly_float getOutputTotal(capusyn::Output* output, capusyn::poly_float default_value);
 
     void setupFilterState();
     void loadShader(int index);
@@ -75,17 +75,17 @@ class FlangerResponse : public OpenGlLineRenderer {
     bool active_;
     Point<int> last_mouse_position_;
 
-    vital::CombFilter comb_filter_;
-    vital::SynthFilter::FilterState filter_state_;
-    vital::poly_float mix_;
+    capusyn::CombFilter comb_filter_;
+    capusyn::SynthFilter::FilterState filter_state_;
+    capusyn::poly_float mix_;
 
     SynthSlider* center_slider_;
     SynthSlider* feedback_slider_;
     SynthSlider* mix_slider_;
 
-    const vital::StatusOutput* flanger_frequency_;
-    vital::Output* feedback_output_;
-    vital::Output* mix_output_;
+    const capusyn::StatusOutput* flanger_frequency_;
+    capusyn::Output* feedback_output_;
+    capusyn::Output* mix_output_;
 
     FilterResponseShader response_shader_;
     std::unique_ptr<float[]> line_data_;
@@ -98,7 +98,7 @@ class FlangerResponse : public OpenGlLineRenderer {
 
 class FlangerSection : public SynthSection {
   public:
-    FlangerSection(String name, const vital::output_map& mono_modulations);
+    FlangerSection(String name, const capusyn::output_map& mono_modulations);
     virtual ~FlangerSection();
 
     void paintBackground(Graphics& g) override;

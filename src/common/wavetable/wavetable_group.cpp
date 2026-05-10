@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "wavetable_group.h"
@@ -69,15 +69,15 @@ bool WavetableGroup::isShepardTone() {
   return true;
 }
 
-void WavetableGroup::render(vital::WaveFrame* wave_frame, float position) const {
+void WavetableGroup::render(capusyn::WaveFrame* wave_frame, float position) const {
   wave_frame->index = position;
 
   for (auto& component : components_)
     component->render(wave_frame, position);
 }
 
-void WavetableGroup::renderTo(vital::Wavetable* wavetable) {
-  for (int i = 0; i < vital::kNumOscillatorWaveFrames; ++i) {
+void WavetableGroup::renderTo(capusyn::Wavetable* wavetable) {
+  for (int i = 0; i < capusyn::kNumOscillatorWaveFrames; ++i) {
     compute_frame_.index = i;
 
     for (auto& component : components_)
@@ -90,10 +90,10 @@ void WavetableGroup::renderTo(vital::Wavetable* wavetable) {
 void WavetableGroup::loadDefaultGroup() {
   WaveSource* wave_source = new WaveSource();
   wave_source->insertNewKeyframe(0);
-  vital::WaveFrame* wave_frame = wave_source->getWaveFrame(0);
-  for (int i = 0; i < vital::WaveFrame::kWaveformSize; ++i) {
-    float t = i / (vital::WaveFrame::kWaveformSize - 1.0f);
-    int half_shift = (i + vital::WaveFrame::kWaveformSize / 2) % vital::WaveFrame::kWaveformSize;
+  capusyn::WaveFrame* wave_frame = wave_source->getWaveFrame(0);
+  for (int i = 0; i < capusyn::WaveFrame::kWaveformSize; ++i) {
+    float t = i / (capusyn::WaveFrame::kWaveformSize - 1.0f);
+    int half_shift = (i + capusyn::WaveFrame::kWaveformSize / 2) % capusyn::WaveFrame::kWaveformSize;
     wave_frame->time_domain[half_shift] = 1.0f - 2.0f * t;
   }
   wave_frame->toFrequencyDomain();

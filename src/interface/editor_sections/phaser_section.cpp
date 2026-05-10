@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "phaser_section.h"
@@ -26,7 +26,7 @@
 #include "tempo_selector.h"
 #include "text_look_and_feel.h"
 
-PhaserResponse::PhaserResponse(const vital::output_map& mono_modulations) :
+PhaserResponse::PhaserResponse(const capusyn::output_map& mono_modulations) :
     OpenGlLineRenderer(kResolution), phaser_filter_(false) {
   parent_ = nullptr;
   active_ = true;
@@ -143,7 +143,7 @@ void PhaserResponse::destroy(OpenGlWrapper& open_gl) {
     response_shader_.stages[s] = nullptr;
 }
 
-vital::poly_float PhaserResponse::getOutputTotal(const vital::Output* output, vital::poly_float default_value) {
+capusyn::poly_float PhaserResponse::getOutputTotal(const capusyn::Output* output, capusyn::poly_float default_value) {
   if (output && output->owner->enabled())
     return output->trigger_value;
   return default_value;
@@ -161,7 +161,7 @@ void PhaserResponse::loadShader(int index) {
   response_shader_.shader->use();
   response_shader_.midi_cutoff->set(filter_state_.midi_cutoff[index]);
   response_shader_.resonance->set(phaser_filter_.getResonance()[index]);
-  response_shader_.db24->set(filter_state_.style != vital::SynthFilter::k12Db ? 1.0f : 0.0f);
+  response_shader_.db24->set(filter_state_.style != capusyn::SynthFilter::k12Db ? 1.0f : 0.0f);
 
   response_shader_.stages[0]->set(phaser_filter_.getPeak1Amount()[index]);
   response_shader_.stages[1]->set(phaser_filter_.getPeak3Amount()[index]);
@@ -253,7 +253,7 @@ void PhaserResponse::drawFilterResponse(OpenGlWrapper& open_gl, bool animate) {
   checkGlError();
 }
 
-PhaserSection::PhaserSection(String name, const vital::output_map& mono_modulations) : SynthSection(name) {
+PhaserSection::PhaserSection(String name, const capusyn::output_map& mono_modulations) : SynthSection(name) {
   static const double TEMPO_DRAG_SENSITIVITY = 0.3;
 
   phase_offset_ = std::make_unique<SynthSlider>("phaser_phase_offset");

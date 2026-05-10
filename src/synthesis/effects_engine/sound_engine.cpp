@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sound_engine.h"
@@ -28,7 +28,7 @@
 #include "reorderable_effect_chain.h"
 #include "value_switch.h"
 
-namespace vital {
+namespace capusyn {
 
   SoundEngine::SoundEngine() : SynthModule(0, 1), modulation_handler_(nullptr), 
                                last_oversampling_amount_(-1), last_sample_rate_(-1), peak_meter_(nullptr) {
@@ -59,7 +59,7 @@ namespace vital {
 
     modulation_handler_ = new EffectsModulationHandler(beats_per_second_clamped->output());
     addSubmodule(modulation_handler_);
-    modulation_handler_->setPolyphony(vital::kMaxPolyphony);
+    modulation_handler_->setPolyphony(capusyn::kMaxPolyphony);
     modulation_handler_->plug(polyphony, VoiceHandler::kPolyphony);
     modulation_handler_->plug(voice_priority, VoiceHandler::kVoicePriority);
     modulation_handler_->plug(voice_override, VoiceHandler::kVoiceOverride);
@@ -135,7 +135,7 @@ namespace vital {
   void SoundEngine::connectModulation(const modulation_change& change) {
     change.modulation_processor->plug(change.source, ModulationConnectionProcessor::kModulationInput);
     change.modulation_processor->setDestinationScale(change.destination_scale);
-    VITAL_ASSERT(vital::utils::isFinite(change.destination_scale));
+    CAPUSYN_ASSERT(capusyn::utils::isFinite(change.destination_scale));
 
     Processor* destination = change.mono_destination;
     bool polyphonic = change.source->owner->isPolyphonic() && change.poly_destination;
@@ -228,7 +228,7 @@ namespace vital {
   }
 
   void SoundEngine::processWithInput(const poly_float* audio_in, int num_samples) {
-    VITAL_ASSERT(num_samples <= output()->buffer_size);
+    CAPUSYN_ASSERT(num_samples <= output()->buffer_size);
 
     FloatVectorOperations::disableDenormalisedNumberSupport();
     modulation_handler_->setLegato(legato_->value());
@@ -374,4 +374,4 @@ namespace vital {
   void SoundEngine::sostenutoOffRange(int sample, int from_channel, int to_channel) {
     modulation_handler_->sostenutoOffRange(sample, from_channel, to_channel);
   }
-} // namespace vital
+} // namespace capusyn

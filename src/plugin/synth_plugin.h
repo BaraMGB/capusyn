@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
  * pylon is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class SynthPlugin : public SynthBase, public AudioProcessor, public ValueBridge:
     SynthGuiInterface* getGuiInterface() override;
     void beginChangeGesture(const std::string& name) override;
     void endChangeGesture(const std::string& name) override;
-    void setValueNotifyHost(const std::string& name, vital::mono_float value) override;
+    void setValueNotifyHost(const std::string& name, capusyn::mono_float value) override;
     const CriticalSection& getCriticalSection() override;
     void pauseProcessing(bool pause) override;
 
@@ -68,7 +68,7 @@ class SynthPlugin : public SynthBase, public AudioProcessor, public ValueBridge:
     void setStateInformation(const void* data, int size_in_bytes) override;
     AudioProcessorParameter* getBypassParameter() const override { return bypass_parameter_; }
 
-    void parameterChanged(std::string name, vital::mono_float value) override;
+    void parameterChanged(std::string name, capusyn::mono_float value) override;
 
   private:
     ValueBridge* bypass_parameter_;

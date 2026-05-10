@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -22,14 +22,14 @@
 #include <cstring>
 #include <vector>
 
-namespace vital {
+namespace capusyn {
 
   class Processor;
   class ProcessorRouter;
 
   struct Output {
     Output(int size = kMaxBufferSize, int max_oversample = 1) {
-      VITAL_ASSERT(size > 0);
+      CAPUSYN_ASSERT(size > 0);
 
       owner = nullptr;
       buffer_size = size * max_oversample;
@@ -113,7 +113,7 @@ namespace vital {
   };
 
   namespace cr {
-    struct Output : public ::vital::Output {
+    struct Output : public ::capusyn::Output {
       Output() {
         owner = nullptr;
         buffer_size = 1;
@@ -139,11 +139,11 @@ namespace vital {
 
       // Override this for main processing code.
       virtual void process(int num_samples) = 0;
-      virtual void processWithInput(const poly_float* audio_in, int num_samples) { VITAL_ASSERT(false); }
+      virtual void processWithInput(const poly_float* audio_in, int num_samples) { CAPUSYN_ASSERT(false); }
 
       // Override this for plugging in inputs and outputs.
       virtual void init() {
-        VITAL_ASSERT(!initialized());
+        CAPUSYN_ASSERT(!initialized());
         state_->initialized = true;
       }
 
@@ -251,7 +251,7 @@ namespace vital {
       virtual void numInputsChanged() { }
 
       // Sets the ProcessorRouter that will own this Processor.
-      force_inline void router(ProcessorRouter* router) { router_ = router; VITAL_ASSERT((Processor*)router != this); }
+      force_inline void router(ProcessorRouter* router) { router_ = router; CAPUSYN_ASSERT((Processor*)router != this); }
 
       // Returns the ProcessorRouter that owns this Processor.
       force_inline ProcessorRouter* router() const { return router_; }
@@ -270,7 +270,7 @@ namespace vital {
       force_inline int numOwnedOutputs() const { return static_cast<int>(owned_outputs_.size()); }
 
       force_inline Input* input(unsigned int index = 0) const {
-        VITAL_ASSERT(index < inputs_->size());
+        CAPUSYN_ASSERT(index < inputs_->size());
 
         return inputs_->operator[](index);
       }
@@ -280,19 +280,19 @@ namespace vital {
       }
 
       force_inline Input* ownedInput(unsigned int index = 0) const {
-        VITAL_ASSERT(index < owned_inputs_.size());
+        CAPUSYN_ASSERT(index < owned_inputs_.size());
 
         return owned_inputs_[index].get();
       }
 
       force_inline Output* output(unsigned int index = 0) const {
-        VITAL_ASSERT(index < outputs_->size());
+        CAPUSYN_ASSERT(index < outputs_->size());
 
         return outputs_->operator[](index);
       }
 
       force_inline Output* ownedOutput(unsigned int index = 0) const {
-        VITAL_ASSERT(index < owned_outputs_.size());
+        CAPUSYN_ASSERT(index < owned_outputs_.size());
 
         return owned_outputs_[index].get();
       }
@@ -318,5 +318,5 @@ namespace vital {
 
       JUCE_LEAK_DETECTOR(Processor)
   };
-} // namespace vital
+} // namespace capusyn
 

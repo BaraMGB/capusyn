@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -168,7 +168,7 @@ class WavetableEditSection : public SynthSection,
 
     Slider* wave_frame_slider_;
 
-    vital::WaveFrame compute_frame_;
+    capusyn::WaveFrame compute_frame_;
     WavetableCreator* wavetable_creator_;
     std::map<WavetableComponent*, WavetableComponentFactory::ComponentType> type_lookup_;
     std::unique_ptr<WavetableComponentOverlay> overlays_[WavetableComponentFactory::kNumComponentTypes];

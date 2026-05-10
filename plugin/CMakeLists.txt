@@ -1,27 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
-project(VitalPlugin LANGUAGES CXX)
+project(CapusynPlugin LANGUAGES CXX)
 
 # Plugin-specific unity-build source.
-set(VITAL_PLUGIN_CPP
+set(CAPUSYN_PLUGIN_CPP
     ${CMAKE_SOURCE_DIR}/src/unity_build/plugin.cpp
 )
-juce_add_plugin(Vital
+juce_add_plugin(Capusyn
     VERSION "1.0.6"
-    BUNDLE_ID "audio.vital.synth"
-    COMPANY_NAME "Vital Audio"
+    BUNDLE_ID "io.github.BaraMGB.capusyn.synth"
+    COMPANY_NAME "Capusyn Project"
     PLUGIN_VERSION "1.0.6"
-    PLUGIN_MANUFACTURER_CODE Open
-    PLUGIN_CODE Vial
+    PLUGIN_MANUFACTURER_CODE CPSN
+    PLUGIN_CODE CPSY
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
     VST3_CATEGORIES Instrument Synth
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    AAX_IDENTIFIER "audio.vial.synth"
+    AAX_IDENTIFIER "io.github.BaraMGB.capusyn.synth"
     AAX_CATEGORY SWGenerators
-    COMPANY_WEBSITE "vital.audio"
-    COMPANY_EMAIL "matthewtytel@gmail.com"
-    COPYRIGHT "Matt Tytel"
+    COMPANY_WEBSITE "https://github.com/BaraMGB/capusyn"
+    COMPANY_EMAIL "opensource@capusyn.invalid"
+    COPYRIGHT "Capusyn Project"
     IS_MIDI_EFFECT FALSE
     # Linux: only VST3 and Standalone are enabled.
     BUILD_AUV3 FALSE
@@ -30,38 +30,38 @@ juce_add_plugin(Vital
     CPP_LANGUAGE_STANDARD "17"
 )
 
-juce_generate_juce_header(Vital)
+juce_generate_juce_header(Capusyn)
 
-target_sources(Vital PRIVATE
-    ${VITAL_PLUGIN_CPP}
-    $<TARGET_OBJECTS:VitalCore>
-    $<TARGET_OBJECTS:VitalGui>
+target_sources(Capusyn PRIVATE
+    ${CAPUSYN_PLUGIN_CPP}
+    $<TARGET_OBJECTS:CapusynCore>
+    $<TARGET_OBJECTS:CapusynGui>
 )
 
-add_custom_command(TARGET Vital_VST3 PRE_LINK
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:Vital_VST3>"
+add_custom_command(TARGET Capusyn_VST3 PRE_LINK
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:Capusyn_VST3>"
 )
 
-target_include_directories(Vital PRIVATE
+target_include_directories(Capusyn PRIVATE
     BEFORE
     ${CMAKE_SOURCE_DIR}/src/plugin
 )
 
-target_include_directories(Vital PRIVATE
-    ${VITAL_COMMON_INCLUDE_DIRS}
+target_include_directories(Capusyn PRIVATE
+    ${CAPUSYN_COMMON_INCLUDE_DIRS}
 )
 
-target_compile_definitions(Vital PRIVATE
+target_compile_definitions(Capusyn PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_MODAL_LOOPS_PERMITTED=1
     JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING=1
     NO_AUTH=1
 )
 
-target_link_libraries(Vital
+target_link_libraries(Capusyn
     PUBLIC
-        VitalData
-        ${VITAL_JUCE_SHARED_MODULES}
+        CapusynData
+        ${CAPUSYN_JUCE_SHARED_MODULES}
         CURL::libcurl
         juce::juce_audio_plugin_client
         juce::juce_recommended_config_flags

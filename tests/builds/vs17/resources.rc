@@ -15,11 +15,11 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "CompanyName",  "Matt Tytel\0"
-      VALUE "LegalCopyright",  "Matt Tytel\0"
-      VALUE "FileDescription",  "VitalTests\0"
+      VALUE "CompanyName",  "Capusyn Project\0"
+      VALUE "LegalCopyright",  "Capusyn Project\0"
+      VALUE "FileDescription",  "CapusynTests\0"
       VALUE "FileVersion",  "1.0.6\0"
-      VALUE "ProductName",  "VitalTests\0"
+      VALUE "ProductName",  "CapusynTests\0"
       VALUE "ProductVersion",  "1.0.6\0"
     END
   END

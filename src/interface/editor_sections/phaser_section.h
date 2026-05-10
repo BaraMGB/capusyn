@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -32,7 +32,7 @@ class PhaserResponse : public OpenGlLineRenderer {
     static constexpr int kResolution = 256;
     static constexpr int kDefaultVisualSampleRate = 200000;
 
-    PhaserResponse(const vital::output_map& mono_modulations);
+    PhaserResponse(const capusyn::output_map& mono_modulations);
     virtual ~PhaserResponse();
 
     void init(OpenGlWrapper& open_gl) override;
@@ -50,7 +50,7 @@ class PhaserResponse : public OpenGlLineRenderer {
     void setActive(bool active) { active_ = active; }
     void setStyle(int style) { filter_state_.style = style; }
 
-    void setDefaultBlend(vital::poly_float blend) { blend_setting_ = blend; }
+    void setDefaultBlend(capusyn::poly_float blend) { blend_setting_ = blend; }
 
   private:
     struct FilterResponseShader {
@@ -66,7 +66,7 @@ class PhaserResponse : public OpenGlLineRenderer {
     };
 
     void drawFilterResponse(OpenGlWrapper& open_gl, bool animate);
-    vital::poly_float getOutputTotal(const vital::Output* output, vital::poly_float default_value);
+    capusyn::poly_float getOutputTotal(const capusyn::Output* output, capusyn::poly_float default_value);
 
     void setupFilterState();
     void loadShader(int index);
@@ -78,22 +78,22 @@ class PhaserResponse : public OpenGlLineRenderer {
     bool active_;
     Point<int> last_mouse_position_;
 
-    vital::PhaserFilter phaser_filter_;
+    capusyn::PhaserFilter phaser_filter_;
 
-    vital::SynthFilter::FilterState filter_state_;
-    vital::poly_float mix_;
+    capusyn::SynthFilter::FilterState filter_state_;
+    capusyn::poly_float mix_;
 
     SynthSlider* cutoff_slider_;
     SynthSlider* resonance_slider_;
     SynthSlider* blend_slider_;
     SynthSlider* mix_slider_;
 
-    const vital::StatusOutput* phaser_cutoff_;
-    const vital::Output* filter_mix_output_;
-    const vital::Output* resonance_output_;
-    const vital::Output* blend_output_;
+    const capusyn::StatusOutput* phaser_cutoff_;
+    const capusyn::Output* filter_mix_output_;
+    const capusyn::Output* resonance_output_;
+    const capusyn::Output* blend_output_;
 
-    vital::poly_float blend_setting_;
+    capusyn::poly_float blend_setting_;
 
     FilterResponseShader response_shader_;
     std::unique_ptr<float[]> line_data_;
@@ -106,7 +106,7 @@ class PhaserResponse : public OpenGlLineRenderer {
 
 class PhaserSection : public SynthSection {
   public:
-    PhaserSection(String name, const vital::output_map& mono_modulations);
+    PhaserSection(String name, const capusyn::output_map& mono_modulations);
     virtual ~PhaserSection();
 
     void paintBackground(Graphics& g) override;

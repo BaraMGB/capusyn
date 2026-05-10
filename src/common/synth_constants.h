@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -20,7 +20,7 @@
 
 #include <string>
 
-namespace vital {
+namespace capusyn {
 
   constexpr int kNumLfos = 8;
   constexpr int kNumOscillators = 3;
@@ -49,13 +49,13 @@ namespace vital {
   constexpr wchar_t kDefaultKeyboardOctaveDown = 'z';
   const std::wstring kDefaultKeyboard = L"awsedftgyhujkolp;'";
 
-  const std::string kPresetExtension = "vital";
-  const std::string kWavetableExtension = "vitaltable";
-  const std::string kWavetableExtensionsList = "*." + vital::kWavetableExtension + ";*.wav;*.flac";
+  const std::string kPresetExtension = "capusyn";
+  const std::string kWavetableExtension = "caputable";
+  const std::string kWavetableExtensionsList = "*." + capusyn::kWavetableExtension + ";*.wav;*.flac";
   const std::string kSampleExtensionsList = "*.wav;*.flac";
-  const std::string kSkinExtension = "vitalskin";
-  const std::string kLfoExtension = "vitallfo";
-  const std::string kBankExtension = "vitalbank";
+  const std::string kSkinExtension = "capuskin";
+  const std::string kLfoExtension = "capulfo";
+  const std::string kBankExtension = "capubank";
 
   namespace constants {
     enum SourceDestination {
@@ -69,30 +69,30 @@ namespace vital {
 
     static SourceDestination toggleFilter1(SourceDestination current_destination, bool on) {
       if (on) {
-        if (current_destination == vital::constants::kFilter2)
-          return vital::constants::kDualFilters;
+        if (current_destination == capusyn::constants::kFilter2)
+          return capusyn::constants::kDualFilters;
         else
-          return vital::constants::kFilter1;
+          return capusyn::constants::kFilter1;
       }
-      else if (current_destination == vital::constants::kDualFilters)
-        return vital::constants::kFilter2;
-      else if (current_destination == vital::constants::kFilter1)
-        return vital::constants::kEffects;
+      else if (current_destination == capusyn::constants::kDualFilters)
+        return capusyn::constants::kFilter2;
+      else if (current_destination == capusyn::constants::kFilter1)
+        return capusyn::constants::kEffects;
 
       return current_destination;
     }
 
     static SourceDestination toggleFilter2(SourceDestination current_destination, bool on) {
       if (on) {
-        if (current_destination == vital::constants::kFilter1)
-          return vital::constants::kDualFilters;
+        if (current_destination == capusyn::constants::kFilter1)
+          return capusyn::constants::kDualFilters;
         else
-          return vital::constants::kFilter2;
+          return capusyn::constants::kFilter2;
       }
-      else if (current_destination == vital::constants::kDualFilters)
-        return vital::constants::kFilter1;
-      else if (current_destination == vital::constants::kFilter2)
-        return vital::constants::kEffects;
+      else if (current_destination == capusyn::constants::kDualFilters)
+        return capusyn::constants::kFilter1;
+      else if (current_destination == capusyn::constants::kFilter2)
+        return capusyn::constants::kEffects;
 
       return current_destination;
     }
@@ -130,7 +130,7 @@ namespace vital {
     };
 
     constexpr int kNumSyncedFrequencyRatios = 13;
-    constexpr vital::mono_float kSyncedFrequencyRatios[kNumSyncedFrequencyRatios] = {
+    constexpr capusyn::mono_float kSyncedFrequencyRatios[kNumSyncedFrequencyRatios] = {
       0.0f,
       1.0f / 128.0f,
       1.0f / 64.0f,
@@ -169,4 +169,4 @@ namespace vital {
     const cr::Value kValueSqrt2(kSqrt2);
     const cr::Value kValueNegOne(-1.0f);
   } // namespace constants
-} // namespace vital
+} // namespace capusyn

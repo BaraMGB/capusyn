@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -19,7 +19,7 @@
 #include "synth_module.h"
 #include "delay.h"
 
-namespace vital {
+namespace capusyn {
   class ChorusModule : public SynthModule {
     public:
       static constexpr mono_float kMaxChorusModulation = 0.03f;
@@ -34,7 +34,7 @@ namespace vital {
 
       void processWithInput(const poly_float* audio_in, int num_samples) override;
       void correctToTime(double seconds) override;
-      Processor* clone() const override { VITAL_ASSERT(false); return nullptr; }
+      Processor* clone() const override { CAPUSYN_ASSERT(false); return nullptr; }
 
       int getNextNumVoicePairs();
 
@@ -62,5 +62,5 @@ namespace vital {
 
       JUCE_LEAK_DETECTOR(ChorusModule) 
   };
-} // namespace vital
+} // namespace capusyn
 

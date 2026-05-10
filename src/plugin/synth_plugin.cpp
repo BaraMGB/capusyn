@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
  * pylon is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@ SynthPlugin::SynthPlugin() :
     AudioProcessor(BusesProperties().withOutput("Output", AudioChannelSet::stereo(), true)) {
   last_seconds_time_ = 0.0;
 
-  int num_params = vital::Parameters::getNumParameters();
+  int num_params = capusyn::Parameters::getNumParameters();
   for (int i = 0; i < num_params; ++i) {
-    const vital::ValueDetails* details = vital::Parameters::getDetails(i);
+    const capusyn::ValueDetails* details = capusyn::Parameters::getDetails(i);
     if (controls_.count(details->name) == 0)
       continue;
 
@@ -60,9 +60,9 @@ void SynthPlugin::endChangeGesture(const std::string& name) {
     bridge_lookup_[name]->endChangeGesture();
 }
 
-void SynthPlugin::setValueNotifyHost(const std::string& name, vital::mono_float value) {
+void SynthPlugin::setValueNotifyHost(const std::string& name, capusyn::mono_float value) {
   if (bridge_lookup_.count(name)) {
-    vital::mono_float plugin_value = bridge_lookup_[name]->convertToPluginValue(value);
+    capusyn::mono_float plugin_value = bridge_lookup_[name]->convertToPluginValue(value);
     bridge_lookup_[name]->setValueNotifyHost(plugin_value);
   }
 }
@@ -172,7 +172,7 @@ void SynthPlugin::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midi_messa
 
   double sample_time = 1.0 / AudioProcessor::getSampleRate();
   for (int sample_offset = 0; sample_offset < total_samples;) {
-    int num_samples = std::min<int>(total_samples - sample_offset, vital::kMaxBufferSize);
+    int num_samples = std::min<int>(total_samples - sample_offset, capusyn::kMaxBufferSize);
 
     engine_->correctToTime(last_seconds_time_);
     processMidi(midi_messages, sample_offset, sample_offset + num_samples);
@@ -191,7 +191,7 @@ AudioProcessorEditor* SynthPlugin::createEditor() {
   return new SynthEditor(*this);
 }
 
-void SynthPlugin::parameterChanged(std::string name, vital::mono_float value) {
+void SynthPlugin::parameterChanged(std::string name, capusyn::mono_float value) {
   valueChangedExternal(name, value);
 }
 

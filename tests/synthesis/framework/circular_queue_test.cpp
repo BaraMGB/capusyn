@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "circular_queue_test.h"
@@ -42,7 +42,7 @@ void CircularQueueTest::runTest() {
 }
 
 void CircularQueueTest::testAddingRemoving() {
-  vital::CircularQueue<int> queue;
+  capusyn::CircularQueue<int> queue;
   queue.reserve(kAddNumber);
 
   beginTest("Adding and Removing");
@@ -89,7 +89,7 @@ void CircularQueueTest::testAddingRemoving() {
 }
 
 void CircularQueueTest::testClearing() {
-  vital::CircularQueue<float> queue;
+  capusyn::CircularQueue<float> queue;
   queue.reserve(kAddNumber);
 
   beginTest("Clearing");
@@ -125,7 +125,7 @@ void CircularQueueTest::testClearing() {
 }
 
 void CircularQueueTest::testLongQueue() {
-  vital::CircularQueue<float> queue;
+  capusyn::CircularQueue<float> queue;
   queue.reserve(kAddNumber);
 
   beginTest("Long Queue");
@@ -174,7 +174,7 @@ void CircularQueueTest::testLongQueue() {
 }
 
 void CircularQueueTest::testCount() {
-  vital::CircularQueue<float> queue;
+  capusyn::CircularQueue<float> queue;
   queue.reserve(kAddNumber * kLoopNumber);
 
   beginTest("Count");
@@ -202,8 +202,8 @@ void CircularQueueTest::testCount() {
 }
 
 void CircularQueueTest::testResizing() {
-  vital::CircularQueue<float> queue_ensure;
-  vital::CircularQueue<float> queue_reserve;
+  capusyn::CircularQueue<float> queue_ensure;
+  capusyn::CircularQueue<float> queue_reserve;
   queue_ensure.reserve(kAddNumber);
   queue_reserve.reserve(kAddNumber);
   beginTest("Resizing");
@@ -236,7 +236,7 @@ void CircularQueueTest::testResizing() {
 }
 
 void CircularQueueTest::testIterator() {
-  vital::CircularQueue<float> queue;
+  capusyn::CircularQueue<float> queue;
   queue.reserve(kAddNumber);
   beginTest("Iterator");
 
@@ -255,7 +255,7 @@ void CircularQueueTest::testIterator() {
 }
 
 void CircularQueueTest::testPopping() {
-  vital::CircularQueue<float> queue;
+  capusyn::CircularQueue<float> queue;
   queue.reserve(kAddNumber * kLoopNumber);
   beginTest("Popping");
 
@@ -301,7 +301,7 @@ void CircularQueueTest::testPopping() {
 }
 
 void CircularQueueTest::testSorting() {
-  vital::CircularQueue<int> queue;
+  capusyn::CircularQueue<int> queue;
   queue.reserve(kAddNumber);
   beginTest("Sorting");
 

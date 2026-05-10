@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "JuceHeader.h"
@@ -27,7 +27,7 @@
 #include "wavetable_3d.h"
 #endif
 
-void handleVitalCrash(void* data) {
+void handleCapusynCrash(void* data) {
   LoadSave::writeCrashLog(SystemStats::getStackBacktrace());
 }
 
@@ -100,7 +100,7 @@ class SynthApplication : public JUCEApplication {
             quit();
           }
 
-          SystemStats::setApplicationCrashHandler(handleVitalCrash);
+          SystemStats::setApplicationCrashHandler(handleCapusynCrash);
               
           if (visible) {
             setUsingNativeTitleBar(true);
@@ -113,9 +113,9 @@ class SynthApplication : public JUCEApplication {
             editor_->animate(true);
             setContentOwned(editor_, true);
 
-            constrainer_.setMinimumSize(vital::kMinWindowWidth, vital::kMinWindowHeight);
+            constrainer_.setMinimumSize(capusyn::kMinWindowWidth, capusyn::kMinWindowHeight);
             constrainer_.setBorder(getPeer()->getFrameSize());
-            float ratio = (1.0f * vital::kDefaultWindowWidth) / vital::kDefaultWindowHeight;
+            float ratio = (1.0f * capusyn::kDefaultWindowWidth) / capusyn::kDefaultWindowHeight;
 
             constrainer_.setFixedAspectRatio(ratio);
             setConstrainer(&constrainer_);
@@ -184,16 +184,16 @@ class SynthApplication : public JUCEApplication {
           }
           else if (info.commandID == kSaveAs) {
             File active_file = editor_->getActiveFile();
-            FileChooser save_box("Export Preset", File(), String("*.") + vital::kPresetExtension);
+            FileChooser save_box("Export Preset", File(), String("*.") + capusyn::kPresetExtension);
             if (save_box.browseForFileToSave(true))
-              editor_->saveToFile(save_box.getResult().withFileExtension(vital::kPresetExtension));
+              editor_->saveToFile(save_box.getResult().withFileExtension(capusyn::kPresetExtension));
             grabKeyboardFocus();
             editor_->setFocus();
             return true;
           }
           else if (info.commandID == kOpen) {
             File active_file = editor_->getActiveFile();
-            FileChooser open_box("Open Preset", active_file, String("*.") + vital::kPresetExtension);
+            FileChooser open_box("Open Preset", active_file, String("*.") + capusyn::kPresetExtension);
             if (!open_box.browseForFileToOpen())
               return true;
             
@@ -271,7 +271,7 @@ class SynthApplication : public JUCEApplication {
         std::cout << "Application Options:" << newLine;
         std::cout << "  -v, --version                       Show version information and exit" << newLine;
         std::cout << "  --headless                          Run without graphical interface." << newLine;
-        std::cout << "  --tabletowav                        Converts a vitaltable to wav file." << newLine;
+        std::cout << "  --tabletowav                        Converts a caputable to wav file." << newLine;
         std::cout << "  --tableimages                       Renders an image for the table." << newLine;
         std::cout << "  --render                            Render to an audio file." << newLine;
         std::cout << "  -m, --midi                          Note to play (with --render)." << newLine;
@@ -283,7 +283,7 @@ class SynthApplication : public JUCEApplication {
       else if (command.contains(" --tabletowav ")) {
         static constexpr int kSampleRate = 88200;
         
-        vital::Wavetable wavetable(vital::kNumOscillatorWaveFrames);
+        capusyn::Wavetable wavetable(capusyn::kNumOscillatorWaveFrames);
         WavetableCreator wavetable_creator(&wavetable);
         File output_file;
 
@@ -297,7 +297,7 @@ class SynthApplication : public JUCEApplication {
             file = File("./" + arg);
           
           if (arg != "" && arg[0] != '-' && !last_arg_was_option && file.exists()) {
-            if (file.getFileExtension() == String(".") + String(vital::kWavetableExtension)) {
+            if (file.getFileExtension() == String(".") + String(capusyn::kWavetableExtension)) {
               output_file = File::getCurrentWorkingDirectory().getChildFile(file.getFileNameWithoutExtension() + ".wav");
 
               try {
@@ -336,13 +336,13 @@ class SynthApplication : public JUCEApplication {
         std::unique_ptr<FileOutputStream> file_stream = output_file.createOutputStream();
         WavAudioFormat wav_format;
         StringPairArray meta_data;
-        meta_data.set("clm ", "<!>2048 20000000 wavetable (vital.audio)");
+        meta_data.set("clm ", "<!>2048 20000000 wavetable (github.com/BaraMGB/capusyn)");
         std::unique_ptr<AudioFormatWriter> writer(wav_format.createWriterFor(file_stream.get(), kSampleRate,
                                                                              1, 16, meta_data, 0));
 
-        int total_samples = vital::WaveFrame::kWaveformSize * vital::kNumOscillatorWaveFrames;
+        int total_samples = capusyn::WaveFrame::kWaveformSize * capusyn::kNumOscillatorWaveFrames;
         std::unique_ptr<float[]> buffer = std::make_unique<float[]>(total_samples);
-        wavetable_creator.renderToBuffer(buffer.get(), vital::kNumOscillatorWaveFrames, vital::WaveFrame::kWaveformSize);
+        wavetable_creator.renderToBuffer(buffer.get(), capusyn::kNumOscillatorWaveFrames, capusyn::WaveFrame::kWaveformSize);
 
         float* channel = buffer.get();
         writer->writeFromFloatArrays(&channel, 1, total_samples);
@@ -359,7 +359,7 @@ class SynthApplication : public JUCEApplication {
         static constexpr int kFrameRate = 30;
         static constexpr int kSamplesPerFrame = kSampleRate / kFrameRate;
 
-        vital::Wavetable wavetable(vital::kNumOscillatorWaveFrames);
+        capusyn::Wavetable wavetable(capusyn::kNumOscillatorWaveFrames);
         WavetableCreator wavetable_creator(&wavetable);
 
         bool last_arg_was_option = false;
@@ -371,7 +371,7 @@ class SynthApplication : public JUCEApplication {
           else
             file = File("./" + arg);
           if (arg != "" && arg[0] != '-' && !last_arg_was_option && file.exists()) {
-            if (file.getFileExtension() == String(".") + String(vital::kWavetableExtension)) {
+            if (file.getFileExtension() == String(".") + String(capusyn::kWavetableExtension)) {
               try {
                 json parsed_json_state = json::parse(file.loadFileAsString().toStdString(), nullptr, false);
                 wavetable_creator.jsonToState(parsed_json_state);
@@ -429,10 +429,10 @@ class SynthApplication : public JUCEApplication {
         Wavetable3d::paint3dBackground(base_g, &wavetable, true, background, color, color, kImageWidth, kImageHeight,
                                        kWaveHeightPercent, kWaveRangeX, kFrameRangeX, kWaveRangeY, kFrameRangeY,
                                        kStartX, kStartY, kOffsetX, kOffsetY);
-        int total_samples = vital::WaveFrame::kWaveformSize * vital::kNumOscillatorWaveFrames;
+        int total_samples = capusyn::WaveFrame::kWaveformSize * capusyn::kNumOscillatorWaveFrames;
         int frame = 0;
         for (int i = 0; i < total_samples; i += kSamplesPerFrame) {
-          int index = std::min((i * vital::kNumOscillatorWaveFrames) / total_samples, vital::kNumOscillatorWaveFrames - 1);
+          int index = std::min((i * capusyn::kNumOscillatorWaveFrames) / total_samples, capusyn::kNumOscillatorWaveFrames - 1);
           Image image = base_image.createCopy();
           Graphics g(image);
           Wavetable3d::paint3dLine(g, &wavetable, index, selected_color, kImageWidth, kImageHeight,

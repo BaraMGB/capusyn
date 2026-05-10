@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
  * pylon is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ SynthEditor::SynthEditor(SynthPlugin& synth) :
   gui_->setAudioMemory(synth.getAudioMemory());
   gui_->animate(LoadSave::shouldAnimateWidgets());
 
-  constrainer_.setMinimumSize(vital::kMinWindowWidth, vital::kMinWindowHeight);
-  double ratio = (1.0 * vital::kDefaultWindowWidth) / vital::kDefaultWindowHeight;
+  constrainer_.setMinimumSize(capusyn::kMinWindowWidth, capusyn::kMinWindowHeight);
+  double ratio = (1.0 * capusyn::kDefaultWindowWidth) / capusyn::kDefaultWindowHeight;
   constrainer_.setFixedAspectRatio(ratio);
   constrainer_.setGui(gui_.get());
   setConstrainer(&constrainer_);
@@ -44,10 +44,10 @@ SynthEditor::SynthEditor(SynthPlugin& synth) :
 
   addAndMakeVisible(gui_.get());
   float window_size = LoadSave::loadWindowSize();
-  window_size = std::min(window_size, total_bounds.getWidth() / (1.0f * vital::kDefaultWindowWidth));
-  window_size = std::min(window_size, total_bounds.getHeight() / (1.0f * vital::kDefaultWindowHeight));
-  int width = std::round(window_size * vital::kDefaultWindowWidth);
-  int height = std::round(window_size * vital::kDefaultWindowHeight);
+  window_size = std::min(window_size, total_bounds.getWidth() / (1.0f * capusyn::kDefaultWindowWidth));
+  window_size = std::min(window_size, total_bounds.getHeight() / (1.0f * capusyn::kDefaultWindowHeight));
+  int width = std::round(window_size * capusyn::kDefaultWindowWidth);
+  int height = std::round(window_size * capusyn::kDefaultWindowHeight);
   setResizable(true, true);
   setSize(width, height);
 }

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sample_source.h"
@@ -20,7 +20,7 @@
 
 #include <thread>
 
-namespace vital {
+namespace capusyn {
 
   namespace {
     const std::string kDefaultName = "White Noise";
@@ -170,7 +170,7 @@ namespace vital {
       mono_float total = 0.0f;
       for (int i = start; i <= end; ++i) {
         int coefficient_index = i - index + radius - 1;
-        VITAL_ASSERT(coefficient_index >= 0 && coefficient_index < SampleSource::kNumUpsampleTaps);
+        CAPUSYN_ASSERT(coefficient_index >= 0 && coefficient_index < SampleSource::kNumUpsampleTaps);
         mono_float coefficient = kUpsampleCoefficients[coefficient_index];
         total += coefficient * buffer[i];
       }
@@ -270,7 +270,7 @@ namespace vital {
   void Sample::loadSample(const mono_float* buffer, int size, int sample_rate) {
     static constexpr int kMaxSize = 1764000;
 
-    VITAL_ASSERT(active_audio_data_.is_lock_free());
+    CAPUSYN_ASSERT(active_audio_data_.is_lock_free());
 
     size = std::min(size, kMaxSize);
     std::unique_ptr<SampleData> old_data = std::move(data_);
@@ -455,14 +455,14 @@ namespace vital {
 
       t = utils::maskLoad(t, poly_float(1.0f) - t, current_bounce);
 
-      VITAL_ASSERT(poly_float::lessThan(utils::toFloat(start_indices), 0.0f).anyMask() == 0);
-      VITAL_ASSERT(poly_float::greaterThan(utils::toFloat(start_indices), audio_length).anyMask() == 0);
+      CAPUSYN_ASSERT(poly_float::lessThan(utils::toFloat(start_indices), 0.0f).anyMask() == 0);
+      CAPUSYN_ASSERT(poly_float::greaterThan(utils::toFloat(start_indices), audio_length).anyMask() == 0);
 
       matrix interpolation_matrix = utils::getCatmullInterpolationMatrix(t);
       matrix value_matrix = utils::getValueMatrix(audio_buffers, start_indices);
       value_matrix.transpose();
       raw_output[i] = interpolation_matrix.multiplyAndSumRows(value_matrix);
-      VITAL_ASSERT(utils::isContained(raw_output[i]));
+      CAPUSYN_ASSERT(utils::isContained(raw_output[i]));
 
       current_fraction += current_phase_inc;
       poly_float increment = utils::floor(current_fraction);
@@ -523,4 +523,4 @@ namespace vital {
     transpose_quantize_ = quantize;
     return post_add + snapped;
   }
-} // namespace vital
+} // namespace capusyn

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -30,26 +30,26 @@ class Paths {
       return drawable->getOutlineAsPath();
     }
 
-    static Path vitalRing() {
-      Path path = fromSvgData((const void*)BinaryData::vital_ring_svg, BinaryData::vital_ring_svgSize);
+    static Path capusynRing() {
+      Path path = fromSvgData((const void*)BinaryData::capusyn_ring_svg, BinaryData::capusyn_ring_svgSize);
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(kLogoWidth, kLogoWidth, kLogoWidth, kLogoWidth), 0.2f);
       return path;
     }
 
-    static Path vitalV() {
-      Path path = fromSvgData((const void*)BinaryData::vital_v_svg, BinaryData::vital_ring_svgSize);
+    static Path capusynV() {
+      Path path = fromSvgData((const void*)BinaryData::capusyn_v_svg, BinaryData::capusyn_ring_svgSize);
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(kLogoWidth, kLogoWidth, kLogoWidth, kLogoWidth), 0.2f);
       return path;
     }
 
-    static Path vitalWord() {
-      return fromSvgData((const void*)BinaryData::vital_word_svg, BinaryData::vital_word_svgSize);
+    static Path capusynWord() {
+      return fromSvgData((const void*)BinaryData::capusyn_word_svg, BinaryData::capusyn_word_svgSize);
     }
 
-    static Path vitalWordRing() {
-      return fromSvgData((const void*)BinaryData::vital_word_ring_svg, BinaryData::vital_word_ring_svgSize);
+    static Path capusynWordRing() {
+      return fromSvgData((const void*)BinaryData::capusyn_word_ring_svg, BinaryData::capusyn_word_ring_svgSize);
     }
 
     static Path chorus() {
@@ -128,7 +128,7 @@ class Paths {
       static const float kBuffer = (1.0f - kClockWidth) / 2.0f;
 
       Path path;
-      path.addPieSegment(kBuffer, kBuffer, kClockWidth, kClockWidth, 0.0f, kClockAngle - 2.0f * vital::kPi, 0.0f);
+      path.addPieSegment(kBuffer, kBuffer, kClockWidth, kClockWidth, 0.0f, kClockAngle - 2.0f * capusyn::kPi, 0.0f);
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(1.0f, 1.0f, 1.0f, 1.0f), 0.2f);
       return path;
@@ -481,9 +481,9 @@ class Paths {
       path.addLineSegment(Line<float>(1.0f, 1.0f, 1.0f, 1.0f), 0.2f);
       float offset = 0.5f - kRadius;
       float diameter = 2.0f * kRadius;
-      path.addPieSegment(offset, offset, diameter, diameter, 0.0f, 2.0f * vital::kPi, 0.5f);
+      path.addPieSegment(offset, offset, diameter, diameter, 0.0f, 2.0f * capusyn::kPi, 0.5f);
       for (int i = 0; i < kNumGearTeeth; ++i) {
-        float phase = 2.0f * i * vital::kPi / kNumGearTeeth;
+        float phase = 2.0f * i * capusyn::kPi / kNumGearTeeth;
         float x_offset = kRadius * cosf(phase);
         float y_offset = kRadius * sinf(phase);
         Line<float> line(0.5f + x_offset, 0.5f + y_offset,
@@ -504,7 +504,7 @@ class Paths {
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(1.0f, 1.0f, 1.0f, 1.0f), 0.2f);
       float diameter = 2.0f * kRadius;
-      path.addPieSegment(kGlassOffset, kGlassOffset, diameter, diameter, 0.0f, 2.0f * vital::kPi, 1.0f - kWidthRatio);
+      path.addPieSegment(kGlassOffset, kGlassOffset, diameter, diameter, 0.0f, 2.0f * capusyn::kPi, 1.0f - kWidthRatio);
 
       float line_width = kWidthRatio * kRadius;
       float line_start = kGlassOffset + kSqrt2 * kRadius + line_width / 2.0f;
@@ -663,7 +663,7 @@ class Paths {
       static constexpr float kEndpointStrokeWidth = 0.08f;
       static constexpr float kEndpointRadius = 0.09f;
       static constexpr int kNumCurvePoints = 16;
-      static constexpr float kFullRadians = vital::kPi * 2.0f;
+      static constexpr float kFullRadians = capusyn::kPi * 2.0f;
       static constexpr float kBumpIn = kEndpointRadius;
       static constexpr float kAdjustXIn = kBumpIn + kEndpointRadius / 2.0f;
 
@@ -677,7 +677,7 @@ class Paths {
       for (int i = 0; i < kNumCurvePoints; ++i) {
         float t = (1.0f + i) / kNumCurvePoints;
         float x = t * end_x + (1.0f - t) * start_x;
-        float y_t = sinf((t - 0.5f) * vital::kPi) * 0.5f + 0.5f;
+        float y_t = sinf((t - 0.5f) * capusyn::kPi) * 0.5f + 0.5f;
         float y = y_t * end_y + (1.0f - y_t) * start_y;
         curve.lineTo(x, y);
       }

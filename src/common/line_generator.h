@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -29,7 +29,7 @@ class LineGenerator {
     static constexpr int kExtraValues = 3;
 
     static force_inline float smoothTransition(float t) {
-      return 0.5f * sinf((t - 0.5f) * vital::kPi) + 0.5f;
+      return 0.5f * sinf((t - 0.5f) * capusyn::kPi) + 0.5f;
     }
 
     LineGenerator(int resolution = kDefaultResolution);
@@ -70,16 +70,16 @@ class LineGenerator {
     force_inline int resolution() const { return resolution_; }
     force_inline bool linear() const { return linear_; }
     force_inline bool smooth() const { return smooth_; }
-    force_inline vital::mono_float* getBuffer() const { return buffer_.get() + 1; }
-    force_inline vital::mono_float* getCubicInterpolationBuffer() const { return buffer_.get(); }
+    force_inline capusyn::mono_float* getBuffer() const { return buffer_.get() + 1; }
+    force_inline capusyn::mono_float* getCubicInterpolationBuffer() const { return buffer_.get(); }
 
     force_inline std::pair<float, float> getPoint(int index) const {
-      VITAL_ASSERT(index < kMaxPoints && index >= 0);
+      CAPUSYN_ASSERT(index < kMaxPoints && index >= 0);
       return points_[index];
     }
 
     force_inline float getPower(int index) const {
-      VITAL_ASSERT(index < kMaxPoints && index >= 0);
+      CAPUSYN_ASSERT(index < kMaxPoints && index >= 0);
       return powers_[index];
     }
 
@@ -88,19 +88,19 @@ class LineGenerator {
     }
 
     force_inline void setPoint(int index, std::pair<float, float> point) {
-      VITAL_ASSERT(index < kMaxPoints && index >= 0);
+      CAPUSYN_ASSERT(index < kMaxPoints && index >= 0);
       points_[index] = point;
       checkLineIsLinear();
     }
 
     force_inline void setPower(int index, float power) {
-      VITAL_ASSERT(index < kMaxPoints && index >= 0);
+      CAPUSYN_ASSERT(index < kMaxPoints && index >= 0);
       powers_[index] = power;
       checkLineIsLinear();
     }
 
     force_inline void setNumPoints(int num_points) {
-      VITAL_ASSERT(num_points <= kMaxPoints && num_points >= 0);
+      CAPUSYN_ASSERT(num_points <= kMaxPoints && num_points >= 0);
       num_points_ = num_points;
       checkLineIsLinear();
     }
@@ -115,7 +115,7 @@ class LineGenerator {
     int num_points_;
     int resolution_;
 
-    std::unique_ptr<vital::mono_float[]> buffer_;
+    std::unique_ptr<capusyn::mono_float[]> buffer_;
     bool loop_;
     bool smooth_;
     bool linear_;

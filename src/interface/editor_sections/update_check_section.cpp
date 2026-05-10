@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "update_check_section.h"
@@ -35,7 +35,7 @@ UpdateCheckSection::UpdateCheckSection(String name) : Overlay(name), version_req
                                                       body_(Shaders::kRoundedRectangleFragment) {
   addOpenGlComponent(&body_);
 
-  notify_text_ = std::make_unique<PlainTextComponent>("notify", "There is a new version of Vital!");
+  notify_text_ = std::make_unique<PlainTextComponent>("notify", "There is a new version of Capusyn!");
   notify_text_->setTextSize(20.0f);
   notify_text_->setFontType(PlainTextComponent::kLight);
   addOpenGlComponent(notify_text_.get());
@@ -144,7 +144,7 @@ void UpdateCheckSection::finished(URL::DownloadTask* task, bool success) {
 
 void UpdateCheckSection::checkUpdate() {
   URL version_url("");
-  version_file_ = File::getSpecialLocation(File::tempDirectory).getChildFile("vital_versions.txt");
+  version_file_ = File::getSpecialLocation(File::tempDirectory).getChildFile("capusyn_versions.txt");
   download_task_ = version_url.downloadToFile(version_file_, "", this);
 }
 

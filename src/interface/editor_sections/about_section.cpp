@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "about_section.h"
@@ -36,7 +36,7 @@ AboutSection::AboutSection(const String& name) : Overlay(name), body_(Shaders::k
   logo_ = std::make_unique<AppLogo>("logo");
   addOpenGlComponent(logo_.get());
 
-  name_text_ = std::make_unique<PlainTextComponent>("plugin name", "VIAL");
+  name_text_ = std::make_unique<PlainTextComponent>("plugin name", String(ProjectInfo::projectName).toUpperCase());
   addOpenGlComponent(name_text_.get());
   name_text_->setFontType(PlainTextComponent::kRegular);
   name_text_->setTextSize(40.0f);
@@ -116,7 +116,7 @@ void AboutSection::resized() {
     AudioDeviceManager* device_manager = parent->getAudioDeviceManager();
     if (device_manager) {
       device_selector_ = std::make_unique<OpenGlDeviceSelector>(
-          *device_manager, 0, 0, vital::kNumChannels, vital::kNumChannels, true, false, false, false);
+          *device_manager, 0, 0, capusyn::kNumChannels, capusyn::kNumChannels, true, false, false, false);
       addAndMakeVisible(device_selector_.get());
       addOpenGlComponent(device_selector_->getImageComponent());
     }

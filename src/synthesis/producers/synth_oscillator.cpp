@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "synth_oscillator.h"
@@ -23,7 +23,7 @@
 
 #include <climits>
 
-namespace vital {
+namespace capusyn {
   namespace {
     constexpr int kNumVoicesPerProcess = poly_float::kSize / 2;
     constexpr int kWaveformBits = WaveFrame::kWaveformBits;
@@ -432,7 +432,7 @@ namespace vital {
         poly_float read = mult * interpolate(from_buffers, to_buffers, distorted_phase + current_dist_phase, t);
         poly_float center_value = current_center_amplitude * read;
         audio_out[i] = center_value + current_detuned_amplitude * audio_out[i];
-        VITAL_ASSERT(utils::isFinite(audio_out[i]));
+        CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
 
         t += t_inc;
       }
@@ -890,7 +890,7 @@ namespace vital {
 
   void SynthOscillator::levelOutput(poly_float* audio_out, const poly_float* raw_out,
                                     int num_samples, poly_mask reset_mask) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAmplitude));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAmplitude));
 
     poly_float current_pan_amplitude = pan_amplitude_;
     pan_amplitude_ = futils::panAmplitude(utils::clamp(input(kPan)->at(0), -1.0f, 1.0f));
@@ -905,7 +905,7 @@ namespace vital {
       current_pan_amplitude += delta_pan_amplitude;
       audio_out[i] = current_pan_amplitude * raw_out[i] * amp * amp;
 
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -1427,8 +1427,8 @@ namespace vital {
       if (new_buffer_mask[2])
         setWaveBuffers(buffer_phase_inc, 2);
 
-      VITAL_ASSERT((int)voice_block_.current_buffer_sample[0] < voice_block_.num_buffer_samples);
-      VITAL_ASSERT((int)voice_block_.current_buffer_sample[2] < voice_block_.num_buffer_samples);
+      CAPUSYN_ASSERT((int)voice_block_.current_buffer_sample[0] < voice_block_.num_buffer_samples);
+      CAPUSYN_ASSERT((int)voice_block_.current_buffer_sample[2] < voice_block_.num_buffer_samples);
     }
 
     if (reset_mask.anyMask())
@@ -1444,7 +1444,7 @@ namespace vital {
     if (active_channels < 2)
       return;
 
-    VITAL_ASSERT(active_channels == 2 || active_channels == 4);
+    CAPUSYN_ASSERT(active_channels == 2 || active_channels == 4);
     int num_active_voices = active_channels / 2;
     poly_mask active_voice_mask = poly_float::equal(input(kActiveVoices)->at(0), 1.0f);
     int num_samples = voice_block_.end_sample - voice_block_.start_sample;
@@ -1511,4 +1511,4 @@ namespace vital {
     stereoBlend(audio_out, num_samples, reset_mask);
     levelOutput(output(kLevelled)->buffer, audio_out, num_samples, reset_mask);
   }
-} // namespace vital
+} // namespace capusyn

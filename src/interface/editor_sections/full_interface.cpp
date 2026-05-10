@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "full_interface.h"
@@ -61,7 +61,7 @@ FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_inte
                                                                 synth_data->mono_modulations,
                                                                 synth_data->poly_modulations);
 
-    for (int i = 0; i < vital::kNumOscillators; ++i) {
+    for (int i = 0; i < capusyn::kNumOscillators; ++i) {
       wavetable_edits_[i] = std::make_unique<WavetableEditSection>(i, synth_data->wavetable_creators[i]);
       addSubSection(wavetable_edits_[i].get());
       wavetable_edits_[i]->setVisible(false);
@@ -83,7 +83,7 @@ FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_inte
   master_controls_interface_->setVisible(false);
 
   if (synthesis_interface_) {
-    for (int i = 0; i < vital::kNumOscillators; ++i)
+    for (int i = 0; i < capusyn::kNumOscillators; ++i)
       master_controls_interface_->passOscillatorSection(i, synthesis_interface_->getOscillatorSection(i));
   }
 
@@ -365,7 +365,7 @@ void FullInterface::repaintOpenGlBackground(OpenGlComponent* component) {
 void FullInterface::redoBackground() {
   int width = std::ceil(display_scale_ * getWidth());
   int height = std::ceil(display_scale_ * getHeight());
-  if (width < vital::kMinWindowWidth || height < vital::kMinWindowHeight)
+  if (width < capusyn::kMinWindowWidth || height < capusyn::kMinWindowHeight)
     return;
 
   ScopedLock open_gl_lock(open_gl_critical_section_);
@@ -409,17 +409,17 @@ void FullInterface::resized() {
   int height = std::ceil(getHeight() * display_scale_);
   Rectangle<int> bounds(0, 0, width, height);
 
-  float width_ratio = getWidth() / (1.0f * vital::kDefaultWindowWidth);
+  float width_ratio = getWidth() / (1.0f * capusyn::kDefaultWindowWidth);
   float ratio = width_ratio * display_scale_;
-  float height_ratio = getHeight() / (1.0f * vital::kDefaultWindowHeight);
-  if (width_ratio > height_ratio + 1.0f / vital::kDefaultWindowHeight) {
+  float height_ratio = getHeight() / (1.0f * capusyn::kDefaultWindowHeight);
+  if (width_ratio > height_ratio + 1.0f / capusyn::kDefaultWindowHeight) {
     ratio = height_ratio;
-    width = height_ratio * vital::kDefaultWindowWidth * display_scale_;
+    width = height_ratio * capusyn::kDefaultWindowWidth * display_scale_;
     left = (getWidth() - width) / 2;
   }
-  if (height_ratio > width_ratio + 1.0f / vital::kDefaultWindowHeight) {
+  if (height_ratio > width_ratio + 1.0f / capusyn::kDefaultWindowHeight) {
     ratio = width_ratio;
-    height = ratio * vital::kDefaultWindowHeight * display_scale_;
+    height = ratio * capusyn::kDefaultWindowHeight * display_scale_;
     top = (getHeight() - height) / 2;
   }
 
@@ -494,13 +494,13 @@ void FullInterface::resized() {
 
   modulation_manager_->setBounds(bounds);
   
-  for (int i = 0; i < vital::kNumOscillators; ++i) {
+  for (int i = 0; i < capusyn::kNumOscillators; ++i) {
     if (wavetable_edits_[i])
       wavetable_edits_[i]->setBounds(left, 0, width, height);
   }
 
   if (synthesis_interface_) {
-    for (int i = 0; i < vital::kNumOscillators; ++i)
+    for (int i = 0; i < capusyn::kNumOscillators; ++i)
       master_controls_interface_->setOscillatorBounds(i, synthesis_interface_->getOscillatorBounds(i));
   }
   master_controls_interface_->setBounds(main_bounds);
@@ -515,22 +515,22 @@ void FullInterface::resized() {
     redoBackground();
 }
 
-void FullInterface::setOscilloscopeMemory(const vital::poly_float* memory) {
+void FullInterface::setOscilloscopeMemory(const capusyn::poly_float* memory) {
   if (header_)
     header_->setOscilloscopeMemory(memory);
   if (master_controls_interface_)
     master_controls_interface_->setOscilloscopeMemory(memory);
 }
 
-void FullInterface::setAudioMemory(const vital::StereoMemory* memory) {
+void FullInterface::setAudioMemory(const capusyn::StereoMemory* memory) {
   if (header_)
     header_->setAudioMemory(memory);
   if (master_controls_interface_)
     master_controls_interface_->setAudioMemory(memory);
 }
 
-void FullInterface::createModulationSliders(const vital::output_map& mono_modulations,
-                                            const vital::output_map& poly_modulations) {
+void FullInterface::createModulationSliders(const capusyn::output_map& mono_modulations,
+                                            const capusyn::output_map& poly_modulations) {
   std::map<std::string, SynthSlider*> all_sliders = getAllSliders();
   std::map<std::string, SynthSlider*> modulatable_sliders;
 
@@ -570,7 +570,7 @@ void FullInterface::reset() {
   repaintSynthesisSection();
 }
 
-void FullInterface::setAllValues(vital::control_map& controls) {
+void FullInterface::setAllValues(capusyn::control_map& controls) {
   ScopedLock lock(open_gl_critical_section_);
   setting_all_values_ = true;
   SynthSection::setAllValues(controls);
@@ -578,7 +578,7 @@ void FullInterface::setAllValues(vital::control_map& controls) {
 }
 
 void FullInterface::setWavetableNames() {
-  for (int i = 0; i < vital::kNumOscillators; ++i) {
+  for (int i = 0; i < capusyn::kNumOscillators; ++i) {
     if (wavetable_edits_[i])
       synthesis_interface_->setWavetableName(i, wavetable_edits_[i]->getName());
   }
@@ -596,7 +596,7 @@ void FullInterface::newOpenGLContextCreated() {
   unsupported_ = version_supported < kMinOpenGlVersion;
   if (unsupported_) {
     NativeMessageBox::showMessageBoxAsync(AlertWindow::WarningIcon, "Unsupported OpenGl Version",
-                                          String("Vial requires OpenGL version: ") + String(kMinOpenGlVersion) +
+                                          String("Capusyn requires OpenGL version: ") + String(kMinOpenGlVersion) +
                                           String("\nSupported version: ") + String(version_supported));
     return;
   }
@@ -758,7 +758,7 @@ void FullInterface::showFullScreenSection(SynthSection* full_screen) {
     full_screen_section_->setBounds(getLocalBounds());
   }
 
-  for (int i = 0; i < vital::kNumOscillators; ++i)
+  for (int i = 0; i < capusyn::kNumOscillators; ++i)
     wavetable_edits_[i]->setVisible(false);
 
   bool show_rest = full_screen == nullptr;
@@ -779,7 +779,7 @@ void FullInterface::showWavetableEditSection(int index) {
     return;
 
   ScopedLock lock(open_gl_critical_section_);
-  for (int i = 0; i < vital::kNumOscillators; ++i)
+  for (int i = 0; i < capusyn::kNumOscillators; ++i)
     wavetable_edits_[i]->setVisible(i == index);
 
   bool show_rest = index < 0;
@@ -849,7 +849,7 @@ void FullInterface::resynthesizeToWavetable(int index) {
 void FullInterface::saveWavetable(int index) {
   save_section_->setIsPreset(false);
   save_section_->setSaveBounds();
-  save_section_->setFileExtension(vital::kWavetableExtension);
+  save_section_->setFileExtension(capusyn::kWavetableExtension);
   save_section_->setFileType("Wavetable");
   File destination = LoadSave::getUserWavetableDirectory();
   if (!destination.exists())
@@ -861,7 +861,7 @@ void FullInterface::saveWavetable(int index) {
 
 void FullInterface::saveLfo(const json& data) {
   save_section_->setIsPreset(false);
-  save_section_->setFileExtension(vital::kLfoExtension);
+  save_section_->setFileExtension(capusyn::kLfoExtension);
   save_section_->setFileType("LFO");
   save_section_->setDirectory(LoadSave::getUserLfoDirectory());
   save_section_->setFileData(data);

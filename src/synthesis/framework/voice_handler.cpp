@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "voice_handler.h"
@@ -19,7 +19,7 @@
 #include "synth_constants.h"
 #include "utils.h"
 
-namespace vital {
+namespace capusyn {
 
   namespace {
     constexpr int kParallelVoices = poly_float::kSize / 2;
@@ -259,7 +259,7 @@ namespace vital {
       poly_float* dest = outputs.second->buffer;
       const poly_float* source = outputs.first->buffer;
 
-      VITAL_ASSERT(buffer_size == 1);
+      CAPUSYN_ASSERT(buffer_size == 1);
 
       for (int i = 0; i < buffer_size; ++i) {
         poly_float masked = source[i] & voice_mask;
@@ -549,7 +549,7 @@ namespace vital {
       }
 
       if (has_active_voice && dead_voice) {
-        VITAL_ASSERT(free_voices_.count(dead_voice));
+        CAPUSYN_ASSERT(free_voices_.count(dead_voice));
         free_voices_.remove(dead_voice);
         return dead_voice;
       }
@@ -647,7 +647,7 @@ namespace vital {
   }
 
   void VoiceHandler::noteOn(int note, mono_float velocity, int sample, int channel) {
-    VITAL_ASSERT(channel >= 0 && channel < kNumMidiChannels);
+    CAPUSYN_ASSERT(channel >= 0 && channel < kNumMidiChannels);
 
     Voice* voice = grabVoice();
     if (voice == nullptr)
@@ -812,8 +812,8 @@ namespace vital {
   }
 
   Output* VoiceHandler::registerOutput(Output* output) {
-    VITAL_ASSERT(accumulated_outputs_.count(output) == 0);
-    VITAL_ASSERT(last_voice_outputs_.count(output) == 0);
+    CAPUSYN_ASSERT(accumulated_outputs_.count(output) == 0);
+    CAPUSYN_ASSERT(last_voice_outputs_.count(output) == 0);
 
     Output* new_output = new Output(output->buffer_size);
     new_output->owner = this;
@@ -830,8 +830,8 @@ namespace vital {
   }
 
   Output* VoiceHandler::registerControlRateOutput(Output* output, bool active) {
-    VITAL_ASSERT(accumulated_outputs_.count(output) == 0);
-    VITAL_ASSERT(last_voice_outputs_.count(output) == 0);
+    CAPUSYN_ASSERT(accumulated_outputs_.count(output) == 0);
+    CAPUSYN_ASSERT(last_voice_outputs_.count(output) == 0);
 
     cr::Output* new_output = new cr::Output();
     new_output->owner = this;
@@ -845,7 +845,7 @@ namespace vital {
   }
 
   Output* VoiceHandler::registerOutput(Output* output, int index) {
-    VITAL_ASSERT(false);
+    CAPUSYN_ASSERT(false);
     return output;
   }
 
@@ -894,4 +894,4 @@ namespace vital {
 
     all_aggregate_voices_.push_back(std::move(aggregate_voice));
   }
-} // namespace vital
+} // namespace capusyn

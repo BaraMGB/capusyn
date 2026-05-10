@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -22,7 +22,7 @@
 
 using json = nlohmann::json;
 
-namespace vital {
+namespace capusyn {
 
   class Sample {
     public:
@@ -70,20 +70,20 @@ namespace vital {
       }
 
       force_inline const mono_float* getActiveLeftBuffer(int index) {
-        VITAL_ASSERT(index >= 0 && index < active_audio_data_.load()->left_buffers.size());
+        CAPUSYN_ASSERT(index >= 0 && index < active_audio_data_.load()->left_buffers.size());
 
         return active_audio_data_.load()->left_buffers[index].get();
       }
 
       force_inline const mono_float* getActiveLeftLoopBuffer(int index) {
-        VITAL_ASSERT(index >= 0 && index < active_audio_data_.load()->left_loop_buffers.size());
+        CAPUSYN_ASSERT(index >= 0 && index < active_audio_data_.load()->left_loop_buffers.size());
 
         return active_audio_data_.load()->left_loop_buffers[index].get();
       }
 
       force_inline const mono_float* getActiveRightBuffer(int index) {
         if (active_audio_data_.load()->stereo) {
-          VITAL_ASSERT(index >= 0 && index < active_audio_data_.load()->right_buffers.size());
+          CAPUSYN_ASSERT(index >= 0 && index < active_audio_data_.load()->right_buffers.size());
           return active_audio_data_.load()->right_buffers[index].get();
         }
         return getActiveLeftBuffer(index);
@@ -91,7 +91,7 @@ namespace vital {
 
       force_inline const mono_float* getActiveRightLoopBuffer(int index) {
         if (active_audio_data_.load()->stereo) {
-          VITAL_ASSERT(index >= 0 && index < active_audio_data_.load()->right_loop_buffers.size());
+          CAPUSYN_ASSERT(index >= 0 && index < active_audio_data_.load()->right_loop_buffers.size());
           return active_audio_data_.load()->right_loop_buffers[index].get();
         }
         return getActiveLeftLoopBuffer(index);
@@ -168,5 +168,5 @@ namespace vital {
 
       JUCE_LEAK_DETECTOR(SampleSource)
   };
-} // namespace vital
+} // namespace capusyn
 

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "wavetable_edit_section.h"
@@ -129,9 +129,9 @@ WavetableEditSection::WavetableEditSection(int index, WavetableCreator* wavetabl
     wavetable_creator_(wavetable_creator) {
   format_manager_.registerBasicFormats();
   current_overlay_ = nullptr;
-  int num_bars = vital::WaveFrame::kNumRealComplex;
-  int num_frames = vital::kNumOscillatorWaveFrames;
-  int waveform_size = vital::Wavetable::kWaveformSize;
+  int num_bars = capusyn::WaveFrame::kNumRealComplex;
+  int num_frames = capusyn::kNumOscillatorWaveFrames;
+  int waveform_size = capusyn::Wavetable::kWaveformSize;
   wave_frame_slider_ = nullptr;
 
   oscillator_waveform_ = std::make_unique<WaveSourceEditor>(waveform_size);
@@ -372,14 +372,14 @@ void WavetableEditSection::frameChanged() {
 }
 
 void WavetableEditSection::prevClicked() {
-  File wavetable_file = LoadSave::getShiftedFile(LoadSave::kWavetableFolderName, vital::kWavetableExtensionsList,
+  File wavetable_file = LoadSave::getShiftedFile(LoadSave::kWavetableFolderName, capusyn::kWavetableExtensionsList,
                                                  LoadSave::kAdditionalWavetableFoldersName, getCurrentFile(), -1);
   if (wavetable_file.exists())
     loadFile(wavetable_file);
 }
 
 void WavetableEditSection::nextClicked() {
-  File wavetable_file = LoadSave::getShiftedFile(LoadSave::kWavetableFolderName, vital::kWavetableExtensionsList,
+  File wavetable_file = LoadSave::getShiftedFile(LoadSave::kWavetableFolderName, capusyn::kWavetableExtensionsList,
                                                  LoadSave::kAdditionalWavetableFoldersName, getCurrentFile(), 1);
   if (wavetable_file.exists())
     loadFile(wavetable_file);
@@ -391,7 +391,7 @@ void WavetableEditSection::textMouseDown(const MouseEvent& e) {
   Rectangle<int> bounds(preset_selector_->getX(), preset_selector_->getBottom(),
                         kBrowserWidth * size_ratio_, kBrowserHeight * size_ratio_);
   bounds = getLocalArea(this, bounds);
-  showPopupBrowser(this, bounds, LoadSave::getWavetableDirectories(), vital::kWavetableExtensionsList,
+  showPopupBrowser(this, bounds, LoadSave::getWavetableDirectories(), capusyn::kWavetableExtensionsList,
                    LoadSave::kWavetableFolderName, LoadSave::kAdditionalWavetableFoldersName);
 }
 
@@ -478,7 +478,7 @@ void WavetableEditSection::render(int position) {
 
 void WavetableEditSection::updateGlDisplay() {
   int position = wavetable_playhead_->position();
-  VITAL_ASSERT(position >= 0 && position <= vital::kNumOscillatorWaveFrames);
+  CAPUSYN_ASSERT(position >= 0 && position <= capusyn::kNumOscillatorWaveFrames);
   updateTimeDomain(wavetable_creator_->getWavetable()->getBuffer(position));
   updateFrequencyDomain(wavetable_creator_->getWavetable()->getBuffer(position));
 }
@@ -506,14 +506,14 @@ void WavetableEditSection::updateFrequencyDomain(float* time_domain) {
   static constexpr float kPhaseEpsilon = 0.0001f;
   compute_frame_.loadTimeDomain(time_domain);
 
-  for (int i = 0; i < vital::WaveFrame::kWaveformSize / 2; ++i) {
+  for (int i = 0; i < capusyn::WaveFrame::kWaveformSize / 2; ++i) {
     std::complex<float> val = compute_frame_.frequency_domain[i];
-    float amplitude = std::abs(val) / vital::WaveFrame::kWaveformSize;
-    float phase = amplitude > kAmplitudeEpsilon ? std::arg(val) : -vital::kPi / 2.0f;
+    float amplitude = std::abs(val) / capusyn::WaveFrame::kWaveformSize;
+    float phase = amplitude > kAmplitudeEpsilon ? std::arg(val) : -capusyn::kPi / 2.0f;
     frequency_amplitudes_->setScaledY(i, amplitude);
-    if (phase >= vital::kPi - kPhaseEpsilon)
-      phase = -vital::kPi;
-    frequency_phases_->setY(i, phase / vital::kPi);
+    if (phase >= capusyn::kPi - kPhaseEpsilon)
+      phase = -capusyn::kPi;
+    frequency_phases_->setY(i, phase / capusyn::kPi);
   }
 }
 
@@ -575,7 +575,7 @@ void WavetableEditSection::saveAsWavetable() {
 }
 
 void WavetableEditSection::importWavetable() {
-  FileChooser open_box("Import Wavetable", File(), vital::kWavetableExtensionsList);
+  FileChooser open_box("Import Wavetable", File(), capusyn::kWavetableExtensionsList);
   if (open_box.browseForFileToOpen()) {
     if (!open_box.getResult().exists())
       return;
@@ -584,10 +584,10 @@ void WavetableEditSection::importWavetable() {
 }
 
 void WavetableEditSection::exportWavetable() {
-  FileChooser save_box("Export Wavetable", File(), String("*.") + vital::kWavetableExtension);
+  FileChooser save_box("Export Wavetable", File(), String("*.") + capusyn::kWavetableExtension);
   if (save_box.browseForFileToSave(true)) {
     json wavetable_data = wavetable_creator_->stateToJson();
-    File file = save_box.getResult().withFileExtension(vital::kWavetableExtension);
+    File file = save_box.getResult().withFileExtension(capusyn::kWavetableExtension);
     file.replaceWithText(wavetable_data.dump());
   }
 }
@@ -608,13 +608,13 @@ void WavetableEditSection::exportToWav() {
   std::unique_ptr<FileOutputStream> file_stream = file.createOutputStream();
   WavAudioFormat wav_format;
   StringPairArray meta_data;
-  meta_data.set("clm ", "<!>2048 20000000 wavetable (vital.audio)");
+  meta_data.set("clm ", "<!>2048 20000000 wavetable (github.com/BaraMGB/capusyn)");
   std::unique_ptr<AudioFormatWriter> writer(wav_format.createWriterFor(file_stream.get(), kWavetableSampleRate,
                                                                        1, 16, meta_data, 0));
 
-  int total_samples = vital::WaveFrame::kWaveformSize * kNumWaveframes;
+  int total_samples = capusyn::WaveFrame::kWaveformSize * kNumWaveframes;
   std::unique_ptr<float[]> buffer = std::make_unique<float[]>(total_samples);
-  wavetable_creator_->renderToBuffer(buffer.get(), kNumWaveframes, vital::WaveFrame::kWaveformSize);
+  wavetable_creator_->renderToBuffer(buffer.get(), kNumWaveframes, capusyn::WaveFrame::kWaveformSize);
 
   float* channel = buffer.get();
   writer->writeFromFloatArrays(&channel, 1, total_samples);
@@ -699,7 +699,7 @@ void WavetableEditSection::resynthesizeToWavetable() {
   wavetable_creator_->setName("Resynthesize");
   FileSource* file_source = dynamic_cast<FileSource*>(wavetable_creator_->getGroup(0)->getComponent(0));
   if (file_source)
-    file_source->setWindowSize(sample_rate / vital::utils::midiNoteToFrequency(kResynthesizeNote));
+    file_source->setWindowSize(sample_rate / capusyn::utils::midiNoteToFrequency(kResynthesizeNote));
   wavetable_creator_->render();
   reset();
 }

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "modulation_matrix.h"
@@ -82,9 +82,9 @@ namespace {
       if (parameter_name.substring(0, prefix_length) == prefix) {
         std::string display_name;
         if (local)
-          display_name = vital::Parameters::getDetails(parameter_name.toStdString()).local_description;
+          display_name = capusyn::Parameters::getDetails(parameter_name.toStdString()).local_description;
         else
-          display_name = vital::Parameters::getDetails(parameter_name.toStdString()).display_name;
+          display_name = capusyn::Parameters::getDetails(parameter_name.toStdString()).display_name;
         items.addItem(index, display_name);
       }
 
@@ -105,7 +105,7 @@ namespace {
       }
 
       if (!prefix_match && parameter_name != String(kNoConnectionString)) {
-        std::string display_name = vital::Parameters::getDetails(parameter_name.toStdString()).display_name;
+        std::string display_name = capusyn::Parameters::getDetails(parameter_name.toStdString()).display_name;
         items.addItem(index, display_name);
       }
       index++;
@@ -200,12 +200,12 @@ class BypassButton : public SynthButton {
 
 class ModulationMeterReadouts : public BarRenderer {
   public:
-    ModulationMeterReadouts() : BarRenderer(vital::kMaxModulationConnections, false),
+    ModulationMeterReadouts() : BarRenderer(capusyn::kMaxModulationConnections, false),
                                 parent_(nullptr), modulation_amounts_(), scroll_offset_(0), modulation_active_() { }
 
     void loadAmountOutputs() {
       std::string modulation_prefix = "modulation_amount_";
-      for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+      for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
         std::string number = std::to_string(i + 1);
         modulation_amounts_[i] = parent_->getSynth()->getStatusOutput(modulation_prefix + number);
       }
@@ -227,19 +227,19 @@ class ModulationMeterReadouts : public BarRenderer {
 
       float width = getWidth();
       float height = getHeight();
-      setBarWidth(vital::kMaxModulationConnections * modulation_bounds_[0].getHeight() / height);
+      setBarWidth(capusyn::kMaxModulationConnections * modulation_bounds_[0].getHeight() / height);
 
-      for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+      for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
         if (modulation_active_[i]) {
           float min_x = 2.0f * modulation_bounds_[i].getX() / width - 1.0f;
           float max_x = 2.0f * modulation_bounds_[i].getRight() / width - 1.0f;
           float y = 1.0f - 2.0f * (modulation_bounds_[i].getBottom() - scroll_offset_) / height;
 
           float value = modulation_amounts_[i]->value()[index];
-          if (value == vital::StatusOutput::kClearValue)
+          if (value == capusyn::StatusOutput::kClearValue)
             value = 0.0f;
-          float t = vital::utils::clamp(0.5f * (value + 1.0f), 0.0f, 1.0f);
-          float x = vital::utils::interpolate(min_x, max_x, t);
+          float t = capusyn::utils::clamp(0.5f * (value + 1.0f), 0.0f, 1.0f);
+          float x = capusyn::utils::interpolate(min_x, max_x, t);
           float center_x = (max_x + min_x) / 2.0f;
           positionBar(i, center_x, y, x - center_x, 0.0f);
         }
@@ -276,10 +276,10 @@ class ModulationMeterReadouts : public BarRenderer {
 
   private:
     SynthGuiInterface* parent_;
-    const vital::StatusOutput* modulation_amounts_[vital::kMaxModulationConnections];
-    Rectangle<int> modulation_bounds_[vital::kMaxModulationConnections];
+    const capusyn::StatusOutput* modulation_amounts_[capusyn::kMaxModulationConnections];
+    Rectangle<int> modulation_bounds_[capusyn::kMaxModulationConnections];
     int scroll_offset_;
-    bool modulation_active_[vital::kMaxModulationConnections];
+    bool modulation_active_[capusyn::kMaxModulationConnections];
 };
 
 String ModulationSelector::getTextFromValue(double value) {
@@ -460,8 +460,8 @@ void ModulationMatrixRow::updateDisplayValue() {
 
   amount_slider_->setDisplayMultiply(1.0f);
   if (last_destination_value_ > 0.0 && last_source_value_) {
-    vital::ValueDetails details = vital::Parameters::getDetails(connection_->destination_name);
-    if (details.value_scale == vital::ValueDetails::kLinear || details.value_scale == vital::ValueDetails::kIndexed)
+    capusyn::ValueDetails details = capusyn::Parameters::getDetails(connection_->destination_name);
+    if (details.value_scale == capusyn::ValueDetails::kLinear || details.value_scale == capusyn::ValueDetails::kIndexed)
       amount_slider_->setDisplayMultiply(details.max - details.min);
 
     float current_value = connection_->modulation_processor->currentBaseValue();
@@ -544,7 +544,7 @@ String ModulationMatrix::getUiSourceDisplayName(const String& original) {
   return getMenuSourceDisplayName(original).toUpperCase();
 }
 
-ModulationMatrix::ModulationMatrix(const vital::output_map& sources, const vital::output_map& destinations) :
+ModulationMatrix::ModulationMatrix(const capusyn::output_map& sources, const capusyn::output_map& destinations) :
     SynthSection("MODULATION MATRIX"), container_("Container") {
   const NaturalStringComparator comparator;
 
@@ -589,7 +589,7 @@ ModulationMatrix::ModulationMatrix(const vital::output_map& sources, const vital
     }
   }
 
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
     rows_[i] = std::make_unique<ModulationMatrixRow>(i, &source_popup_items_, &destination_popup_items_,
                                                      &source_strings_, &destination_strings_);
     rows_[i]->addListener(this);
@@ -816,10 +816,10 @@ void ModulationMatrix::parentHierarchyChanged() {
   if (parent == nullptr)
     return;
 
-  vital::ModulationConnectionBank& bank = parent->getSynth()->getModulationBank();
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+  capusyn::ModulationConnectionBank& bank = parent->getSynth()->getModulationBank();
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
     rows_[i]->setGuiParent(parent);
-    vital::ModulationConnection* connection = bank.atIndex(i);
+    capusyn::ModulationConnection* connection = bank.atIndex(i);
     rows_[i]->setConnection(connection);
 
     if (map_editors_[i] == nullptr) {
@@ -848,7 +848,7 @@ void ModulationMatrix::setRowPositions() {
   Rectangle<int> mapping_bounds(widget_margin, remap_y,
                                 getWidth() - 2 * widget_margin, getHeight() - remap_y - widget_margin);
 
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
     row_order_[i]->setBounds(0, kRowPadding + i * (row_height + kRowPadding), matrix_width, row_height);
 
     float size_ratio = getSizeRatio();
@@ -910,7 +910,7 @@ void ModulationMatrix::resized() {
 
 void ModulationMatrix::setMeterBounds() {
   readouts_->setBounds(viewport_.getBounds());
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i)
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i)
     readouts_->setMeterBounds(i, rows_[i]->getMeterBounds() + rows_[i]->getPosition());
 }
 
@@ -945,7 +945,7 @@ void ModulationMatrix::buttonClicked(Button* clicked_button) {
     SynthSection::buttonClicked(clicked_button);
 }
 
-void ModulationMatrix::setAllValues(vital::control_map& controls) {
+void ModulationMatrix::setAllValues(capusyn::control_map& controls) {
   SynthSection::setAllValues(controls);
   if (map_editors_[selected_index_])
     smooth_->setToggleState(map_editors_[selected_index_]->getSmooth(), dontSendNotification);
@@ -974,17 +974,17 @@ void ModulationMatrix::updateModulationValue(int index) {
 }
 
 void ModulationMatrix::checkNumModulationsShown() {
-  if (row_order_.size() != vital::kMaxModulationConnections)
+  if (row_order_.size() != capusyn::kMaxModulationConnections)
     return;
 
   int num_show = 1;
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
     if (row_order_[i]->isActive())
       num_show = i + 2;
   }
-  num_show = std::min(vital::kMaxModulationConnections, num_show);
+  num_show = std::min(capusyn::kMaxModulationConnections, num_show);
 
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i)
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i)
     row_order_[i]->setVisible(i < num_show);
 
   if (num_shown_ != num_show) {
@@ -997,7 +997,7 @@ void ModulationMatrix::rowSelected(ModulationMatrixRow* selected_row) {
   if (rows_[selected_row->index()]->selected())
     return;
   
-  for (int i = 0; i < vital::kMaxModulationConnections; ++i) {
+  for (int i = 0; i < capusyn::kMaxModulationConnections; ++i) {
     bool selected = rows_[i].get() == selected_row;
     rows_[i]->select(selected);
     if (map_editors_[i]) {
@@ -1146,7 +1146,7 @@ void ModulationMatrix::destroyOpenGlComponents(OpenGlWrapper& open_gl) {
 }
 
 void ModulationMatrix::prevClicked() {
-  File lfo_file = LoadSave::getShiftedFile(LoadSave::kLfoFolderName, String("*.") + vital::kLfoExtension,
+  File lfo_file = LoadSave::getShiftedFile(LoadSave::kLfoFolderName, String("*.") + capusyn::kLfoExtension,
                                            "", getCurrentFile(), -1);
   if (lfo_file.exists())
     loadFile(lfo_file);
@@ -1155,7 +1155,7 @@ void ModulationMatrix::prevClicked() {
 }
 
 void ModulationMatrix::nextClicked() {
-  File lfo_file = LoadSave::getShiftedFile(LoadSave::kLfoFolderName, String("*.") + vital::kLfoExtension,
+  File lfo_file = LoadSave::getShiftedFile(LoadSave::kLfoFolderName, String("*.") + capusyn::kLfoExtension,
                                            "", getCurrentFile(), 1);
   if (lfo_file.exists())
     loadFile(lfo_file);
@@ -1171,7 +1171,7 @@ void ModulationMatrix::textMouseDown(const MouseEvent& e) {
   int browser_height = kBrowserHeight * size_ratio_;
   Rectangle<int> bounds(preset_selector_->getRight(), preset_selector_->getY(), browser_width, browser_height);
   bounds = getLocalArea(this, bounds);
-  showPopupBrowser(this, bounds, LoadSave::getLfoDirectories(), String("*.") + vital::kLfoExtension,
+  showPopupBrowser(this, bounds, LoadSave::getLfoDirectories(), String("*.") + capusyn::kLfoExtension,
                    LoadSave::kLfoFolderName, "");
 }
 
@@ -1188,21 +1188,21 @@ void ModulationMatrix::togglePaintMode(bool enabled, bool temporary_switch) {
 }
 
 void ModulationMatrix::importLfo() {
-  FileChooser import_box("Import LFO", LoadSave::getUserLfoDirectory(), String("*.") + vital::kLfoExtension);
+  FileChooser import_box("Import LFO", LoadSave::getUserLfoDirectory(), String("*.") + capusyn::kLfoExtension);
   if (!import_box.browseForFileToOpen())
     return;
 
   File choice = import_box.getResult();
-  loadFile(choice.withFileExtension(vital::kLfoExtension));
+  loadFile(choice.withFileExtension(capusyn::kLfoExtension));
 }
 
 void ModulationMatrix::exportLfo() {
-  FileChooser export_box("Export LFO", LoadSave::getUserLfoDirectory(), String("*.") + vital::kLfoExtension);
+  FileChooser export_box("Export LFO", LoadSave::getUserLfoDirectory(), String("*.") + capusyn::kLfoExtension);
   if (!export_box.browseForFileToSave(true))
     return;
 
   File choice = export_box.getResult();
-  choice = choice.withFileExtension(vital::kLfoExtension);
+  choice = choice.withFileExtension(capusyn::kLfoExtension);
   if (!choice.exists())
     choice.create();
   choice.replaceWithText(map_editors_[selected_index_]->getModel()->stateToJson().dump());

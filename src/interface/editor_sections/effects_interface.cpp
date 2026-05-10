@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "effects_interface.h"
@@ -37,7 +37,7 @@ class EffectsContainer : public SynthSection {
     }
 };
 
-EffectsInterface::EffectsInterface(const vital::output_map& mono_modulations) : SynthSection("effects") {
+EffectsInterface::EffectsInterface(const capusyn::output_map& mono_modulations) : SynthSection("effects") {
   container_ = std::make_unique<EffectsContainer>("container");
 
   addAndMakeVisible(viewport_);
@@ -187,7 +187,7 @@ void EffectsInterface::setEffectPositions() {
 
   Point<int> position = viewport_.getViewPosition();
 
-  for (int i = 0; i < vital::constants::kNumEffects; ++i) {
+  for (int i = 0; i < capusyn::constants::kNumEffects; ++i) {
     bool enabled = effect_order_->effectEnabled(i);
     effects_list_[effect_order_->getEffectIndex(i)]->setVisible(enabled);
     if (enabled) {

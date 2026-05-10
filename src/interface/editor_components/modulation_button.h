@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -19,9 +19,9 @@
 #include "JuceHeader.h"
 #include "open_gl_image_component.h"
 
-namespace vital {
+namespace capusyn {
   struct ModulationConnection;
-} // namespace vital
+} // namespace capusyn
 
 class SynthGuiInterface;
 
@@ -52,7 +52,7 @@ class ModulationButton : public PlainShapeComponent {
         virtual ~Listener() = default;
 
         virtual void modulationConnectionChanged() { }
-        virtual void modulationDisconnected(vital::ModulationConnection* connection, bool last) { }
+        virtual void modulationDisconnected(capusyn::ModulationConnection* connection, bool last) { }
         virtual void modulationSelected(ModulationButton* source) { }
         virtual void modulationLostFocus(ModulationButton* source) { }
         virtual void startModulationMap(ModulationButton* source, const MouseEvent& e) { }
@@ -102,7 +102,7 @@ class ModulationButton : public PlainShapeComponent {
     void overrideText(String text) { text_override_ = std::move(text); repaint(); }
 
   private:
-    void disconnectModulation(vital::ModulationConnection* connection);
+    void disconnectModulation(capusyn::ModulationConnection* connection);
 
     String text_override_;
     SynthGuiInterface* parent_;

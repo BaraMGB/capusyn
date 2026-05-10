@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -189,7 +189,7 @@ namespace strings {
     "1/64",
   };
 
-  const std::string kStereoModeNames[vital::StereoEncoder::kNumStereoModes] = {
+  const std::string kStereoModeNames[capusyn::StereoEncoder::kNumStereoModes] = {
     "SPREAD",
     "ROTATE"
   };
@@ -267,7 +267,7 @@ namespace strings {
     "High Pass"
   };
 
-  const std::string kDestinationNames[vital::constants::kNumSourceDestinations + vital::constants::kNumEffects] = {
+  const std::string kDestinationNames[capusyn::constants::kNumSourceDestinations + capusyn::constants::kNumEffects] = {
     "FILTER 1",
     "FILTER 2",
     "FILTER 1+2",
@@ -284,7 +284,7 @@ namespace strings {
     "REVERB",
   };
 
-  const std::string kDestinationMenuNames[vital::constants::kNumSourceDestinations + vital::constants::kNumEffects] = {
+  const std::string kDestinationMenuNames[capusyn::constants::kNumSourceDestinations + capusyn::constants::kNumEffects] = {
     "Filter 1",
     "Filter 2",
     "Filter 1+2",

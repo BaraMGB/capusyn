@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "synth_gui_interface.h"
@@ -26,7 +26,7 @@ SynthGuiData::SynthGuiData(SynthBase* synth_base) : synth(synth_base) {
   mono_modulations = synth->getEngine()->getMonoModulations();
   poly_modulations = synth->getEngine()->getPolyModulations();
   modulation_sources = synth->getEngine()->getModulationSources();
-  for (int i = 0; i < vital::kNumOscillators; ++i)
+  for (int i = 0; i < capusyn::kNumOscillators; ++i)
     wavetable_creators[i] = synth->getWavetableCreator(i);
 }
 
@@ -35,14 +35,14 @@ SynthGuiData::SynthGuiData(SynthBase* synth_base) : synth(synth_base) {
 SynthGuiInterface::SynthGuiInterface(SynthBase* synth, bool use_gui) : synth_(synth) { }
 SynthGuiInterface::~SynthGuiInterface() { }
 void SynthGuiInterface::updateFullGui() { }
-void SynthGuiInterface::updateGuiControl(const std::string& name, vital::mono_float value) { }
-vital::mono_float SynthGuiInterface::getControlValue(const std::string& name) { return 0.0f; }
+void SynthGuiInterface::updateGuiControl(const std::string& name, capusyn::mono_float value) { }
+capusyn::mono_float SynthGuiInterface::getControlValue(const std::string& name) { return 0.0f; }
 void SynthGuiInterface::connectModulation(std::string source, std::string destination) { }
-void SynthGuiInterface::connectModulation(vital::ModulationConnection* connection) { }
+void SynthGuiInterface::connectModulation(capusyn::ModulationConnection* connection) { }
 void SynthGuiInterface::setModulationValues(const std::string& source, const std::string& destination,
-                                            vital::mono_float amount, bool bipolar, bool stereo, bool bypass) { }
+                                            capusyn::mono_float amount, bool bipolar, bool stereo, bool bypass) { }
 void SynthGuiInterface::disconnectModulation(std::string source, std::string destination) { }
-void SynthGuiInterface::disconnectModulation(vital::ModulationConnection* connection) { }
+void SynthGuiInterface::disconnectModulation(capusyn::ModulationConnection* connection) { }
 void SynthGuiInterface::setFocus() { }
 void SynthGuiInterface::notifyChange() { }
 void SynthGuiInterface::notifyFresh() { }
@@ -57,8 +57,8 @@ void SynthGuiInterface::setGuiSize(float scale) { }
 
 SynthGuiInterface::SynthGuiInterface(SynthBase* synth, bool use_gui) : synth_(synth) {
   if (use_gui) {
-    LineGenerator* lfo_sources[vital::kNumLfos];
-    for (int i = 0; i < vital::kNumLfos; ++i)
+    LineGenerator* lfo_sources[capusyn::kNumLfos];
+    for (int i = 0; i < capusyn::kNumLfos; ++i)
       lfo_sources[i] = synth->getLfoSource(i);
     SynthGuiData synth_data(synth_);
     gui_ = std::make_unique<FullInterface>(&synth_data);
@@ -75,14 +75,14 @@ void SynthGuiInterface::updateFullGui() {
   gui_->reset();
 }
 
-void SynthGuiInterface::updateGuiControl(const std::string& name, vital::mono_float value) {
+void SynthGuiInterface::updateGuiControl(const std::string& name, capusyn::mono_float value) {
   if (gui_ == nullptr)
     return;
 
   gui_->setValue(name, value, NotificationType::dontSendNotification);
 }
 
-vital::mono_float SynthGuiInterface::getControlValue(const std::string& name) {
+capusyn::mono_float SynthGuiInterface::getControlValue(const std::string& name) {
   return synth_->getControls()[name]->value();
 }
 
@@ -101,7 +101,7 @@ void SynthGuiInterface::connectModulation(std::string source, std::string destin
   notifyModulationsChanged();
 }
 
-void SynthGuiInterface::connectModulation(vital::ModulationConnection* connection) {
+void SynthGuiInterface::connectModulation(capusyn::ModulationConnection* connection) {
   synth_->connectModulation(connection);
   notifyModulationsChanged();
 }
@@ -111,7 +111,7 @@ void SynthGuiInterface::initModulationValues(const std::string& source, const st
   if (connection_index < 0)
     return;
 
-  vital::ModulationConnection* connection = synth_->getModulationBank().atIndex(connection_index);
+  capusyn::ModulationConnection* connection = synth_->getModulationBank().atIndex(connection_index);
   LineGenerator* map_generator = connection->modulation_processor->lineMapGenerator();
   map_generator->initLinear();
 
@@ -121,7 +121,7 @@ void SynthGuiInterface::initModulationValues(const std::string& source, const st
 }
 
 void SynthGuiInterface::setModulationValues(const std::string& source, const std::string& destination,
-                                            vital::mono_float amount, bool bipolar, bool stereo, bool bypass) {
+                                            capusyn::mono_float amount, bool bipolar, bool stereo, bool bypass) {
   int connection_index = synth_->getConnectionIndex(source, destination);
   if (connection_index < 0)
     return;
@@ -151,7 +151,7 @@ void SynthGuiInterface::disconnectModulation(std::string source, std::string des
   notifyModulationsChanged();
 }
 
-void SynthGuiInterface::disconnectModulation(vital::ModulationConnection* connection) {
+void SynthGuiInterface::disconnectModulation(capusyn::ModulationConnection* connection) {
   synth_->disconnectModulation(connection);
   notifyModulationsChanged();
 }
@@ -204,12 +204,12 @@ void SynthGuiInterface::setGuiSize(float scale) {
     peer->getFrameSize().subtractFrom(display_area);
 
   float window_size = scale / display.scale;
-  window_size = std::min(window_size, display_area.getWidth() * 1.0f / vital::kDefaultWindowWidth);
-  window_size = std::min(window_size, display_area.getHeight() * 1.0f / vital::kDefaultWindowHeight);
+  window_size = std::min(window_size, display_area.getWidth() * 1.0f / capusyn::kDefaultWindowWidth);
+  window_size = std::min(window_size, display_area.getHeight() * 1.0f / capusyn::kDefaultWindowHeight);
   LoadSave::saveWindowSize(window_size);
 
-  int width = std::round(window_size * vital::kDefaultWindowWidth);
-  int height = std::round(window_size * vital::kDefaultWindowHeight);
+  int width = std::round(window_size * capusyn::kDefaultWindowWidth);
+  int height = std::round(window_size * capusyn::kDefaultWindowHeight);
 
   Rectangle<int> bounds = gui_->getBounds();
   bounds.setWidth(width);

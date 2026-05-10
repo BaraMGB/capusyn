@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "interface_test.h"
@@ -170,12 +170,12 @@ namespace {
         synth_base_(synth_base), top_component_(full_interface) {
         addAndMakeVisible(&top_component_);
 
-        setAudioChannels(0, vital::kNumChannels);
+        setAudioChannels(0, capusyn::kNumChannels);
 
         AudioDeviceManager::AudioDeviceSetup setup;
         deviceManager.getAudioDeviceSetup(setup);
-        setup.sampleRate = vital::kDefaultSampleRate;
-        deviceManager.initialise(0, vital::kNumChannels, nullptr, true, "", &setup);
+        setup.sampleRate = capusyn::kDefaultSampleRate;
+        deviceManager.initialise(0, capusyn::kNumChannels, nullptr, true, "", &setup);
 
         if (deviceManager.getCurrentAudioDevice() == nullptr) {
           const OwnedArray<AudioIODeviceType>& device_types = deviceManager.getAvailableDeviceTypes();
@@ -193,7 +193,7 @@ namespace {
       }
 
       void setSizes() {
-        top_component_.setSize(vital::kDefaultWindowWidth, vital::kDefaultWindowHeight);
+        top_component_.setSize(capusyn::kDefaultWindowWidth, capusyn::kDefaultWindowHeight);
       }
 
       TestTopComponent* top_component() { return &top_component_; }
@@ -205,14 +205,14 @@ namespace {
 
       void getNextAudioBlock(const AudioSourceChannelInfo& buffer) override {
         int num_samples = buffer.buffer->getNumSamples();
-        int synth_samples = std::min(num_samples, vital::kMaxBufferSize);
+        int synth_samples = std::min(num_samples, capusyn::kMaxBufferSize);
 
         MidiBuffer midi_messages;
 
         for (int b = 0; b < num_samples; b += synth_samples) {
           int current_samples = std::min<int>(synth_samples, num_samples - b);
 
-          synth_base_->process(buffer.buffer, vital::kNumChannels, current_samples, b);
+          synth_base_->process(buffer.buffer, capusyn::kNumChannels, current_samples, b);
         }
       }
 
@@ -235,7 +235,7 @@ namespace {
         top_audio_component_ = std::make_unique<TestAudioComponentBase>(synth_base, full_interface);
         setUsingNativeTitleBar(true);
         setResizable(true, true);
-        top_audio_component_->setSize(vital::kDefaultWindowWidth, vital::kDefaultWindowHeight);
+        top_audio_component_->setSize(capusyn::kDefaultWindowWidth, capusyn::kDefaultWindowHeight);
         setContentOwned(top_audio_component_.get(), true);
         top_audio_component_->setSizes();
         setLookAndFeel(DefaultLookAndFeel::instance());
@@ -260,7 +260,7 @@ namespace {
     public:
       TestApp(TestSynthBase* synth_base, FullInterface* full_interface = nullptr) {
         main_window_ = std::make_unique<TestWindow>(synth_base, full_interface);
-        main_window_->centreWithSize(vital::kDefaultWindowWidth, vital::kDefaultWindowHeight);
+        main_window_->centreWithSize(capusyn::kDefaultWindowWidth, capusyn::kDefaultWindowHeight);
         main_window_->setVisible(true);
       }
 
@@ -301,16 +301,16 @@ void InterfaceTest::runStressRandomTest(SynthSection* component, FullInterface* 
   if (synth_base_ == nullptr)
     createSynthEngine();
 
-  vital::SoundEngine* engine = getSynthEngine();
+  capusyn::SoundEngine* engine = getSynthEngine();
   engine->noteOn(30, 0, 0, 0);
   engine->noteOn(37, 0, 0, 0);
   engine->noteOn(42, 0, 0, 0);
 
   TestApp test_app(synth_base_.get(), full_interface);
   test_app.window()->top_component()->addTestSection(component);
-  component->setSize(vital::kDefaultWindowWidth, vital::kDefaultWindowHeight);
+  component->setSize(capusyn::kDefaultWindowWidth, capusyn::kDefaultWindowHeight);
   test_app.window()->resized();
-  vital::control_map controls = engine->getControls();
+  capusyn::control_map controls = engine->getControls();
   test_app.window()->top_component()->full_interface()->setAllValues(controls);
   test_app.window()->top_component()->full_interface()->reset();
 

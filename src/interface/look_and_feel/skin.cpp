@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "skin.h"
@@ -209,7 +209,7 @@ void Skin::clearSkin() {
 }
 
 void Skin::loadDefaultSkin() {
-  MemoryInputStream skin((const void*)BinaryData::default_vitalskin, BinaryData::default_vitalskinSize, false);
+  MemoryInputStream skin((const void*)BinaryData::default_capuskin, BinaryData::default_capuskinSize, false);
   std::string skin_string = skin.readEntireStreamAsString().toStdString();
 
   try {
@@ -640,7 +640,7 @@ class SkinColorPicker : public Component, public Button::Listener, public Slider
 
     void buttonClicked(Button* clicked_button) override {
       if (clicked_button == &load_button_) {
-        FileChooser open_box("Open Skin", File(), String("*.") + vital::kSkinExtension);
+        FileChooser open_box("Open Skin", File(), String("*.") + capusyn::kSkinExtension);
         if (open_box.browseForFileToOpen()) {
           if (!skin_->loadFromFile(open_box.getResult())) {
             AlertWindow::showMessageBox(MessageBoxIconType::WarningIcon,
@@ -654,9 +654,9 @@ class SkinColorPicker : public Component, public Button::Listener, public Slider
         return;
       }
       if (clicked_button == &save_button_) {
-        FileChooser save_box("Save Skin", File(), String("*.") + vital::kSkinExtension);
+        FileChooser save_box("Save Skin", File(), String("*.") + capusyn::kSkinExtension);
         if (save_box.browseForFileToSave(true))
-          skin_->saveToFile(save_box.getResult().withFileExtension(vital::kSkinExtension));
+          skin_->saveToFile(save_box.getResult().withFileExtension(capusyn::kSkinExtension));
 
         return;
       }

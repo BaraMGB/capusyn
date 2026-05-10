@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "pitch_detector.h"
@@ -36,7 +36,7 @@ float PitchDetector::getPeriodError(float period) {
   static constexpr float kDcDeltaErrorMultiplier = 0.015f;
   float error = 0.0f;
   int waves = size_ / period - 1;
-  VITAL_ASSERT(waves > 0);
+  CAPUSYN_ASSERT(waves > 0);
   int points = kNumPoints / waves;
   for (int w = 0; w < waves; ++w) {
     float total_from = 0.0f;
@@ -49,14 +49,14 @@ float PitchDetector::getPeriodError(float period) {
       float first_t = first_position - first_index;
       float first_from = signal_data_[first_index];
       float first_to = signal_data_[first_index + 1];
-      float first_value = vital::utils::interpolate(first_from, first_to, first_t);
+      float first_value = capusyn::utils::interpolate(first_from, first_to, first_t);
       total_from += first_value;
 
       int second_index = second_position;
       float second_t = second_position - second_index;
       float second_from = signal_data_[second_index];
       float second_to = signal_data_[second_index + 1];
-      float second_value = vital::utils::interpolate(second_from, second_to, second_t);
+      float second_value = capusyn::utils::interpolate(second_from, second_to, second_t);
       total_to += second_value;
 
       float delta = first_value - second_value;

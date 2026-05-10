@@ -1,41 +1,41 @@
 cmake_minimum_required(VERSION 3.15)
-project(VitalHeadless LANGUAGES CXX)
+project(CapusynHeadless LANGUAGES CXX)
 
 # Headless-specific sources only.
-file(GLOB_RECURSE VITAL_HEADLESS_ONLY_CPP
+file(GLOB_RECURSE CAPUSYN_HEADLESS_ONLY_CPP
     ${CMAKE_SOURCE_DIR}/src/headless/*.cpp
 )
 
-juce_add_console_app(VitalHeadless
-    BUNDLE_ID "audio.vital.headless"
+juce_add_console_app(CapusynHeadless
+    BUNDLE_ID "io.github.BaraMGB.capusyn.headless"
     VERSION "99999.9.9"
-    COMPANY_NAME "Matt Tytel"
-    COMPANY_WEBSITE "vital.audio"
-    COMPANY_EMAIL "matthewtytel@gmail.com"
-    COMPANY_COPYRIGHT "Matt Tytel"
+    COMPANY_NAME "Capusyn Project"
+    COMPANY_WEBSITE "https://github.com/BaraMGB/capusyn"
+    COMPANY_EMAIL "opensource@capusyn.invalid"
+    COMPANY_COPYRIGHT "Capusyn Project"
     CPP_LANGUAGE_STANDARD "17"
 )
 
-juce_generate_juce_header(VitalHeadless)
+juce_generate_juce_header(CapusynHeadless)
 
-target_sources(VitalHeadless PRIVATE
-    ${VITAL_HEADLESS_ONLY_CPP}
-    $<TARGET_OBJECTS:VitalCoreHeadless>
+target_sources(CapusynHeadless PRIVATE
+    ${CAPUSYN_HEADLESS_ONLY_CPP}
+    $<TARGET_OBJECTS:CapusynCoreHeadless>
 )
 
-target_include_directories(VitalHeadless PRIVATE
-    ${VITAL_COMMON_INCLUDE_DIRS}
+target_include_directories(CapusynHeadless PRIVATE
+    ${CAPUSYN_COMMON_INCLUDE_DIRS}
 )
 
-target_compile_definitions(VitalHeadless PRIVATE
+target_compile_definitions(CapusynHeadless PRIVATE
     JUCE_WEB_BROWSER=0
     HEADLESS=1
     NO_AUTH=1
 )
 
-target_link_libraries(VitalHeadless
+target_link_libraries(CapusynHeadless
     PUBLIC
-        VitalData
+        CapusynData
         juce::juce_core
         juce::juce_data_structures
         juce::juce_events

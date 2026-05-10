@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "synth_constants.h"
@@ -19,7 +19,7 @@
 #include "futils.h"
 #include "wavetable.h"
 
-namespace vital {
+namespace capusyn {
   static constexpr int kNumHarmonics = WaveFrame::kWaveformSize / 2 + 1;
   static constexpr mono_float kMaxFormantShift = 1.0f;
   static constexpr mono_float kMaxEvenOddFormantShift = 2.0f;
@@ -42,7 +42,7 @@ namespace vital {
 
 #if DEBUG
     for (int i = 0; i < Wavetable::kWaveformSize + 2 * poly_float::kSize; ++i)
-      VITAL_ASSERT(utils::isFinite(buffer[i]));
+      CAPUSYN_ASSERT(utils::isFinite(buffer[i]));
 #endif
   }
 
@@ -321,7 +321,7 @@ namespace vital {
       float shifted_index = std::max(1.0f, i * shift);
       int index_start = shifted_index;
       index_start = index_start - (i + index_start) % 2;
-      VITAL_ASSERT(index_start >= 0 && index_start < kNumHarmonics);
+      CAPUSYN_ASSERT(index_start >= 0 && index_start < kNumHarmonics);
 
       float t = (shifted_index - index_start) * 0.5f;
       int real_index1 = 2 * index_start;
@@ -333,8 +333,8 @@ namespace vital {
       float imag_from = amplitude_from * normalized[real_index1 + 1];
       float imag_to = amplitude_to * normalized[real_index2 + 1];
 
-      VITAL_ASSERT(utils::isFinite(real_from) && utils::isFinite(real_to));
-      VITAL_ASSERT(utils::isFinite(imag_from) && utils::isFinite(imag_to));
+      CAPUSYN_ASSERT(utils::isFinite(real_from) && utils::isFinite(real_to));
+      CAPUSYN_ASSERT(utils::isFinite(imag_from) && utils::isFinite(imag_to));
 
       int real_index = 2 * i;
       wave_start[real_index] = shift * utils::interpolate(real_from, real_to, t);
@@ -363,7 +363,7 @@ namespace vital {
     for (int i = 1; i <= harmonics; ++i) {
       float shifted_index = std::max(1.0f, (i - 1) * shift + 1);
       int dest_index = shifted_index;
-      VITAL_ASSERT(dest_index >= 0 && dest_index <= kNumHarmonics);
+      CAPUSYN_ASSERT(dest_index >= 0 && dest_index <= kNumHarmonics);
 
       float t = shifted_index - dest_index;
       float real_amount = normalized[2 * i];
@@ -419,14 +419,14 @@ namespace vital {
       int dest_index = shifted_index;
       if (dest_index > 2 * last_harmonic)
         break;
-      VITAL_ASSERT(dest_index >= 0 && dest_index <= kNumHarmonics * 2);
+      CAPUSYN_ASSERT(dest_index >= 0 && dest_index <= kNumHarmonics * 2);
 
       float t = shifted_index - dest_index;
       float amplitude = amplitudes[index];
       float real = normalized[index];
       float imag = normalized[index + 1];
-      VITAL_ASSERT(real < 10000.0f);
-      VITAL_ASSERT(imag < 10000.0f);
+      CAPUSYN_ASSERT(real < 10000.0f);
+      CAPUSYN_ASSERT(imag < 10000.0f);
 
       int real_index = 2 * dest_index;
       float value1 = (1.0f - t) * amplitude;
@@ -475,4 +475,4 @@ namespace vital {
 
     transformAndWrapBuffer(transform, dest);
   }
-} // namespace vital
+} // namespace capusyn

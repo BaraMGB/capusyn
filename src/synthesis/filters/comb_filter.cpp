@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "comb_filter.h"
@@ -19,7 +19,7 @@
 #include "futils.h"
 #include "memory.h"
 
-namespace vital {
+namespace capusyn {
 
   namespace {
     constexpr float kFlangeScale = 0.70710678119f;
@@ -47,7 +47,7 @@ namespace vital {
       poly_float result = stage1_output - stage2_output;
       memory->push(futils::hardTanh(result));
 
-      VITAL_ASSERT(utils::isFinite(result));
+      CAPUSYN_ASSERT(utils::isFinite(result));
       return result;
     }
 
@@ -62,7 +62,7 @@ namespace vital {
       poly_float stage1_output = utils::mulAdd(low_gain * low_output, high_gain, high_output);
       poly_float stage2_output = filter2.tickBasic(stage1_output, filter2_coefficient);
       poly_float filter_output = stage1_output - stage2_output;
-      VITAL_ASSERT(utils::isFinite(filter_output));
+      CAPUSYN_ASSERT(utils::isFinite(filter_output));
       
       poly_float scaled_input = audio_in * kFlangeScale;
       memory->push(scaled_input + futils::hardTanh(filter_output * feedback));
@@ -81,7 +81,7 @@ namespace vital {
       poly_float stage1_output = utils::mulAdd(low_gain * low_output, high_gain, high_output);
       poly_float stage2_output = filter2.tickBasic(stage1_output, filter2_coefficient);
       poly_float filter_output = stage1_output - stage2_output;
-      VITAL_ASSERT(utils::isFinite(filter_output));
+      CAPUSYN_ASSERT(utils::isFinite(filter_output));
 
       poly_float scaled_input = audio_in * kFlangeScale;
       memory->push(scaled_input - futils::hardTanh(filter_output * feedback));
@@ -199,7 +199,7 @@ namespace vital {
   }
 
   void CombFilter::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
 
     filter_state_.loadSettings(this);
     FeedbackStyle style = getFeedbackStyle(filter_state_.style);
@@ -211,7 +211,7 @@ namespace vital {
     else if (style == kNegativeFlange)
       processFilter<tickNegativeFlange>(num_samples);
     else
-      VITAL_ASSERT(false);
+      CAPUSYN_ASSERT(false);
   }
 
   template<poly_float(*tick)(poly_float, Memory*, OnePoleFilter<>&, OnePoleFilter<>&,
@@ -286,4 +286,4 @@ namespace vital {
     }
   }
 
-} // namespace vital
+} // namespace capusyn

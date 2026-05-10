@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -32,7 +32,7 @@ class DistortionFilterResponse : public OpenGlLineRenderer {
     static constexpr int kResolution = 256;
     static constexpr int kDefaultVisualSampleRate = 200000;
 
-    DistortionFilterResponse(const vital::output_map& mono_modulations);
+    DistortionFilterResponse(const capusyn::output_map& mono_modulations);
     virtual ~DistortionFilterResponse();
 
     void init(OpenGlWrapper& open_gl) override;
@@ -63,7 +63,7 @@ class DistortionFilterResponse : public OpenGlLineRenderer {
     };
 
     void drawFilterResponse(OpenGlWrapper& open_gl, bool animate);
-    vital::poly_float getOutputTotal(vital::Output* output, vital::poly_float default_value);
+    capusyn::poly_float getOutputTotal(capusyn::Output* output, capusyn::poly_float default_value);
 
     void setupFilterState();
     void loadShader(int index);
@@ -73,16 +73,16 @@ class DistortionFilterResponse : public OpenGlLineRenderer {
 
     bool active_;
     Point<int> last_mouse_position_;
-    vital::DigitalSvf filter_;
-    vital::SynthFilter::FilterState filter_state_;
+    capusyn::DigitalSvf filter_;
+    capusyn::SynthFilter::FilterState filter_state_;
 
     SynthSlider* cutoff_slider_;
     SynthSlider* resonance_slider_;
     SynthSlider* blend_slider_;
 
-    vital::Output* cutoff_output_;
-    vital::Output* resonance_output_;
-    vital::Output* blend_output_;
+    capusyn::Output* cutoff_output_;
+    capusyn::Output* resonance_output_;
+    capusyn::Output* blend_output_;
 
     FilterResponseShader response_shader_;
     std::unique_ptr<float[]> line_data_;
@@ -97,7 +97,7 @@ class DistortionSection : public SynthSection {
   public:
     static constexpr int kViewerResolution = 124;
 
-    DistortionSection(String name, const vital::output_map& mono_modulations);
+    DistortionSection(String name, const capusyn::output_map& mono_modulations);
     virtual ~DistortionSection();
 
     void paintBackground(Graphics& g) override;
@@ -105,7 +105,7 @@ class DistortionSection : public SynthSection {
     void resized() override;
     void setActive(bool active) override;
     void sliderValueChanged(Slider* changed_slider) override;
-    void setAllValues(vital::control_map& controls) override;
+    void setAllValues(capusyn::control_map& controls) override;
     void setFilterActive(bool active);
 
   private:

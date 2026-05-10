@@ -1,24 +1,24 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "envelope_module.h"
 
 #include "envelope.h"
 
-namespace vital {
+namespace capusyn {
 
   EnvelopeModule::EnvelopeModule(const std::string& prefix, bool force_audio_rate) :
       SynthModule(kNumInputs, kNumOutputs), prefix_(prefix), force_audio_rate_(force_audio_rate) {
@@ -54,4 +54,4 @@ namespace vital {
     envelope_->plug(decay_power, Envelope::kDecayPower);
     envelope_->plug(release_power, Envelope::kReleasePower);
   }
-} // namespace vital
+} // namespace capusyn

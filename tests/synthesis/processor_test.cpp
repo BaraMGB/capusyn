@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "processor_test.h"
@@ -24,33 +24,33 @@
 
 #define RANDOMIZE_AMOUNT 50
 
-void ProcessorTest::processAndCheckFinite(vital::Processor* processor, const std::set<int>& ignore_outputs) {
+void ProcessorTest::processAndCheckFinite(capusyn::Processor* processor, const std::set<int>& ignore_outputs) {
   processor->setSampleRate(processor->getSampleRate());
 
   int num_outputs = processor->numOutputs();
   for (int i = 0; i < PROCESS_AMOUNT; ++i)
-    processor->process(vital::kMaxBufferSize);
+    processor->process(capusyn::kMaxBufferSize);
 
   for (int i = 0; i < num_outputs; ++i) {
     if (ignore_outputs.count(i) == 0) {
-      vital::Output* output = processor->output(i);
-      expect(vital::utils::isContained(output->buffer, output->buffer_size));
+      capusyn::Output* output = processor->output(i);
+      expect(capusyn::utils::isContained(output->buffer, output->buffer_size));
     }
   }
 }
 
-void ProcessorTest::runInputBoundsTest(vital::Processor* processor) {
+void ProcessorTest::runInputBoundsTest(capusyn::Processor* processor) {
   runInputBoundsTest(processor, std::set<int>(), std::set<int>());
 }
 
-void ProcessorTest::runInputBoundsTest(vital::Processor* processor, std::set<int> leave_inputs,
+void ProcessorTest::runInputBoundsTest(capusyn::Processor* processor, std::set<int> leave_inputs,
                                        std::set<int> ignore_outputs) {
   int num_inputs = processor->numInputs();
 
-  std::vector<vital::Value> inputs;
-  vital::Output audio;
-  audio.ensureBufferSize(vital::kMaxBufferSize);
-  for (int i = 0; i < vital::kMaxBufferSize; ++i)
+  std::vector<capusyn::Value> inputs;
+  capusyn::Output audio;
+  audio.ensureBufferSize(capusyn::kMaxBufferSize);
+  for (int i = 0; i < capusyn::kMaxBufferSize; ++i)
     audio.buffer[i] = (rand() * 2.0f) / RAND_MAX - 1.0f;
 
   inputs.resize(num_inputs);

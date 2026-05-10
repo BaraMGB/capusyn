@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "line_generator.h"
@@ -20,7 +20,7 @@
 
 LineGenerator::LineGenerator(int resolution) : points_(), powers_(), num_points_(2), resolution_(resolution),
                                                loop_(false), smooth_(false), linear_(true), render_count_(0) {
-  buffer_ = std::make_unique<vital::mono_float[]>(resolution + kExtraValues);
+  buffer_ = std::make_unique<capusyn::mono_float[]>(resolution + kExtraValues);
   initLinear();
 }
 
@@ -183,7 +183,7 @@ void LineGenerator::render() {
     if (smooth_)
       t = smoothTransition(t);
 
-    t = vital::utils::clamp(vital::futils::powerScale(t, current_power), 0.0f, 1.0f);
+    t = capusyn::utils::clamp(capusyn::futils::powerScale(t, current_power), 0.0f, 1.0f);
     
     float y = last_point.second + t * (current_point.second - last_point.second);
     buffer_[i + 1] = 1.0f - y;
@@ -213,9 +213,9 @@ void LineGenerator::render() {
 }
 
 float LineGenerator::valueAtPhase(float phase) {
-  float scaled_phase = vital::utils::clamp(phase, 0.0f, 1.0f) * resolution_;
+  float scaled_phase = capusyn::utils::clamp(phase, 0.0f, 1.0f) * resolution_;
   int index = scaled_phase;
-  return vital::utils::interpolate(buffer_[index + 1], buffer_[index + 2], scaled_phase - index);
+  return capusyn::utils::interpolate(buffer_[index + 1], buffer_[index + 2], scaled_phase - index);
 }
 
 void LineGenerator::checkLineIsLinear() {
@@ -225,7 +225,7 @@ void LineGenerator::checkLineIsLinear() {
 }
 
 float LineGenerator::getValueBetweenPoints(float x, int index_from, int index_to) {
-  VITAL_ASSERT(index_from >= 0 && index_to < num_points_);
+  CAPUSYN_ASSERT(index_from >= 0 && index_to < num_points_);
 
   std::pair<float, float> first = points_[index_from];
   std::pair<float, float> second = points_[index_to];
@@ -239,7 +239,7 @@ float LineGenerator::getValueBetweenPoints(float x, int index_from, int index_to
   if (smooth_)
     t = smoothTransition(t);
 
-  t = vital::utils::clamp(vital::futils::powerScale(t, power), 0.0f, 1.0f);
+  t = capusyn::utils::clamp(capusyn::futils::powerScale(t, power), 0.0f, 1.0f);
   return t * (second.second - first.second) + first.second;
 }
 
@@ -265,7 +265,7 @@ void LineGenerator::addPoint(int index, std::pair<float, float> position) {
 }
 
 void LineGenerator::addMiddlePoint(int index) {
-  VITAL_ASSERT(index > 0);
+  CAPUSYN_ASSERT(index > 0);
 
   float x = (points_[index - 1].first + points_[index].first) * 0.5f;
   float y = getValueBetweenPoints(x, index - 1, index);

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "header_section.h"
@@ -122,7 +122,7 @@ class LogoButton : public Button {
 LogoSection::LogoSection() : SynthSection("logo_section") {
 #if !defined(NO_TEXT_ENTRY)
   logo_button_ = std::make_unique<LogoButton>("logo");
-  logo_button_->setPaths(Paths::vitalV(), Paths::vitalRing());
+  logo_button_->setPaths(Paths::capusynV(), Paths::capusynRing());
   addAndMakeVisible(logo_button_.get());
   addOpenGlComponent(logo_button_->getImageComponent());
   logo_button_->addListener(this);
@@ -276,7 +276,7 @@ void HeaderSection::reset() {
     synth_preset_selector_->resetText();
 }
 
-void HeaderSection::setAllValues(vital::control_map& controls) {
+void HeaderSection::setAllValues(capusyn::control_map& controls) {
   SynthSection::setAllValues(controls);
   bool view_spectrogram = view_spectrogram_->getToggleState();
   oscilloscope_->setVisible(!view_spectrogram);
@@ -342,11 +342,11 @@ void HeaderSection::setTemporaryTab(String name) {
   repaintBackground();
 }
 
-void HeaderSection::setOscilloscopeMemory(const vital::poly_float* memory) {
+void HeaderSection::setOscilloscopeMemory(const capusyn::poly_float* memory) {
   oscilloscope_->setOscilloscopeMemory(memory);
 }
 
-void HeaderSection::setAudioMemory(const vital::StereoMemory* memory) {
+void HeaderSection::setAudioMemory(const capusyn::StereoMemory* memory) {
   spectrogram_->setAudioMemory(memory);
 }
 

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -45,7 +45,7 @@ class SampleSection : public SynthSection, public SampleViewer::Listener, public
     void setActive(bool active) override;
     void resized() override;
     void reset() override;
-    void setAllValues(vital::control_map& controls) override;
+    void setAllValues(capusyn::control_map& controls) override;
     void buttonClicked(Button* clicked_button) override;
     void setDestinationSelected(int selection);
     void setupDestination();
@@ -86,7 +86,7 @@ class SampleSection : public SynthSection, public SampleViewer::Listener, public
     std::unique_ptr<OpenGlShapeButton> random_phase_;
 
     AudioSampleBuffer sample_buffer_;
-    vital::Sample* sample_;
+    capusyn::Sample* sample_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SampleSection)
 };

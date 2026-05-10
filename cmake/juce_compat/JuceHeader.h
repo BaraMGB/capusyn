@@ -28,8 +28,8 @@ using namespace juce::gl;
 
 #if ! JUCE_DONT_DECLARE_PROJECTINFO
 namespace ProjectInfo {
-const char* const projectName = "Vital";
-const char* const companyName = "Vital Audio";
+const char* const projectName = "Capusyn";
+const char* const companyName = "Capusyn Project";
 const char* const versionString = "1.0.6";
 const int versionNumber = 0x10006;
 }

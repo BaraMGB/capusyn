@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "JuceHeader.h"
@@ -72,7 +72,7 @@ void rebrandAllWavs() {
   converted_directory.createDirectory();
   for (File& file : wavs) {
     FileInputStream* input_stream = new FileInputStream(file);
-    String clm_data = getWavetableDataString(input_stream) + "[Matt Tytel]";
+    String clm_data = getWavetableDataString(input_stream) + "[Capusyn Project]";
     input_stream->setPosition(0);
     std::unique_ptr<AudioFormatReader> format_reader(
         format_manager.createReaderFor(std::unique_ptr<InputStream>(input_stream)));

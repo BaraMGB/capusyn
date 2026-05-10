@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "delay.h"
@@ -19,7 +19,7 @@
 #include "futils.h"
 #include "memory.h"
 #include "synth_constants.h"
-namespace vital {
+namespace capusyn {
 
   namespace {
     force_inline poly_float saturate(poly_float value) {
@@ -50,13 +50,13 @@ namespace vital {
   
   template<class MemoryType>
   void Delay<MemoryType>::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
     processWithInput(input(kAudio)->source->buffer, num_samples);
   }
 
   template<class MemoryType>
   void Delay<MemoryType>::processWithInput(const poly_float* audio_in, int num_samples) {
-    VITAL_ASSERT(checkInputAndOutputSize(num_samples));
+    CAPUSYN_ASSERT(checkInputAndOutputSize(num_samples));
 
     poly_float current_wet = wet_;
     poly_float current_dry = dry_;
@@ -376,4 +376,4 @@ namespace vital {
 
   template class Delay<StereoMemory>;
   template class Delay<Memory>;
-} // namespace vital
+} // namespace capusyn

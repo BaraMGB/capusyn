@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Vital VERSION 1.0.6 LANGUAGES C CXX)
+project(Capusyn VERSION 1.0.6 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -16,7 +16,7 @@ find_package(CURL REQUIRED)
 add_subdirectory(third_party/JUCE)
 
 # Shared include directories for the local targets.
-set(VITAL_COMMON_INCLUDE_DIRS
+set(CAPUSYN_COMMON_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/third_party
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/common
@@ -42,19 +42,19 @@ set(VITAL_COMMON_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/src/synthesis/utilities
 )
 
-set(VITAL_SHARED_ASSETS
+set(CAPUSYN_SHARED_ASSETS
     ${CMAKE_SOURCE_DIR}/tunings/*.scl
     ${CMAKE_SOURCE_DIR}/tunings/*.sclx
-    ${CMAKE_SOURCE_DIR}/default.vitalskin
+    ${CMAKE_SOURCE_DIR}/default.capuskin
     ${CMAKE_SOURCE_DIR}/fonts/*.*
     ${CMAKE_SOURCE_DIR}/icons/*.svg
     ${CMAKE_SOURCE_DIR}/icons/*.png
 )
 
-file(GLOB VITAL_SHARED_ASSET_FILES ${VITAL_SHARED_ASSETS})
-juce_add_binary_data(VitalData SOURCES ${VITAL_SHARED_ASSET_FILES})
+file(GLOB CAPUSYN_SHARED_ASSET_FILES ${CAPUSYN_SHARED_ASSETS})
+juce_add_binary_data(CapusynData SOURCES ${CAPUSYN_SHARED_ASSET_FILES})
 
-set(VITAL_JUCE_SHARED_MODULES
+set(CAPUSYN_JUCE_SHARED_MODULES
     juce::juce_audio_basics
     juce::juce_audio_devices
     juce::juce_audio_formats
@@ -71,22 +71,22 @@ set(VITAL_JUCE_SHARED_MODULES
 )
 
 # Core sources as unity-build translation units.
-set(VITAL_CORE_CPP
-    ${CMAKE_SOURCE_DIR}/cmake/juce_compat/vital_core.cpp
+set(CAPUSYN_CORE_CPP
+    ${CMAKE_SOURCE_DIR}/cmake/juce_compat/capusyn_core.cpp
     ${CMAKE_SOURCE_DIR}/src/unity_build/synthesis.cpp
 )
 
-add_library(VitalCore OBJECT ${VITAL_CORE_CPP})
-target_include_directories(VitalCore PRIVATE ${VITAL_COMMON_INCLUDE_DIRS})
-target_include_directories(VitalCore PRIVATE
+add_library(CapusynCore OBJECT ${CAPUSYN_CORE_CPP})
+target_include_directories(CapusynCore PRIVATE ${CAPUSYN_COMMON_INCLUDE_DIRS})
+target_include_directories(CapusynCore PRIVATE
     ${CMAKE_SOURCE_DIR}/cmake/juce_compat
     ${CMAKE_SOURCE_DIR}/third_party/JUCE/modules
 )
-target_link_libraries(VitalCore PRIVATE
-    VitalData
+target_link_libraries(CapusynCore PRIVATE
+    CapusynData
 )
 # Headless/tests do not need WebView support.
-target_compile_definitions(VitalCore PRIVATE
+target_compile_definitions(CapusynCore PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_DSP_USE_SHARED_FFTW=1
     JUCE_USE_XRANDR=0
@@ -95,16 +95,16 @@ target_compile_definitions(VitalCore PRIVATE
     NO_AUTH=1
 )
 
-add_library(VitalCoreHeadless OBJECT ${VITAL_CORE_CPP})
-target_include_directories(VitalCoreHeadless PRIVATE ${VITAL_COMMON_INCLUDE_DIRS})
-target_include_directories(VitalCoreHeadless PRIVATE
+add_library(CapusynCoreHeadless OBJECT ${CAPUSYN_CORE_CPP})
+target_include_directories(CapusynCoreHeadless PRIVATE ${CAPUSYN_COMMON_INCLUDE_DIRS})
+target_include_directories(CapusynCoreHeadless PRIVATE
     ${CMAKE_SOURCE_DIR}/cmake/juce_compat
     ${CMAKE_SOURCE_DIR}/third_party/JUCE/modules
 )
-target_link_libraries(VitalCoreHeadless PRIVATE
-    VitalData
+target_link_libraries(CapusynCoreHeadless PRIVATE
+    CapusynData
 )
-target_compile_definitions(VitalCoreHeadless PRIVATE
+target_compile_definitions(CapusynCoreHeadless PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_DSP_USE_SHARED_FFTW=1
     JUCE_USE_XRANDR=0
@@ -115,7 +115,7 @@ target_compile_definitions(VitalCoreHeadless PRIVATE
 )
 
 # GUI sources as unity-build translation units.
-set(VITAL_GUI_CPP
+set(CAPUSYN_GUI_CPP
     ${CMAKE_SOURCE_DIR}/src/common/border_bounds_constrainer.cpp
     ${CMAKE_SOURCE_DIR}/src/unity_build/interface_look_and_feel.cpp
     ${CMAKE_SOURCE_DIR}/src/unity_build/interface_editor_components.cpp
@@ -124,17 +124,17 @@ set(VITAL_GUI_CPP
     ${CMAKE_SOURCE_DIR}/src/unity_build/interface_wavetable.cpp
 )
 
-add_library(VitalGui OBJECT ${VITAL_GUI_CPP})
-target_include_directories(VitalGui PRIVATE ${VITAL_COMMON_INCLUDE_DIRS})
-target_include_directories(VitalGui PRIVATE
+add_library(CapusynGui OBJECT ${CAPUSYN_GUI_CPP})
+target_include_directories(CapusynGui PRIVATE ${CAPUSYN_COMMON_INCLUDE_DIRS})
+target_include_directories(CapusynGui PRIVATE
     ${CMAKE_SOURCE_DIR}/cmake/juce_compat
     ${CMAKE_SOURCE_DIR}/third_party/JUCE/modules
 )
-target_link_libraries(VitalGui
+target_link_libraries(CapusynGui
     PRIVATE
-        VitalData
+        CapusynData
 )
-target_compile_definitions(VitalGui PRIVATE
+target_compile_definitions(CapusynGui PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_DSP_USE_SHARED_FFTW=1
     JUCE_USE_XRANDR=0

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "distortion_module.h"
@@ -19,7 +19,7 @@
 #include "distortion.h"
 #include "digital_svf.h"
 
-namespace vital {
+namespace capusyn {
 
   DistortionModule::DistortionModule() :
       SynthModule(0, 1), distortion_(nullptr), filter_(nullptr), mix_(0.0f) { }
@@ -86,4 +86,4 @@ namespace vital {
       audio_out[i] = utils::interpolate(audio_in[i], audio_out[i], current_mix);
     }
   }
-} // namespace vital
+} // namespace capusyn

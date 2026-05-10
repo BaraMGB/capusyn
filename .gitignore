@@ -5,7 +5,7 @@ forge.yaml
 VTune\ Profiler\ Results
 cmake-build*
 build-*
-scripts/install-vital-vst3.sh
+scripts/install-capusyn-vst3.sh
 *.swp
 *.Trashes
 xcuserdata

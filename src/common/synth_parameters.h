@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -21,7 +21,7 @@
 #include <map>
 #include <string>
 
-namespace vital {
+namespace capusyn {
 
   struct ValueDetails {
     enum ValueScale {
@@ -61,7 +61,7 @@ namespace vital {
 
       const ValueDetails& getDetails(const std::string& name) const {
         auto details = details_lookup_.find(name);
-        VITAL_ASSERT(details != details_lookup_.end());
+        CAPUSYN_ASSERT(details != details_lookup_.end());
         return details->second;
       }
 
@@ -79,7 +79,7 @@ namespace vital {
 
       mono_float getParameterRange(const std::string& name) const {
         auto details = details_lookup_.find(name);
-        VITAL_ASSERT(details != details_lookup_.end());
+        CAPUSYN_ASSERT(details != details_lookup_.end());
         return details->second.max - details->second.min;
       }
 
@@ -143,5 +143,5 @@ namespace vital {
     private:
       Parameters() { }
   };
-} // namespace vital
+} // namespace capusyn
 

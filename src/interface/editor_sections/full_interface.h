@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -63,11 +63,11 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     FullInterface();
     virtual ~FullInterface();
 
-    void setOscilloscopeMemory(const vital::poly_float* memory);
-    void setAudioMemory(const vital::StereoMemory* memory);
+    void setOscilloscopeMemory(const capusyn::poly_float* memory);
+    void setAudioMemory(const capusyn::StereoMemory* memory);
 
-    void createModulationSliders(const vital::output_map& mono_modulations,
-                                 const vital::output_map& poly_modulations);
+    void createModulationSliders(const capusyn::output_map& mono_modulations,
+                                 const capusyn::output_map& poly_modulations);
 
     virtual void paintBackground(Graphics& g) override;
     void copySkinValues(const Skin& skin);
@@ -85,7 +85,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     virtual void resized() override;
     void animate(bool animate) override;
     void reset() override;
-    void setAllValues(vital::control_map& controls) override;
+    void setAllValues(capusyn::control_map& controls) override;
 
     void dataDirectoryChanged() override;
     void noDownloadNeeded() override;
@@ -161,7 +161,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
 
   private:
     bool wavetableEditorsInitialized() {
-      for (int i = 0; i < vital::kNumOscillators; ++i) {
+      for (int i = 0; i < capusyn::kNumOscillators; ++i) {
         if (wavetable_edits_[i] == nullptr)
           return false;
       }
@@ -185,7 +185,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     std::unique_ptr<ModulationInterface> modulation_interface_;
     std::unique_ptr<ExtraModSection> extra_mod_section_;
     std::unique_ptr<EffectsInterface> effects_interface_;
-    std::unique_ptr<WavetableEditSection> wavetable_edits_[vital::kNumOscillators];
+    std::unique_ptr<WavetableEditSection> wavetable_edits_[capusyn::kNumOscillators];
     std::unique_ptr<KeyboardInterface> keyboard_interface_;
     std::unique_ptr<BendSection> bend_section_;
     std::unique_ptr<PortamentoSection> portamento_section_;

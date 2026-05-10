@@ -1,24 +1,24 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sallen_key_filter.h"
 
 #include "futils.h"
 
-namespace vital {
+namespace capusyn {
 
   SallenKeyFilter::SallenKeyFilter() : Processor(SallenKeyFilter::kNumInputs, 1) {
     hardReset();
@@ -44,7 +44,7 @@ namespace vital {
   }
 
   void SallenKeyFilter::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
     processWithInput(input(kAudio)->source->buffer, num_samples);
   }
 
@@ -133,7 +133,7 @@ namespace vital {
       poly_float band_low = utils::mulAdd(low, current_band, band_pass);
       audio_out[i] = utils::mulAdd(band_low, current_high, high_pass) * current_post_multiply;
 
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -187,7 +187,7 @@ namespace vital {
       poly_float band_low = utils::mulAdd(low, current_band, band_pass);
       audio_out[i] = utils::mulAdd(band_low, current_high, high_pass) * current_post_multiply;
 
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -236,7 +236,7 @@ namespace vital {
       poly_float low = current_high * low_pass;
       audio_out[i] = utils::mulAdd(low, current_low, high_pass) * current_post_multiply;
 
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -328,4 +328,4 @@ namespace vital {
     poly_float stage1_out = stage1_.tickBasic(stage1_input_, coefficient);
     stage2_.tickBasic(stage1_out, coefficient);
   }
-} // namespace vital
+} // namespace capusyn

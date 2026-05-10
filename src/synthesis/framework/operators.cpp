@@ -1,26 +1,26 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "operators.h"
 #include "synth_constants.h"
 
-namespace vital {
+namespace capusyn {
 
   void Clamp::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize());
+    CAPUSYN_ASSERT(inputMatchesBufferSize());
 
     const poly_float* source = input()->source->buffer;
     poly_float* dest = output()->buffer;
@@ -30,7 +30,7 @@ namespace vital {
   }
 
   void Negate::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize());
+    CAPUSYN_ASSERT(inputMatchesBufferSize());
 
     const poly_float* source = input()->source->buffer;
     poly_float* dest = output()->buffer;
@@ -40,7 +40,7 @@ namespace vital {
   }
 
   void Inverse::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize());
+    CAPUSYN_ASSERT(inputMatchesBufferSize());
 
     const poly_float* source = input()->source->buffer;
     poly_float* dest = output()->buffer;
@@ -50,7 +50,7 @@ namespace vital {
   }
 
   void LinearScale::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize());
+    CAPUSYN_ASSERT(inputMatchesBufferSize());
 
     const poly_float* source = input()->source->buffer;
     poly_float* dest = output()->buffer;
@@ -60,7 +60,7 @@ namespace vital {
   }
 
   void Square::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(0));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(0));
     poly_float* dest = output()->buffer;
     const poly_float* source = input()->source->buffer;
 
@@ -71,8 +71,8 @@ namespace vital {
   }
 
   void Add::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(0));
-    VITAL_ASSERT(inputMatchesBufferSize(1));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(0));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(1));
 
     poly_float* dest = output()->buffer;
     const poly_float* source_left = input(0)->source->buffer;
@@ -83,8 +83,8 @@ namespace vital {
   }
 
   void Subtract::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(0));
-    VITAL_ASSERT(inputMatchesBufferSize(1));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(0));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(1));
 
     poly_float* dest = output()->buffer;
     const poly_float* source_left = input(0)->source->buffer;
@@ -95,8 +95,8 @@ namespace vital {
   }
 
   void Multiply::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(0));
-    VITAL_ASSERT(inputMatchesBufferSize(1));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(0));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(1));
 
     poly_float* dest = output()->buffer;
     const poly_float* source_left = input(0)->source->buffer;
@@ -111,7 +111,7 @@ namespace vital {
   }
 
   void SmoothMultiply::processMultiply(int num_samples, poly_float multiply) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudioRate));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudioRate));
 
     poly_float* audio_out = output()->buffer;
     const poly_float* audio_in = input(kAudioRate)->source->buffer;
@@ -136,8 +136,8 @@ namespace vital {
   }
 
   void Interpolate::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kFrom));
-    VITAL_ASSERT(inputMatchesBufferSize(kTo));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kFrom));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kTo));
 
     poly_float* dest = output()->buffer;
     const poly_float* from = input(kFrom)->source->buffer;
@@ -164,8 +164,8 @@ namespace vital {
   void BilinearInterpolate::process(int num_samples) {
     static constexpr float kMaxOffset = 1.0f;
 
-    VITAL_ASSERT(inputMatchesBufferSize(kXPosition));
-    VITAL_ASSERT(inputMatchesBufferSize(kYPosition));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kXPosition));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kYPosition));
 
     poly_float top_left = input(kTopLeft)->at(0);
     poly_float top_right = input(kTopRight)->at(0);
@@ -187,7 +187,7 @@ namespace vital {
   void VariableAdd::process(int num_samples) {
 #if DEBUG
     for (int i = 0; i < inputs_->size(); ++i)
-      VITAL_ASSERT(inputMatchesBufferSize(i));
+      CAPUSYN_ASSERT(inputMatchesBufferSize(i));
 #endif
 
     poly_float* dest = output()->buffer;
@@ -214,7 +214,7 @@ namespace vital {
   }
   
   void ModulationSum::process(int num_samples) {
-    VITAL_ASSERT(output()->buffer_size >= num_samples);
+    CAPUSYN_ASSERT(output()->buffer_size >= num_samples);
 
     poly_float* dest = output()->buffer;
     int num_inputs = static_cast<int>(inputs_->size());
@@ -236,7 +236,7 @@ namespace vital {
 
     for (int i = kNumStaticInputs; i < num_inputs; ++i) {
       if (input(i)->source != &Processor::null_source_ && !input(i)->source->owner->isControlRate()) {
-        VITAL_ASSERT(inputMatchesBufferSize(i));
+        CAPUSYN_ASSERT(inputMatchesBufferSize(i));
 
         const poly_float* source = input(i)->source->buffer;
 
@@ -269,7 +269,7 @@ namespace vital {
 
   void StereoEncoder::processRotate(int num_samples) {
     static const poly_float kSign(1.0f, -1.0f);
-    VITAL_ASSERT(inputMatchesBufferSize());
+    CAPUSYN_ASSERT(inputMatchesBufferSize());
 
     poly_float current_cos_mult = cos_mult_;
     poly_float current_sin_mult = sin_mult_;
@@ -342,4 +342,4 @@ namespace vital {
     poly_float result = utils::maskLoad(tempo_adjusted, input(kFrequency)->at(0), frequency_mask);
     output()->buffer[0] = utils::maskLoad(result, keytrack_frequency, keytrack_mask);
   }
-} // namespace vital
+} // namespace capusyn

@@ -1,24 +1,24 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "digital_svf.h"
 
 #include "futils.h"
 
-namespace vital {
+namespace capusyn {
   const DigitalSvf::SvfCoefficientLookup DigitalSvf::svf_coefficient_lookup_;
 
   DigitalSvf::DigitalSvf() : Processor(DigitalSvf::kNumInputs, 1),
@@ -28,8 +28,8 @@ namespace vital {
   }
 
   void DigitalSvf::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
-    VITAL_ASSERT(inputMatchesBufferSize(kMidiCutoff));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kMidiCutoff));
     processWithInput(input(kAudio)->source->buffer, num_samples);
   }
 
@@ -91,7 +91,7 @@ namespace vital {
       current_post_multiply += delta_post_multiply;
 
       audio_out[i] = tick(audio_in[i], coefficient, current_resonance, current_drive, blends) * current_post_multiply;
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -121,7 +121,7 @@ namespace vital {
       current_post_multiply += delta_post_multiply;
 
       audio_out[i] = tickBasic(audio_in[i], coefficient, current_resonance, current_drive, blends) * current_post_multiply;
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -152,7 +152,7 @@ namespace vital {
       
       poly_float result = tick24(audio_in[i], coefficient, current_resonance, current_drive, blends);
       audio_out[i] = result * current_post_multiply;
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -183,7 +183,7 @@ namespace vital {
 
       poly_float result = tickBasic24(audio_in[i], coefficient, current_resonance, current_drive, blends);
       audio_out[i] = result * current_post_multiply;
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -217,7 +217,7 @@ namespace vital {
 
       poly_float result = tickDual(audio_in[i], coefficient, current_resonance, current_drive, blends1, blends2);
       audio_out[i] = result * current_post_multiply;
-      VITAL_ASSERT(utils::isFinite(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isFinite(audio_out[i]));
     }
   }
 
@@ -431,4 +431,4 @@ namespace vital {
     drive_ = 0.0f;
     post_multiply_ = 0.0f;
   }
-} // namespace vital
+} // namespace capusyn

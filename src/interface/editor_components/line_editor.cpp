@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "line_editor.h"
@@ -202,11 +202,11 @@ void LineEditor::movePoint(int index, Point<float> position, bool snap) {
 
   Point<float> local_position(position.x / getWidth(), position.y / getHeight());
 
-  local_position.x = vital::utils::clamp(local_position.x, min_x, max_x);
-  local_position.y = vital::utils::clamp(local_position.y, 0.0f, 1.0f);
+  local_position.x = capusyn::utils::clamp(local_position.x, min_x, max_x);
+  local_position.y = capusyn::utils::clamp(local_position.y, 0.0f, 1.0f);
   if (snap && grid_size_x_ > 0) {
     float snap_radius = getSnapRadiusX();
-    float snapped_x = vital::utils::clamp(getSnappedX(local_position.x), min_x, max_x);
+    float snapped_x = capusyn::utils::clamp(getSnappedX(local_position.x), min_x, max_x);
     if (fabsf(snapped_x - local_position.x) < snap_radius)
       local_position.x = snapped_x;
   }
@@ -251,14 +251,14 @@ void LineEditor::movePower(int index, Point<float> position, bool all, bool alte
     if (from_y == to_y)
       continue;
 
-    float max_power = vital::SynthLfo::kMaxPower;
+    float max_power = capusyn::SynthLfo::kMaxPower;
     float power = model_->getPower(i);
     float delta_amount = delta_change * alternate_mult;
     if (from_y < to_y && alternate)
       delta_amount *= -1.0f;
 
     power += delta_amount * kPowerMouseMultiplier;
-    model_->setPower(i, vital::utils::clamp(power, -max_power, max_power));
+    model_->setPower(i, capusyn::utils::clamp(power, -max_power, max_power));
   }
   model_->render();
   resetPositions();
@@ -268,7 +268,7 @@ void LineEditor::movePower(int index, Point<float> position, bool all, bool alte
 }
 
 void LineEditor::removePoint(int index) {
-  VITAL_ASSERT(model_->getNumPoints() > 1);
+  CAPUSYN_ASSERT(model_->getNumPoints() > 1);
 
   model_->removePoint(index);
   model_->render();
@@ -421,7 +421,7 @@ void LineEditor::paintLine(const MouseEvent& e) {
   else
     to_index--;
 
-  VITAL_ASSERT(from_index < to_index);
+  CAPUSYN_ASSERT(from_index < to_index);
 
   int pattern_length = static_cast<int>(paint_pattern_.size());
   int delta_size = pattern_length - std::max(0, (to_index - from_index - 1));
@@ -697,9 +697,9 @@ void LineEditor::resetWavePath() {
     if (model_->smooth())
       point_t = LineGenerator::smoothTransition(point_t);
 
-    point_t = vital::futils::powerScale(point_t, power);
+    point_t = capusyn::futils::powerScale(point_t, power);
 
-    float val = vital::utils::interpolate(prev_point.y, next_point.y, point_t);
+    float val = capusyn::utils::interpolate(prev_point.y, next_point.y, point_t);
 
     setXAt(kNumWrapPoints + draw_index, padX(width * t));
     setYAt(kNumWrapPoints + draw_index, padY(height * val));
@@ -822,7 +822,7 @@ Point<float> LineEditor::valuesToOpenGlPosition(float x, float y) {
 }
 
 Point<float> LineEditor::getPowerPosition(int index) {
-  VITAL_ASSERT(index >= 0 && index < model_->getNumPoints());
+  CAPUSYN_ASSERT(index >= 0 && index < model_->getNumPoints());
   Point<float> from = pairToPoint(model_->getPoint(index));
   Point<float> to;
   if (index < model_->getNumPoints() - 1)
@@ -835,13 +835,13 @@ Point<float> LineEditor::getPowerPosition(int index) {
   float x = (from.x + to.x) / 2.0f;
   if (x >= 1.0f)
     x -= 1.0f;
-  float power_t = vital::futils::powerScale(0.5f, model_->getPower(index));
-  float y = vital::utils::interpolate(from.y, to.y, power_t);
+  float power_t = capusyn::futils::powerScale(0.5f, model_->getPower(index));
+  float y = capusyn::utils::interpolate(from.y, to.y, power_t);
   return Point<float>(x, y);
 }
 
 bool LineEditor::powerActive(int index) {
-  VITAL_ASSERT(index >= 0 && index < model_->getNumPoints());
+  CAPUSYN_ASSERT(index >= 0 && index < model_->getNumPoints());
   Point<float> delta;
   if (index < model_->getNumPoints() - 1)
     delta = pairToPoint(model_->getPoint(index + 1)) - pairToPoint(model_->getPoint(index));
@@ -1074,8 +1074,8 @@ void LineEditor::setSliderPositionFromText() {
   resetPositions();
 }
 
-vital::poly_float LineEditor::adjustBoostPhase(vital::poly_float phase) {
-  vital::poly_float result;
+capusyn::poly_float LineEditor::adjustBoostPhase(capusyn::poly_float phase) {
+  capusyn::poly_float result;
   result.set(0, adjustBoostPhase(phase[0]));
   result.set(1, adjustBoostPhase(phase[1]));
   return result;

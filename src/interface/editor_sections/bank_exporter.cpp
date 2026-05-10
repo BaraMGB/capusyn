@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "bank_exporter.h"
@@ -611,10 +611,10 @@ void BankExporter::exportBank() {
       bank_zip.addFile(sample, 9, sample_path + getRelativePath(sample, LoadSave::kSampleFolderName));
   }
 
-  File file = File::getCurrentWorkingDirectory().getChildFile(bank_name + "." + vital::kBankExtension);
-  FileChooser export_box("Export Bank", file, String("*.") + vital::kBankExtension);
+  File file = File::getCurrentWorkingDirectory().getChildFile(bank_name + "." + capusyn::kBankExtension);
+  FileChooser export_box("Export Bank", file, String("*.") + capusyn::kBankExtension);
   if (export_box.browseForFileToSave(true)) {
-    File destination = export_box.getResult().withFileExtension(vital::kBankExtension);
+    File destination = export_box.getResult().withFileExtension(capusyn::kBankExtension);
     if (destination.hasWriteAccess()) {
       FileOutputStream output_stream(destination);
       if (output_stream.openedOk())

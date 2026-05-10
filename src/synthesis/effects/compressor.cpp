@@ -1,23 +1,23 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "compressor.h"
 #include "futils.h"
 
-namespace vital {
+namespace capusyn {
   
   namespace {
     constexpr mono_float kRmsTime = 0.025f;
@@ -113,7 +113,7 @@ namespace vital {
 
       poly_float gain_compression = utils::clamp(upper_mult * lower_mult, 0.0f, kMaxExpandMult);
       audio_out[i] = gain_compression * sample;
-      VITAL_ASSERT(utils::isContained(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isContained(audio_out[i]));
     }
 
     low_enveloped_mean_squared_ = low_enveloped_mean_squared;
@@ -136,7 +136,7 @@ namespace vital {
       current_output_mult += delta_output_mult;
       current_mix += delta_mix;
       audio_out[i] = utils::interpolate(audio_input[i], audio_out[i] * current_output_mult, current_mix);
-      VITAL_ASSERT(utils::isContained(audio_out[i]));
+      CAPUSYN_ASSERT(utils::isContained(audio_out[i]));
     }
   }
 
@@ -353,4 +353,4 @@ namespace vital {
     output(kHighOutputMeanSquared)->buffer[0] = utils::swapVoices(band_high_output_ms);
   }
 
-} // namespace vital
+} // namespace capusyn

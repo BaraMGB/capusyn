@@ -1,38 +1,38 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "note_handler_test.h"
 #include "sound_engine.h"
 
-void NoteHandlerTest::processAndExpectFinite(vital::SoundEngine* engine) {
-  engine->process(vital::kMaxBufferSize);
+void NoteHandlerTest::processAndExpectFinite(capusyn::SoundEngine* engine) {
+  engine->process(capusyn::kMaxBufferSize);
 
-  vital::Output* output = engine->output();
-  expect(vital::utils::isFinite(output->buffer, output->buffer_size));
+  capusyn::Output* output = engine->output();
+  expect(capusyn::utils::isFinite(output->buffer, output->buffer_size));
 }
 
-void NoteHandlerTest::processAndExpectQuiet(vital::SoundEngine* engine) {
-  engine->process(vital::kMaxBufferSize);
+void NoteHandlerTest::processAndExpectQuiet(capusyn::SoundEngine* engine) {
+  engine->process(capusyn::kMaxBufferSize);
 
-  vital::Output* output = engine->output();
-  expect(vital::utils::rms(reinterpret_cast<float*>(output->buffer), output->buffer_size) < 0.001f);
+  capusyn::Output* output = engine->output();
+  expect(capusyn::utils::rms(reinterpret_cast<float*>(output->buffer), output->buffer_size) < 0.001f);
 }
 
 void NoteHandlerTest::runTest() {
-  vital::SoundEngine engine;
+  capusyn::SoundEngine engine;
   engine.getControls()["env_1_release"]->set(0.0f);
 
   beginTest("No Notes");
@@ -50,8 +50,8 @@ void NoteHandlerTest::runTest() {
 
   beginTest("Three Notes On");
   engine.noteOn(61, 1.0f, 10, 0);
-  engine.noteOn(62, 1.0f, vital::kMaxBufferSize - 1, 0);
-  engine.noteOn(63, 1.0f, vital::kMaxBufferSize - 1, 0);
+  engine.noteOn(62, 1.0f, capusyn::kMaxBufferSize - 1, 0);
+  engine.noteOn(63, 1.0f, capusyn::kMaxBufferSize - 1, 0);
   processAndExpectFinite(&engine);
   processAndExpectFinite(&engine);
 

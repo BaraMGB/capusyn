@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -25,8 +25,8 @@ using json = nlohmann::json;
 
 class Tuning {
   public:
-    static constexpr int kTuningSize = 2 * vital::kMidiSize;
-    static constexpr int kTuningCenter = vital::kMidiSize;
+    static constexpr int kTuningSize = 2 * capusyn::kMidiSize;
+    static constexpr int kTuningCenter = capusyn::kMidiSize;
     static Tuning getTuningForFile(File file);
 
     static String allFileExtensions();
@@ -39,7 +39,7 @@ class Tuning {
     void loadFile(File file);
     void setConstantTuning(float note);
     void setDefaultTuning();
-    vital::mono_float convertMidiNote(int note) const;
+    capusyn::mono_float convertMidiNote(int note) const;
     void setStartMidiNote(int start_midi_note) { scale_start_midi_note_ = start_midi_note; }
     void setReferenceNote(int reference_note) { reference_midi_note_ = reference_note; }
     void setReferenceFrequency(float frequency);
@@ -72,7 +72,7 @@ class Tuning {
     float reference_midi_note_;
     std::vector<float> scale_;
     std::vector<int> keyboard_mapping_;
-    vital::mono_float tuning_[kTuningSize];
+    capusyn::mono_float tuning_[kTuningSize];
     std::string tuning_name_;
     std::string mapping_name_;
     bool default_;

@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "shaders.h"
@@ -1029,7 +1029,7 @@ const char* Shaders::getVertexShader(VertexShader shader) {
     case kBarVerticalVertex:
       return kBarVerticalVertexShader;
     default:
-      VITAL_ASSERT(false);
+      CAPUSYN_ASSERT(false);
       return nullptr;
   }
 }
@@ -1079,7 +1079,7 @@ const char* Shaders::getFragmentShader(FragmentShader shader) {
     case kModulationKnobFragment:
       return kModulationKnobFragmentShader;
     default:
-      VITAL_ASSERT(false);
+      CAPUSYN_ASSERT(false);
       return nullptr;
   }
 }
@@ -1105,7 +1105,7 @@ GLuint Shaders::createVertexShader(OpenGLExtensionFunctions& extensions, VertexS
   extensions.glShaderSource(shader_id, 1, &code, nullptr);
   extensions.glCompileShader(shader_id);
 
-  VITAL_ASSERT(checkShaderCorrect(extensions, shader_id));
+  CAPUSYN_ASSERT(checkShaderCorrect(extensions, shader_id));
   return shader_id;
 }
 
@@ -1116,7 +1116,7 @@ GLuint Shaders::createFragmentShader(OpenGLExtensionFunctions& extensions, Fragm
   extensions.glShaderSource(shader_id, 1, &code, nullptr);
   extensions.glCompileShader(shader_id);
 
-  VITAL_ASSERT(checkShaderCorrect(extensions, shader_id));
+  CAPUSYN_ASSERT(checkShaderCorrect(extensions, shader_id));
   return shader_id;
 }
 

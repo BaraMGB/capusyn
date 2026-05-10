@@ -1,24 +1,24 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dirty_filter.h"
 
 #include "futils.h"
 
-namespace vital {
+namespace capusyn {
 
   DirtyFilter::DirtyFilter() : Processor(DirtyFilter::kNumInputs, 1) {
     hardReset();
@@ -47,7 +47,7 @@ namespace vital {
   }
 
   void DirtyFilter::process(int num_samples) {
-    VITAL_ASSERT(inputMatchesBufferSize(kAudio));
+    CAPUSYN_ASSERT(inputMatchesBufferSize(kAudio));
 
     poly_float current_resonance = resonance_;
     poly_float current_drive = drive_;
@@ -378,4 +378,4 @@ namespace vital {
 
     return loop_input * (1.0f / kSaturationBoost);
   }
-} // namespace vital
+} // namespace capusyn

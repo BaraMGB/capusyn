@@ -1,17 +1,17 @@
-/* Copyright 2013-2019 Matt Tytel
+/* Copyright 2013-2019 Capusyn Project
  *
- * vital is free software: you can redistribute it and/or modify
+ * capusyn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * vital is distributed in the hope that it will be useful,
+ * capusyn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with vital.  If not, see <http://www.gnu.org/licenses/>.
+ * along with capusyn.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "preset_browser.h"
@@ -357,7 +357,7 @@ void PresetList::finishRename() {
 void PresetList::reloadPresets() {
   presets_.clear();
   if (current_folder_.exists() && current_folder_.isDirectory())
-    current_folder_.findChildFiles(presets_, File::findFiles, true, "*." + vital::kPresetExtension);
+    current_folder_.findChildFiles(presets_, File::findFiles, true, "*." + capusyn::kPresetExtension);
   else
     LoadSave::getAllPresets(presets_);
   sort();
@@ -930,7 +930,7 @@ void PresetBrowser::jumpToPreset(int indices) {
   File parent = external_preset_.getParentDirectory();
   if (parent.exists()) {
     Array<File> presets;
-    parent.findChildFiles(presets, File::findFiles, false, String("*.") + vital::kPresetExtension);
+    parent.findChildFiles(presets, File::findFiles, false, String("*.") + capusyn::kPresetExtension);
     presets.sort(kFileSorter);
     int index = presets.indexOf(external_preset_);
     index = (index + indices + presets.size()) % presets.size();
