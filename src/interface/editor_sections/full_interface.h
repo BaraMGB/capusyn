@@ -46,15 +46,19 @@ class PortamentoSection;
 class PresetBrowser;
 class SaveSection;
 class SynthesisInterface;
+class PopupMouseWatcher;
 struct SynthGuiData;
 class SynthSlider;
 class WavetableEditSection;
 class VoiceSection;
 
-class FullInterface : public SynthSection, public AuthenticationSection::Listener, public HeaderSection::Listener,
+class FullInterface : public SynthSection,
+                      public AuthenticationSection::Listener, public HeaderSection::Listener,
                       public DownloadSection::Listener, public UpdateCheckSection::Listener,
                       public EffectsInterface::Listener, public ModulationMatrix::Listener,
                       public OpenGLRenderer, DragAndDropContainer {
+    friend class PopupMouseWatcher;
+
   public:
     static constexpr double kMinOpenGlVersion = 1.4;
 
@@ -100,6 +104,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     void newOpenGLContextCreated() override;
     void renderOpenGL() override;
     void openGLContextClosing() override;
+    void mouseDown(const MouseEvent& e) override;
 
     void showAboutSection() override;
     void deleteRequested(File preset) override;
@@ -160,6 +165,16 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     void toggleFilter2Zoom();
 
   private:
+    enum class PopupKind {
+      kNone,
+      kSingle,
+      kDual,
+    };
+
+    void hideTransientPopups();
+    void handleGlobalPopupMouseDown(const MouseEvent& e);
+    bool clickIsInsidePopup(Component* component) const;
+
     bool wavetableEditorsInitialized() {
       for (int i = 0; i < capusyn::kNumOscillators; ++i) {
         if (wavetable_edits_[i] == nullptr)
@@ -194,6 +209,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     std::unique_ptr<PopupBrowser> popup_browser_;
     std::unique_ptr<SinglePopupSelector> popup_selector_;
     std::unique_ptr<DualPopupSelector> dual_popup_selector_;
+    std::unique_ptr<PopupMouseWatcher> popup_mouse_watcher_;
     std::unique_ptr<PopupDisplay> popup_display_1_;
     std::unique_ptr<PopupDisplay> popup_display_2_;
     std::unique_ptr<BankExporter> bank_exporter_;
@@ -213,6 +229,9 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     bool animate_;
     bool enable_redo_background_;
     bool needs_download_;
+    PopupKind active_popup_kind_;
+    Component* active_popup_source_;
+    uint32 popup_open_time_ms_;
     CriticalSection open_gl_critical_section_;
     OpenGLContext open_gl_context_;
     std::unique_ptr<Shaders> shaders_;

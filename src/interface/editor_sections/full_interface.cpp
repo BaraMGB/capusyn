@@ -44,11 +44,26 @@
 #include "update_check_section.h"
 #include "voice_section.h"
 
+class PopupMouseWatcher : public MouseListener {
+  public:
+    explicit PopupMouseWatcher(FullInterface& owner) : owner_(owner) { }
+
+    void mouseDown(const MouseEvent& e) override {
+      owner_.handleGlobalPopupMouseDown(e);
+    }
+
+  private:
+    FullInterface& owner_;
+};
+
 FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_interface"), width_(0), resized_width_(0),
                                                          last_render_scale_(0.0f), display_scale_(1.0f),
                                                          pixel_multiple_(1), setting_all_values_(false),
                                                          unsupported_(false), animate_(true),
                                                          enable_redo_background_(true), needs_download_(false),
+                                                         active_popup_kind_(PopupKind::kNone),
+                                                         active_popup_source_(nullptr),
+                                                         popup_open_time_ms_(0),
                                                          open_gl_(open_gl_context_) {
   full_screen_section_ = nullptr;
   Skin default_skin;
@@ -198,6 +213,9 @@ FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_inte
   popup_display_2_->toFront(true);
   download_section_->toFront(true);
 
+  popup_mouse_watcher_ = std::make_unique<PopupMouseWatcher>(*this);
+  Desktop::getInstance().addGlobalMouseListener(popup_mouse_watcher_.get());
+
   update_check_section_ = std::make_unique<UpdateCheckSection>("update_check");
   addSubSection(update_check_section_.get(), false);
   addChildComponent(update_check_section_.get());
@@ -253,6 +271,8 @@ FullInterface::FullInterface() : SynthSection("EMPTY"), open_gl_(open_gl_context
 }
 
 FullInterface::~FullInterface() {
+  if (popup_mouse_watcher_)
+    Desktop::getInstance().removeGlobalMouseListener(popup_mouse_watcher_.get());
   UpdateMemory::getInstance()->decrementChecker();
 
   open_gl_context_.detach();
@@ -647,8 +667,55 @@ void FullInterface::deleteRequested(File preset) {
   delete_section_->setVisible(true);
 }
 
+void FullInterface::hideTransientPopups() {
+  if (popup_browser_)
+    popup_browser_->setVisible(false);
+  if (popup_selector_)
+    popup_selector_->setVisible(false);
+  if (dual_popup_selector_)
+    dual_popup_selector_->setVisible(false);
+  active_popup_kind_ = PopupKind::kNone;
+  active_popup_source_ = nullptr;
+  popup_open_time_ms_ = 0;
+}
+
+bool FullInterface::clickIsInsidePopup(Component* component) const {
+  if (component == nullptr)
+    return false;
+
+  if (popup_selector_ && popup_selector_->isVisible() &&
+      (component == popup_selector_.get() || popup_selector_->isParentOf(component)))
+    return true;
+
+  if (dual_popup_selector_ && dual_popup_selector_->isVisible() &&
+      (component == dual_popup_selector_.get() || dual_popup_selector_->isParentOf(component)))
+    return true;
+
+  return false;
+}
+
+void FullInterface::handleGlobalPopupMouseDown(const MouseEvent& e) {
+  if (popup_open_time_ms_ != 0 && Time::getMillisecondCounter() - popup_open_time_ms_ < 150)
+    return;
+
+  if (((popup_selector_ && popup_selector_->isVisible()) ||
+       (dual_popup_selector_ && dual_popup_selector_->isVisible())) &&
+      !clickIsInsidePopup(e.originalComponent)) {
+    hideTransientPopups();
+  }
+}
+
+void FullInterface::mouseDown(const MouseEvent& e) {
+  if (((popup_selector_ && popup_selector_->isVisible()) ||
+       (dual_popup_selector_ && dual_popup_selector_->isVisible())) &&
+      !clickIsInsidePopup(e.originalComponent)) {
+    hideTransientPopups();
+  }
+}
+
 void FullInterface::tabSelected(int index) {
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   bool make_visible = !preset_browser_->isVisible() && !bank_exporter_->isVisible();
 
   if (synthesis_interface_)
@@ -666,6 +733,7 @@ void FullInterface::tabSelected(int index) {
 
 void FullInterface::clearTemporaryTab(int current_tab) {
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   preset_browser_->setVisible(false);
   bank_exporter_->setVisible(false);
   modulation_interface_->setVisible(true);
@@ -676,6 +744,7 @@ void FullInterface::clearTemporaryTab(int current_tab) {
 
 void FullInterface::setPresetBrowserVisibility(bool visible, int current_tab) {
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   preset_browser_->setVisible(visible);
   modulation_interface_->setVisible(!visible);
   portamento_section_->setVisible(!visible);
@@ -697,6 +766,7 @@ void FullInterface::setPresetBrowserVisibility(bool visible, int current_tab) {
 
 void FullInterface::setBankExporterVisibility(bool visible, int current_tab) {
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   bank_exporter_->setVisible(visible);
   modulation_interface_->setVisible(!visible);
   portamento_section_->setVisible(!visible);
@@ -751,6 +821,7 @@ void FullInterface::externalPresetLoaded(const File& preset) {
 
 void FullInterface::showFullScreenSection(SynthSection* full_screen) {
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   full_screen_section_ = full_screen;
 
   if (full_screen_section_) {
@@ -779,6 +850,7 @@ void FullInterface::showWavetableEditSection(int index) {
     return;
 
   ScopedLock lock(open_gl_critical_section_);
+  hideTransientPopups();
   for (int i = 0; i < capusyn::kNumOscillators; ++i)
     wavetable_edits_[i]->setVisible(i == index);
 
@@ -886,6 +958,7 @@ bool FullInterface::loadAudioAsWavetable(int index, const String& name, InputStr
 void FullInterface::popupBrowser(SynthSection* owner, Rectangle<int> bounds, std::vector<File> directories,
                                  String extensions, std::string passthrough_name,
                                  std::string additional_folders_name) {
+  hideTransientPopups();
   popup_browser_->setIgnoreBounds(getLocalArea(owner, owner->getLocalBounds()));
   popup_browser_->setBrowserBounds(getLocalArea(owner, bounds));
   popup_browser_->setVisible(true);
@@ -901,21 +974,51 @@ void FullInterface::popupBrowserUpdate(SynthSection* owner) {
 
 void FullInterface::popupSelector(Component* source, Point<int> position, const PopupItems& options,
                                   std::function<void(int)> callback, std::function<void()> cancel) {
-  popup_selector_->setCallback(callback);
-  popup_selector_->setCancelCallback(cancel);
+  if (active_popup_kind_ == PopupKind::kSingle && active_popup_source_ == source &&
+      popup_selector_ && popup_selector_->isVisible()) {
+    hideTransientPopups();
+    return;
+  }
+
+  hideTransientPopups();
+  active_popup_kind_ = PopupKind::kSingle;
+  active_popup_source_ = source;
+  popup_selector_->setCallback([this, callback = std::move(callback)](int selection) {
+    hideTransientPopups();
+    callback(selection);
+  });
+  popup_selector_->setCancelCallback([this, cancel = std::move(cancel)]() {
+    hideTransientPopups();
+    if (cancel)
+      cancel();
+  });
   popup_selector_->showSelections(options);
   Rectangle<int> bounds(0, 0, std::ceil(display_scale_ * getWidth()), std::ceil(display_scale_ * getHeight()));
   popup_selector_->setPosition(getLocalPoint(source, position), bounds);
   popup_selector_->setVisible(true);
+  popup_open_time_ms_ = Time::getMillisecondCounter();
 }
 
 void FullInterface::dualPopupSelector(Component* source, Point<int> position, int width,
                                       const PopupItems& options, std::function<void(int)> callback) {
-  dual_popup_selector_->setCallback(callback);
+  if (active_popup_kind_ == PopupKind::kDual && active_popup_source_ == source &&
+      dual_popup_selector_ && dual_popup_selector_->isVisible()) {
+    hideTransientPopups();
+    return;
+  }
+
+  hideTransientPopups();
+  active_popup_kind_ = PopupKind::kDual;
+  active_popup_source_ = source;
+  dual_popup_selector_->setCallback([this, callback = std::move(callback)](int selection) {
+    hideTransientPopups();
+    callback(selection);
+  });
   dual_popup_selector_->showSelections(options);
   Rectangle<int> bounds(0, 0, std::ceil(display_scale_ * getWidth()), std::ceil(display_scale_ * getHeight()));
   dual_popup_selector_->setPosition(getLocalPoint(source, position), width, bounds);
   dual_popup_selector_->setVisible(true);
+  popup_open_time_ms_ = Time::getMillisecondCounter();
 }
 
 void FullInterface::popupDisplay(Component* source, const std::string& text,
