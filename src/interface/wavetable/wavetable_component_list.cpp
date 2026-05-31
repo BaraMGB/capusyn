@@ -283,7 +283,7 @@ void WavetableComponentList::groupMenuClicked(int row_index) {
   options.addItem(kRemove, "Remove Group");
 
   OpenGlShapeButton* button = menu_buttons_[row_index].get();
-  showPopupSelector(this, Point<int>(button->getX(), button->getBottom()), options,
+  showPopupSelector(button, Point<int>(0, button->getHeight()), options,
                     [=](int selection) { componentRowGroupCallback(selection, this); });
   button->setState(Button::buttonNormal);
 }
@@ -305,7 +305,7 @@ void WavetableComponentList::modifierMenuClicked(int row_index) {
   options.addItem(kReset, "Reset");
   options.addItem(kRemove, "Remove");
   OpenGlShapeButton* button = menu_buttons_[row_index].get();
-  showPopupSelector(this, Point<int>(button->getX(), button->getBottom()), options,
+  showPopupSelector(button, Point<int>(0, button->getHeight()), options,
                     [=](int selection) { componentRowCallback(selection, this); });
   button->setState(Button::buttonNormal);
 }
@@ -327,7 +327,7 @@ void WavetableComponentList::addModifierClicked(int group_index) {
   }
 
   Component* button = add_modifier_buttons_[current_group_index_].get();
-  showPopupSelector(this, Point<int>(button->getX(), button->getBottom()), options,
+  showPopupSelector(button, Point<int>(0, button->getHeight()), options,
                     [=](int selection) { addComponent(selection); });
 }
 
@@ -339,7 +339,7 @@ void WavetableComponentList::addSourceClicked() {
     options.addItem(i, WavetableComponentFactory::getComponentName(type));
   }
 
-  showPopupSelector(this, Point<int>(create_component_button_->getX(), create_component_button_->getBottom()), options,
+  showPopupSelector(create_component_button_.get(), Point<int>(0, create_component_button_->getHeight()), options,
                     [=](int selection) { addSource(selection); });
 }
 

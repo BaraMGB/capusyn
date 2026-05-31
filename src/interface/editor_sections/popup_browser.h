@@ -277,11 +277,7 @@ class SinglePopupSelector : public SynthSection, public PopupList::Listener {
         cancel_();
     }
 
-    void focusLost(FocusChangeType cause) override {
-      setVisible(false);
-      if (cancel_)
-        cancel_();
-    }
+    void focusLost(FocusChangeType) override { }
 
     void setCallback(std::function<void(int)> callback) { callback_ = std::move(callback); }
     void setCancelCallback(std::function<void()> cancel) { cancel_ = std::move(cancel); }
@@ -318,7 +314,7 @@ class DualPopupSelector : public SynthSection, public PopupList::Listener {
     void newSelection(PopupList* list, int id, int index) override;
     void doubleClickedSelected(PopupList* list, int id, int index) override { setVisible(false); }
 
-    void focusLost(FocusChangeType cause) override { setVisible(false); }
+    void focusLost(FocusChangeType) override { }
 
     void setCallback(std::function<void(int)> callback) { callback_ = std::move(callback); }
 

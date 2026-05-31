@@ -413,8 +413,8 @@ void WavetableEditSection::showPopupMenu() {
   options.addItem(kExportWav, "Export to .wav File");
   options.addItem(kResynthesizeWavetable, "Synthesize Preset to Table");
 
-  showPopupSelector(this, Point<int>(menu_button_->getX(), menu_button_->getBottom()), options,
-                                     [=](int selection) { menuCallback(selection, this); });
+  showPopupSelector(menu_button_.get(), Point<int>(0, menu_button_->getHeight()), options,
+                    [=](int selection) { menuCallback(selection, this); });
 }
 
 void WavetableEditSection::hideCurrentOverlay() {
@@ -723,7 +723,7 @@ void WavetableEditSection::buttonClicked(Button* clicked_button) {
     options.addItem(kZoom8, "Zoom 8x");
     options.addItem(kZoom16, "Zoom 16x");
 
-    showPopupSelector(this, Point<int>(clicked_button->getX(), clicked_button->getBottom()), options,
+    showPopupSelector(clicked_button, Point<int>(0, clicked_button->getHeight()), options,
                       [=](int selection) { barViewerCallback(selection, this); });
   }
   else
