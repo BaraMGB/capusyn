@@ -1,6 +1,7 @@
 .DS_Store
 .DS_Store?
 .env
+.cache/
 forge.yaml
 VTune\ Profiler\ Results
 cmake-build*
