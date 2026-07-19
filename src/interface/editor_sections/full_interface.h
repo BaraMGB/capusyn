@@ -56,7 +56,7 @@ class FullInterface : public SynthSection,
                       public AuthenticationSection::Listener, public HeaderSection::Listener,
                       public DownloadSection::Listener, public UpdateCheckSection::Listener,
                       public EffectsInterface::Listener, public ModulationMatrix::Listener,
-                      public OpenGLRenderer, DragAndDropContainer {
+                      public OpenGLRenderer, DragAndDropContainer, private Timer {
     friend class PopupMouseWatcher;
 
   public:
@@ -165,6 +165,10 @@ class FullInterface : public SynthSection,
     void toggleFilter2Zoom();
 
   private:
+    static constexpr int kOpenGlFramesPerSecond = 30;
+
+    void timerCallback() override;
+
     enum class PopupKind {
       kNone,
       kSingle,

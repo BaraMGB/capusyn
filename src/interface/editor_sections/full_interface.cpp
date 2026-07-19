@@ -247,30 +247,32 @@ FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_inte
 
   needs_download_ = UpdateMemory::getInstance()->incrementChecker();
 
-  open_gl_context_.setContinuousRepainting(true);
+  open_gl_context_.setContinuousRepainting(false);
   open_gl_context_.setOpenGLVersionRequired(OpenGLContext::openGL3_2);
-  open_gl_context_.setSwapInterval(0);
   open_gl_context_.setRenderer(this);
   open_gl_context_.setComponentPaintingEnabled(false);
   open_gl_context_.attachTo(*this);
+  startTimerHz(kOpenGlFramesPerSecond);
 }
 
-FullInterface::FullInterface() : SynthSection("EMPTY"), open_gl_(open_gl_context_) {
+FullInterface::FullInterface() : SynthSection("EMPTY"), animate_(true), open_gl_(open_gl_context_) {
   Skin default_skin;
   setSkinValues(default_skin, true);
 
-  open_gl_context_.setContinuousRepainting(true);
+  open_gl_context_.setContinuousRepainting(false);
   open_gl_context_.setOpenGLVersionRequired(OpenGLContext::openGL3_2);
-  open_gl_context_.setSwapInterval(0);
   open_gl_context_.setRenderer(this);
   open_gl_context_.setComponentPaintingEnabled(false);
   open_gl_context_.attachTo(*this);
+  startTimerHz(kOpenGlFramesPerSecond);
 
   reset();
   setOpaque(true);
 }
 
 FullInterface::~FullInterface() {
+  stopTimer();
+
   if (popup_mouse_watcher_)
     Desktop::getInstance().removeGlobalMouseListener(popup_mouse_watcher_.get());
   UpdateMemory::getInstance()->decrementChecker();
@@ -566,11 +568,22 @@ void FullInterface::createModulationSliders(const capusyn::output_map& mono_modu
 }
 
 void FullInterface::animate(bool animate) {
-  if (animate_ != animate)
-    open_gl_context_.setContinuousRepainting(animate);
+  if (animate_ != animate) {
+    animate_ = animate;
+    if (animate_)
+      startTimerHz(kOpenGlFramesPerSecond);
+    else
+      stopTimer();
 
-  animate_ = animate;
+    open_gl_context_.triggerRepaint();
+  }
+
   SynthSection::animate(animate);
+}
+
+void FullInterface::timerCallback() {
+  if (isShowing())
+    open_gl_context_.triggerRepaint();
 }
 
 void FullInterface::reset() {
@@ -612,6 +625,10 @@ void FullInterface::startDownload() {
 }
 
 void FullInterface::newOpenGLContextCreated() {
+  // setSwapInterval only takes effect after JUCE has created the native context.
+  // VSync would block JUCE's OpenGL render thread and can stall the host GUI.
+  open_gl_context_.setSwapInterval(0);
+
   double version_supported = OpenGLShaderProgram::getLanguageVersion();
   unsupported_ = version_supported < kMinOpenGlVersion;
   if (unsupported_) {
