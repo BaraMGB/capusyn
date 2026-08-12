@@ -23,13 +23,24 @@
 
 class MacroLabel : public OpenGlImageComponent {
   public:
-    MacroLabel(String name, String text) : OpenGlImageComponent(name), text_(std::move(text)), text_size_(1.0f) {
-      setInterceptsMouseClicks(false, false);
-    }
+    class Listener {
+      public:
+        virtual ~Listener() = default;
+        virtual void macroLabelClicked() = 0;
+    };
+
+    MacroLabel(String name, String text) : OpenGlImageComponent(name), text_(std::move(text)), text_size_(1.0f),
+                                           listener_(nullptr) { }
 
     void setText(String text) { text_ = text; redrawImage(true); }
     void setTextSize(float size) { text_size_ = size; redrawImage(true); }
+    void setListener(Listener* listener) { listener_ = listener; }
     String getText() { return text_; }
+
+    void mouseDown(const MouseEvent&) override {
+      if (listener_)
+        listener_->macroLabelClicked();
+    }
 
     void paint(Graphics& g) override {
       g.setColour(findColour(Skin::kBodyText, true));
@@ -40,9 +51,10 @@ class MacroLabel : public OpenGlImageComponent {
   private:
     String text_;
     float text_size_;
+    Listener* listener_;
 };
 
-class SingleMacroSection : public SynthSection, public TextEditor::Listener {
+class SingleMacroSection : public SynthSection, public TextEditor::Listener, public MacroLabel::Listener {
   public:
     SingleMacroSection(String name, int index) : SynthSection(name), index_(index) {
       std::string number = std::to_string(index_ + 1);
@@ -58,6 +70,7 @@ class SingleMacroSection : public SynthSection, public TextEditor::Listener {
       macro_source_->overrideText("");
 
       macro_label_ = std::make_unique<MacroLabel>("Macro Label " + number, "MACRO " + number);
+      macro_label_->setListener(this);
       addOpenGlComponent(macro_label_.get());
 
       edit_label_ = std::make_unique<OpenGlShapeButton>("Edit " + number);
@@ -65,7 +78,6 @@ class SingleMacroSection : public SynthSection, public TextEditor::Listener {
       addOpenGlComponent(edit_label_->getGlComponent());
       edit_label_->addListener(this);
       edit_label_->setShape(Paths::pencil());
-      edit_label_->setTriggeredOnMouseDown(true);
 
       setSkinOverride(Skin::kMacro);
 
@@ -118,20 +130,27 @@ class SingleMacroSection : public SynthSection, public TextEditor::Listener {
     }
 
     void buttonClicked(Button* clicked_button) override {
-      if (macro_label_editor_) {
-        if (macro_label_editor_->isVisible()) {
-          saveMacroLabel();
-          return;
-        }
+      if (clicked_button == edit_label_.get())
+        beginMacroLabelEdit();
+    }
 
-        Rectangle<int> bounds = macro_label_->getBounds();
-        float text_height = findValue(Skin::kLabelHeight);
-        macro_label_editor_->setFont(Fonts::instance()->proportional_regular().withHeight(text_height));
-        macro_label_editor_->setText(macro_label_->getText());
-        macro_label_editor_->setBounds(bounds.translated(0, -1));
-        macro_label_editor_->setVisible(true);
-        macro_label_editor_->grabKeyboardFocus();
-      }
+    void macroLabelClicked() override {
+      beginMacroLabelEdit();
+    }
+
+    void beginMacroLabelEdit() {
+      if (!macro_label_editor_)
+        return;
+
+      Rectangle<int> bounds = macro_label_->getBounds();
+      float text_height = findValue(Skin::kLabelHeight);
+      macro_label_editor_->setFont(Fonts::instance()->proportional_regular().withHeight(text_height));
+      macro_label_editor_->setText(macro_label_->getText());
+      macro_label_editor_->setBounds(bounds.translated(0, -1));
+      macro_label_editor_->setVisible(true);
+      macro_label_editor_->toFront(false);
+      macro_label_editor_->grabKeyboardFocus();
+      macro_label_editor_->selectAll();
     }
 
     void saveMacroLabel() {
