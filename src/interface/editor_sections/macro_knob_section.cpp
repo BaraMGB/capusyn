@@ -151,6 +151,15 @@ class SingleMacroSection : public SynthSection, public TextEditor::Listener, pub
       macro_label_editor_->toFront(false);
       macro_label_editor_->grabKeyboardFocus();
       macro_label_editor_->selectAll();
+
+      // Embedded plugin windows may only receive focus after the host has
+      // completed the XEmbed/VST3 focus handshake. Retry once after that.
+      Timer::callAfterDelay(50, [editor = Component::SafePointer<OpenGlTextEditor>(macro_label_editor_.get())] {
+        if (editor && editor->isVisible() && !editor->hasKeyboardFocus(false)) {
+          editor->grabKeyboardFocus();
+          editor->selectAll();
+        }
+      });
     }
 
     void saveMacroLabel() {
