@@ -25,6 +25,14 @@ JUCE **9.0.5** is vendored in `third_party/JUCE` without local patches.
 Upstream tag: [`9.0.5`](https://github.com/juce-framework/JUCE/releases/tag/9.0.5),
 commit `d60b7a78030661574a615b586d9325ba7a7fa7dd`.
 
+## Technical documentation
+
+Start at [docs/README.md](docs/README.md) for the documentation structure and planned technical chapters.
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for priorities, planned improvements, and acceptance criteria.
+
 ## Issues
 
 Report build, runtime, and packaging issues in this repository.

@@ -6,6 +6,8 @@ forge.yaml
 VTune\ Profiler\ Results
 cmake-build*
 build-*
+!docs/build-and-release/
+!docs/build-and-release/**
 scripts/
 *.swp
 *.Trashes
