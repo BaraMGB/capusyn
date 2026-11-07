@@ -1,114 +1,98 @@
 # Capusyn – Roadmap
 
-## Ausgangspunkt
+## Baseline
 
-- JUCE 9.0.5 ist integriert; der Release-Build wurde mit 12 parallelen Jobs geprüft.
-- 182 nichtgrafische Teiltests bestanden beim JUCE-Update.
-- Das aktualisierte VST3 wurde im Host praktisch bestätigt; das ersetzt keine umfassenden GUI-/Host-Regressionstests.
-- Die folgenden Aufgaben stammen aus der Codeprüfung und sind noch offen.
+- JUCE 9.0.5 is integrated; the release build was verified with 12 parallel jobs.
+- 182 non-graphical subtests passed during the JUCE update.
+- The updated VST3 was confirmed working in a host; this does not replace comprehensive GUI/host regression tests.
+- The following tasks were identified during code review and remain open.
 
-## Prioritäten und Reihenfolge
+## Priorities and implementation order
 
-**P1:** Korrektheit, Echtzeitsicherheit und robuste Datenverarbeitung.
-**P2:** Kürzere Build-Zeiten und bessere Automatisierung.
+**P1:** Correctness, real-time safety, and robust data handling.
+**P2:** Shorter build times and better automation.
 
-Zuerst die bestehenden Tests an CTest anbinden. Anschließend Echtzeitpfade und
-Host-Parameter korrigieren, danach Import und Zustandsspeicherung absichern.
-Build-Optimierungen folgen separat. Der Renderer-Umbau bleibt ein eigenes Vorhaben.
+First, register the existing tests with CTest. Then address real-time paths and
+host parameter conversion, followed by import validation and state persistence.
+Build optimizations follow separately.
 
-## 1. Echtzeitpfade absichern — P1
+## 1. Make real-time paths safe — P1
 
-Betroffen: `src/common/midi_manager.cpp`, `src/common/synth_base.cpp`.
+Affected: `src/common/midi_manager.cpp`, `src/common/synth_base.cpp`.
 
-- [ ] Speichern der MIDI-Learn-Konfiguration aus dem Audio-Thread auslagern.
-- [ ] Änderungen über eine begrenzte, vorab angelegte Queue oder einen geeigneten Snapshot an einen Hintergrunddienst übergeben.
-- [ ] Dynamische Nachrichtenallokationen bei Host-Parameter-, MIDI- und Pitchbend-Änderungen vermeiden; GUI-Aktualisierungen bündeln.
-- [ ] Verhalten bei voller Queue, geschlossenem Editor und Plugin-Abbau festlegen und testen.
+- [ ] Move MIDI-learn configuration persistence off the audio thread.
+- [ ] Pass changes to a background worker using a bounded, preallocated queue or an appropriate snapshot.
+- [ ] Avoid dynamic message allocations for host parameter, MIDI, and pitch-bend changes; coalesce GUI updates.
+- [ ] Define and test behavior when the queue is full, the editor is closed, or the plugin is being destroyed.
 
-**Abnahme:** In den überarbeiteten Audio-Callback-Pfaden finden keine Dateizugriffe,
-Heap-Allokationen oder blockierenden Warteoperationen statt. Automation und MIDI-Learn
-funktionieren auch unter Last und bei geschlossenem Editor.
+**Acceptance criteria:** The updated audio callback paths perform no file I/O,
+heap allocations, or blocking waits. Automation and MIDI learn work under load
+and with the editor closed.
 
-## 2. Host-Parameter korrekt konvertieren — P1
+## 2. Convert host parameters correctly — P1
 
-Betroffen: `src/plugin/value_bridge.h`.
+Affected: `src/plugin/value_bridge.h`.
 
-- [ ] `getValueForText()` auf normalisierte Werte zwischen 0 und 1 korrigieren.
-- [ ] Anzeige-Offset, Skalierungsfaktor und sämtliche nichtlinearen Skalierungen korrekt invertieren.
-- [ ] Benannte Auswahlwerte, diskrete Parameter und ungültige Eingaben behandeln.
-- [ ] Roundtrip-Tests für `getText()` und `getValueForText()` ergänzen, einschließlich Transpose, Pan, Volume und exponentieller Parameter.
-- [ ] Bestehende Parameterreihenfolge und Host-Identitäten unverändert lassen.
+- [ ] Make `getValueForText()` return normalized values between 0 and 1.
+- [ ] Correctly invert display offsets, scale factors, and all nonlinear scaling functions.
+- [ ] Handle named choices, discrete parameters, and invalid input.
+- [ ] Add round-trip tests for `getText()` and `getValueForText()`, including transpose, pan, volume, and exponential parameters.
+- [ ] Preserve the existing parameter order and host identities.
 
-**Abnahme:** Beispielsweise wird „Sample Transpose: 12“ korrekt zu `0,625` normalisiert.
-Roundtrips berücksichtigen die Genauigkeit des Anzeigetextes und die Quantisierung.
-Ungültige Eingaben erzeugen keine NaN-, Infinity- oder außerhalb von 0 bis 1 liegenden Werte.
+**Acceptance criteria:** For example, "Sample Transpose: 12" is correctly normalized to `0.625`.
+Round trips account for display-text precision and quantization.
+Invalid input produces no NaN, infinity, or values outside the range from 0 to 1.
 
-## 3. Preset- und Sample-Import validieren — P1
+## 3. Validate preset and sample imports — P1
 
-Betroffen: `src/synthesis/producers/sample_source.cpp`,
+Affected: `src/synthesis/producers/sample_source.cpp`,
 `src/common/wavetable/wave_source.cpp`, `src/common/wavetable/file_source.cpp`,
 `src/common/load_save.cpp`.
 
-- [ ] Sample-Länge und Samplerate vor Speicherallokationen auf gültige Werte und dokumentierte Obergrenzen prüfen.
-- [ ] Base64-Dekodierung auf Erfolg und exakte erwartete Datenlänge prüfen, einschließlich Stereo-Daten.
-- [ ] Größenberechnungen gegen Überläufe absichern und nichtendliche Audiodaten zurückweisen.
-- [ ] Fehlerhafte Daten vor Übernahme in den aktiven Zustand ablehnen.
-- [ ] Tests für leere, abgeschnittene, übergroße und widersprüchliche Daten ergänzen; Importpfade zusätzlich mit Sanitizern prüfen.
+- [ ] Validate sample lengths and sample rates against valid ranges and documented upper limits before allocating memory.
+- [ ] Check Base64 decoding success and the exact expected data length, including stereo data.
+- [ ] Protect size calculations against overflow and reject non-finite audio data.
+- [ ] Reject invalid data before applying it to the active state.
+- [ ] Add tests for empty, truncated, oversized, and inconsistent data; also check import paths with sanitizers.
 
-**Abnahme:** Beschädigte Presets werden mit nachvollziehbarem Fehler abgewiesen,
-ohne Absturz, unkontrollierte Speicheranforderung oder Verlust des zuvor gültigen Zustands.
+**Acceptance criteria:** Corrupted presets are rejected with a meaningful error,
+without crashes, uncontrolled memory requests, or loss of the previously valid state.
 
-## 4. Plugin-Zustand zuverlässig speichern — P1
+## 4. Save plugin state reliably — P1
 
-Betroffen: `src/plugin/synth_plugin.cpp`.
+Affected: `src/plugin/synth_plugin.cpp`.
 
-- [ ] In `getStateInformation()` den Zielpuffer ersetzen statt neue Daten anzuhängen.
-- [ ] Wiederholtes Speichern in denselben `MemoryBlock` testen.
-- [ ] Save-/Restore-Roundtrips für Parameter, Modulationen, Makronamen, Tuning, Samples und Wavetables ergänzen.
-- [ ] Wiederherstellung bei geschlossenem Editor und beschädigten Zustandsdaten testen.
+- [ ] Replace the destination buffer in `getStateInformation()` instead of appending new data.
+- [ ] Test repeated saves to the same `MemoryBlock`.
+- [ ] Add save/restore round trips for parameters, modulations, macro names, tuning, samples, and wavetables.
+- [ ] Test restoration with the editor closed and with corrupted state data.
 
-**Abnahme:** Jeder Aufruf liefert genau einen vollständigen Zustand. Ein erneut
-verwendeter Zielpuffer enthält keine angehängten Altzustände; bestehende gültige
-Projektzustände bleiben ladbar.
+**Acceptance criteria:** Each call returns exactly one complete state. A reused
+destination buffer contains no appended old states; existing valid project states
+remain loadable.
 
-## 5. Build-System verschlanken — P2
+## 5. Streamline the build system — P2
 
-Betroffen: `plugin/CMakeLists.txt`, `CMakeLists.txt` und die übrigen Target-Konfigurationen.
+Affected: `plugin/CMakeLists.txt`, `CMakeLists.txt`, and the other target configurations.
 
-- [ ] JUCE-Modulquellen nicht mehr unnötig über öffentliche Abhängigkeiten an sämtliche Plugin-Wrapper weiterreichen.
-- [ ] Gemeinsamen Code pro kompatibler Konfiguration wiederverwenden; notwendige Unterschiede zwischen GUI-, Headless- und Wrapper-Zielen erhalten.
-- [ ] Serielle LTO-Verarbeitung untersuchen und Parallelität kontrolliert konfigurieren, ohne CPU und RAM zu überbuchen.
-- [ ] Saubere Builds und inkrementelle Builds vor und nach der Änderung unter gleichen Bedingungen messen.
+- [ ] Stop unnecessarily propagating JUCE module sources to every plugin wrapper through public dependencies.
+- [ ] Reuse shared code within compatible configurations while preserving necessary differences between GUI, headless, and wrapper targets.
+- [ ] Investigate serial LTO processing and configure parallelism without oversubscribing CPU or RAM.
+- [ ] Measure clean and incremental builds before and after the changes under identical conditions.
 
-**Abnahme:** JUCE-GUI-Modulquellen werden für die Plugin-Ziele nicht mehr dreifach
-kompiliert. Alle bisherigen Targets bauen weiterhin; Tests und VST3-Host-Prüfung
-bestehen. Die gemessenen Build-Zeiten werden dokumentiert.
+**Acceptance criteria:** JUCE GUI module sources are no longer compiled three times
+for the plugin targets. All existing targets still build; tests and VST3 host checks
+pass. Measured build times are documented.
 
-## 6. Tests und CI automatisieren — P2, Testanbindung vorziehen
+## 6. Automate tests and CI — P2, prioritize test registration
 
-Betroffen: `CMakeLists.txt`, `tests/CMakeLists.txt`, `tests/main.cpp`, neue GitHub-Workflows.
+Affected: `CMakeLists.txt`, `tests/CMakeLists.txt`, `tests/main.cpp`, and new GitHub workflows.
 
-- [ ] Das vorhandene nichtgrafische Testprogramm bei CTest registrieren.
-- [ ] Sicherstellen, dass fehlgeschlagene Tests einen Fehlerstatus liefern; Zeitlimits festlegen.
-- [ ] Linux-CI für Konfiguration, Release-Build und nichtgrafische Tests bei Pushes und Pull Requests einrichten.
-- [ ] Regressionstests aus den Punkten 1 bis 4 in den automatisierten Lauf aufnehmen.
-- [ ] GUI-/Host-Tests getrennt dokumentieren und nicht durch einen erfolgreichen nichtgrafischen Lauf als abgedeckt behandeln.
+- [ ] Register the existing non-graphical test executable with CTest.
+- [ ] Ensure failed tests return a failure exit status; define timeouts.
+- [ ] Set up Linux CI for configuration, release builds, and non-graphical tests on pushes and pull requests.
+- [ ] Include regression tests from items 1 through 4 in the automated runs.
+- [ ] Document GUI/host tests separately; a successful non-graphical run must not imply GUI/host coverage.
 
-**Abnahme:** `ctest --test-dir <build-dir> --output-on-failure` findet und startet die
-Tests. Fehler lassen die CI fehlschlagen; erfolgreiche Läufe sind einem Commit zugeordnet.
-
-## Eigenständiges Folgevorhaben: Renderer-Umbau
-
-Nach den Stabilitätsverbesserungen, ohne Zusage eines Veröffentlichungstermins:
-
-- [ ] Layout, Parameterbindungen und Audio-Engine beibehalten.
-- [ ] OpenGL-Bedienelemente schrittweise auf JUCE `paint(Graphics&)` umstellen.
-- [ ] Shaderbasierte Kurven, Spektren und Wavetable-Vorschauen durch CPU-Berechnung und JUCE-Pfade ersetzen.
-- [ ] Statische Hintergründe zwischenspeichern und Animationen gezielt aktualisieren.
-- [ ] Darstellung, Bedienung und CPU-Last mit mehreren offenen Plugin-Instanzen vergleichen.
-
-**Abnahme:** Die migrierte Oberfläche benötigt keinen OpenGL-Kontext und bleibt
-vollständig bedienbar. Darstellungsqualität und CPU-Last werden separat geprüft.
-
-**Abgrenzung:** Der normale JUCE-Renderer allein bringt keine native
-Wayland-Unterstützung. JUCE 9.0.5 nutzt unter Linux weiterhin X11/XWayland.
+**Acceptance criteria:** `ctest --test-dir <build-dir> --output-on-failure` discovers
+and runs the tests. Test failures fail CI; successful runs are associated with a commit.

@@ -9,9 +9,6 @@
 - `interaction-and-binding.md`: Parameterbindungen, Gesten, Texteingaben, Popups und GUI-Aktualisierungen.
 - `themes-and-assets.md`: Skins, Farben, Schriften, Icons und eingebettete Ressourcen.
 
-Ein möglicher Wechsel zu JUCE `paint(Graphics&)` ist ein separates Vorhaben aus der
-[Roadmap](../../ROADMAP.md), nicht der aktuelle Implementierungsstand.
-
 ## Einstieg in den Code
 
 - [Editor-Komponenten](../../src/interface/editor_components/)
