@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -38,9 +38,10 @@ namespace juce
 static uint32 lastUniquePeerID = 1;
 
 //==============================================================================
-ComponentPeer::ComponentPeer (Component& comp, int flags)
+ComponentPeer::ComponentPeer (Component& comp, int flags, Component* associated)
     : component (comp),
       styleFlags (flags),
+      associatedComponent (associated),
       uniqueID (lastUniquePeerID += 2) // increment by 2 so that this can never hit 0
 {
     auto& desktop = Desktop::getInstance();
@@ -54,6 +55,24 @@ ComponentPeer::~ComponentPeer()
     desktop.removeFocusChangeListener (this);
     desktop.peers.removeFirstMatchingValue (this);
     desktop.triggerFocusCallback();
+}
+
+bool ComponentPeer::setAssociatedComponent (Component* newAssociatedComponent)
+{
+    const auto findWindow = [] (Component* c) { return c != nullptr ? c->getPeer() : nullptr; };
+
+    if (findWindow (newAssociatedComponent) != findWindow (getAssociatedComponent()))
+        return false;
+
+    if (newAssociatedComponent != getAssociatedComponent())
+    {
+        // Both components are in the same window now, but the previous one may have been in
+        // another window when this window was attached to it.
+        associatedComponent = newAssociatedComponent;
+        associationChanged();
+    }
+
+    return true;
 }
 
 //==============================================================================
@@ -164,7 +183,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
   #endif
 
     /** If this fails, it's probably be because your CPU floating-point precision mode has
-        been set to low.. This setting is sometimes changed by things like Direct3D, and can
+        been set to low. This setting is sometimes changed by things like Direct3D, and can
         mess up a lot of the calculations that the library needs to do.
     */
     jassert (roundToInt (10.1f) == 10);
@@ -189,7 +208,7 @@ Component* ComponentPeer::getTargetForKeyPress()
 bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textCharacter)
 {
     return handleKeyPress (KeyPress (keyCode,
-                                     ModifierKeys::currentModifiers.withoutMouseButtons(),
+                                     ModifierKeys::getCurrentModifiers().withoutMouseButtons(),
                                      textCharacter));
 }
 
@@ -199,9 +218,9 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 
     for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
-        const WeakReference<Component> deletionChecker (target);
+        const WeakReference deletionChecker (target);
 
-        if (auto* keyListeners = target->keyListeners.get())
+        if (auto* keyListeners = target->getKeyListeners())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -238,14 +257,14 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 
     for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
-        const WeakReference<Component> deletionChecker (target);
+        const WeakReference deletionChecker (target);
 
         keyWasUsed = target->keyStateChanged (isKeyDown);
 
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (auto* keyListeners = target->keyListeners.get())
+        if (auto* keyListeners = target->getKeyListeners())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -361,6 +380,9 @@ void ComponentPeer::handleMovedOrResized()
 
 void ComponentPeer::handleFocusGain()
 {
+    if (component.hasKeyboardFocus (true))
+        return;
+
     if (component.isParentOf (lastFocusedComponent)
           && lastFocusedComponent->isShowing()
           && lastFocusedComponent->getWantsKeyboardFocus())
@@ -562,7 +584,7 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
             infoCopy.position = targetComp->getLocalPoint (&component, info.position);
 
             // We'll use an async message to deliver the drop, because if the target decides
-            // to run a modal loop, it can gum-up the operating system..
+            // to run a modal loop, it can gum-up the operating system.
             MessageManager::callAsync ([=]
             {
                 if (auto* c = targetComp.get())

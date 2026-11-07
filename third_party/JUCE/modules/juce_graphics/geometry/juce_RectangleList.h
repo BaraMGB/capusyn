@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -212,115 +212,10 @@ public:
     */
     void subtract (const RectangleType rect)
     {
-        if (auto numRects = rects.size())
-        {
-            const auto x1 = rect.getX();
-            const auto y1 = rect.getY();
-            const auto x2 = x1 + rect.getWidth();
-            const auto y2 = y1 + rect.getHeight();
+        if (rects.isEmpty())
+            return;
 
-            for (int i = numRects; --i >= 0;)
-            {
-                auto& r = rects.getReference (i);
-
-                const auto rx1 = r.getX();
-                const auto ry1 = r.getY();
-                const auto rx2 = rx1 + r.getWidth();
-                const auto ry2 = ry1 + r.getHeight();
-
-                const auto isNotEqual = [&] (const RectangleType newRect)
-                {
-                    // When subtracting tiny slices from relatively large rectangles, the
-                    // subtraction may have no effect (due to limited-precision floating point
-                    // maths) and the original rectangle may remain unchanged.
-                    // We check that any 'new' rectangle has different dimensions to the rectangle
-                    // being tested before adding it to the rects array.
-                    // Integer arithmetic is not susceptible to this problem, so there's no need
-                    // for this additional equality check when working with integral rectangles.
-                    if constexpr (std::is_floating_point_v<ValueType>)
-                    {
-                        return newRect != r;
-                    }
-                    else
-                    {
-                        ignoreUnused (newRect);
-                        return true;
-                    }
-                };
-
-                if (rx1 < x2 && x1 < rx2 && ry1 < y2 && y1 < ry2)
-                {
-                    if (rx1 < x1 && x1 < rx2)
-                    {
-                        if (y1 <= ry1 && ry2 <= y2 && rx2 <= x2)
-                        {
-                            r.setWidth (x1 - rx1);
-                        }
-                        else
-                        {
-                            if (const RectangleType newRect (rx1, ry1, x1 - rx1, ry2 - ry1); isNotEqual (newRect))
-                            {
-                                r.setX (x1);
-                                r.setWidth (rx2 - x1);
-
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (rx1 < x2 && x2 < rx2)
-                    {
-                        r.setX (x2);
-                        r.setWidth (rx2 - x2);
-
-                        if (ry1 < y1 || y2 < ry2 || rx1 < x1)
-                        {
-                            if (const RectangleType newRect (rx1, ry1, x2 - rx1, ry2 - ry1); isNotEqual (newRect))
-                            {
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (ry1 < y1 && y1 < ry2)
-                    {
-                        if (x1 <= rx1 && rx2 <= x2 && ry2 <= y2)
-                        {
-                            r.setHeight (y1 - ry1);
-                        }
-                        else
-                        {
-                            if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y1 - ry1); isNotEqual (newRect))
-                            {
-                                r.setY (y1);
-                                r.setHeight (ry2 - y1);
-
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (ry1 < y2 && y2 < ry2)
-                    {
-                        r.setY (y2);
-                        r.setHeight (ry2 - y2);
-
-                        if (rx1 < x1 || x2 < rx2 || ry1 < y1)
-                        {
-                            if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y2 - ry1); isNotEqual (newRect))
-                            {
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        rects.remove (i);
-                    }
-                }
-            }
-        }
+        modifyWithExactEdges ([&] (auto& rectList) { subtract (rectList, rect); });
     }
 
     /** Removes all areas in another RectangleList from this one.
@@ -549,81 +444,18 @@ public:
         return { minX, minY, maxX - minX, maxY - minY };
     }
 
-    /** Optimises the list into a minimum number of constituent rectangles.
+    /** Simplifies the list by splitting and merging adjacent rectangles.
 
-        This will try to combine any adjacent rectangles into larger ones where
-        possible, to simplify lists that might have been fragmented by repeated
-        add/subtract calls.
+        This will try to combine adjacent rectangles into larger ones where possible,
+        to simplify lists that might have been fragmented by repeated add/subtract
+        calls.
     */
     void consolidate()
     {
-        for (int i = 0; i < rects.size() - 1; ++i)
-        {
-            auto& r = rects.getReference (i);
-            auto rx1 = r.getX();
-            auto ry1 = r.getY();
-            auto rx2 = rx1 + r.getWidth();
-            auto ry2 = ry1 + r.getHeight();
+        if (rects.size() < 2)
+            return;
 
-            for (int j = rects.size(); --j > i;)
-            {
-                auto& r2 = rects.getReference (j);
-                auto jrx1 = r2.getX();
-                auto jry1 = r2.getY();
-                auto jrx2 = jrx1 + r2.getWidth();
-                auto jry2 = jry1 + r2.getHeight();
-
-                // if the vertical edges of any blocks are touching and their horizontals don't
-                // line up, split them horizontally..
-                if (jrx1 == rx2 || jrx2 == rx1)
-                {
-                    if (jry1 > ry1 && jry1 < ry2)
-                    {
-                        r.setHeight (jry1 - ry1);
-                        rects.add (RectangleType (rx1, jry1, rx2 - rx1, ry2 - jry1));
-                        i = -1;
-                        break;
-                    }
-
-                    if (jry2 > ry1 && jry2 < ry2)
-                    {
-                        r.setHeight (jry2 - ry1);
-                        rects.add (RectangleType (rx1, jry2, rx2 - rx1, ry2 - jry2));
-                        i = -1;
-                        break;
-                    }
-                    else if (ry1 > jry1 && ry1 < jry2)
-                    {
-                        r2.setHeight (ry1 - jry1);
-                        rects.add (RectangleType (jrx1, ry1, jrx2 - jrx1, jry2 - ry1));
-                        i = -1;
-                        break;
-                    }
-                    else if (ry2 > jry1 && ry2 < jry2)
-                    {
-                        r2.setHeight (ry2 - jry1);
-                        rects.add (RectangleType (jrx1, ry2, jrx2 - jrx1, jry2 - ry2));
-                        i = -1;
-                        break;
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < rects.size() - 1; ++i)
-        {
-            auto& r = rects.getReference (i);
-
-            for (int j = rects.size(); --j > i;)
-            {
-                if (r.enlargeIfAdjacent (rects.getReference (j)))
-                {
-                    rects.remove (j);
-                    i = -1;
-                    break;
-                }
-            }
-        }
+        modifyWithExactEdges ([&] (auto& rectList) { consolidate (rectList); });
     }
 
     /** Adds an x and y value to all the coordinates. */
@@ -687,6 +519,229 @@ public:
     }
 
 private:
+    using PointType = Point<ValueType>;
+
+    struct AABB
+    {
+        AABB() = default;
+        AABB (const RectangleType& r) : tl (r.getTopLeft()), br (r.getBottomRight()) {}
+        AABB (PointType a, PointType b) : tl (a), br (b) {}
+        operator RectangleType() const { return RectangleType { tl, br }; }
+
+        bool completelyOutside (const AABB& other) const
+        {
+            return other.br.x <= tl.x || br.x <= other.tl.x || other.br.y <= tl.y || br.y <= other.tl.y;
+        }
+
+        PointType tl, br;
+    };
+
+    // Selects the axis that a single pass over the list modifies (major) and the one it
+    // leaves unchanged (minor), so the same code can be run once per axis.
+    struct Fields
+    {
+        ValueType PointType::* major;
+        ValueType PointType::* minor;
+    };
+
+    // Floating-point lists are edited as pairs of corners, so that moving an edge copies a
+    // coordinate rather than computing a width or height that may round to a different edge.
+    template <typename Fn>
+    void modifyWithExactEdges (Fn&& fn)
+    {
+        if constexpr (std::is_floating_point_v<ValueType>)
+        {
+            Array<AABB> alternativeRepresentation;
+            alternativeRepresentation.resize (rects.size());
+            std::copy (rects.begin(), rects.end(), alternativeRepresentation.begin());
+
+            fn (alternativeRepresentation);
+
+            rects.resize (alternativeRepresentation.size());
+            std::copy (alternativeRepresentation.begin(), alternativeRepresentation.end(), rects.begin());
+        }
+        else
+        {
+            fn (rects);
+        }
+    }
+
+    static PointType getTL (const AABB& aabb)
+    {
+        return aabb.tl;
+    }
+
+    static PointType getBR (const AABB& aabb)
+    {
+        return aabb.br;
+    }
+
+    static PointType getTL (const RectangleType& r)
+    {
+        return r.getTopLeft();
+    }
+
+    static PointType getBR (const RectangleType& r)
+    {
+        return r.getBottomRight();
+    }
+
+    template <typename Rect>
+    static void subtract (Array<Rect>& rectList, RectangleType rect)
+    {
+        jassert (! rectList.isEmpty());
+
+        const AABB rAABB { getTL (rect), getBR (rect) };
+
+        for (int i = rectList.size(); --i >= 0;)
+        {
+            auto& iRef = rectList.getReference (i);
+            const AABB iAABB { getTL (iRef), getBR (iRef) };
+
+            if (iAABB.completelyOutside (rAABB))
+                continue;
+
+            std::invoke ([&]
+            {
+                // For each rectangle in the list, we check for an overlap with the parameter rect
+                // and subdivide the list rectangles as necessary.
+                // The checks for each list rectangle happen in two stages, treating first the X
+                // then the Y axis as the 'major' axis. The terms 'major' and 'minor' are somewhat
+                // arbitrary. Essentially, in each pass, the rectangles in the list are only
+                // modified and/or subdivided on the major axis, without changing any minor axis
+                // coordinates. Subdividing an overlapping rect in this way may produce new rects
+                // that still overlap with the parameter rect. However, those will get cleaned up
+                // on the subsequent pass, where the major/minor axes are swapped.
+
+                for (const auto& fields : { Fields { &PointType::x, &PointType::y },
+                                            Fields { &PointType::y, &PointType::x } })
+                {
+                    const auto replaceMajor = [&] (auto modified, const auto& replacement)
+                    {
+                        modified.*(fields.major) = replacement.*(fields.major);
+                        return modified;
+                    };
+
+                    const auto insert = [&] (const PointType& rAABBpt)
+                    {
+                        rectList.insert (++i, { iAABB.tl, replaceMajor (iAABB.br, rAABBpt) });
+                        ++i;
+                    };
+
+                    if (   iAABB.tl.*(fields.major) < rAABB.tl.*(fields.major)
+                        && rAABB.tl.*(fields.major) < iAABB.br.*(fields.major))
+                    {
+                        if (   rAABB.tl.*(fields.minor) <= iAABB.tl.*(fields.minor)
+                            && iAABB.br.*(fields.minor) <= rAABB.br.*(fields.minor)
+                            && iAABB.br.*(fields.major) <= rAABB.br.*(fields.major))
+                        {
+                            iRef = { iAABB.tl, replaceMajor (iAABB.br, rAABB.tl) };
+                        }
+                        else
+                        {
+                            iRef = { replaceMajor (iAABB.tl, rAABB.tl), iAABB.br };
+                            insert (rAABB.tl);
+                        }
+
+                        return;
+                    }
+
+                    if (   iAABB.tl.*(fields.major) < rAABB.br.*(fields.major)
+                        && rAABB.br.*(fields.major) < iAABB.br.*(fields.major))
+                    {
+                        iRef = { replaceMajor (iAABB.tl, rAABB.br), iAABB.br };
+
+                        if (   iAABB.tl.*(fields.minor) < rAABB.tl.*(fields.minor)
+                            || rAABB.br.*(fields.minor) < iAABB.br.*(fields.minor)
+                            || iAABB.tl.*(fields.major) < rAABB.tl.*(fields.major))
+                        {
+                            insert (rAABB.br);
+                        }
+
+                        return;
+                    }
+                }
+
+                rectList.remove (i);
+            });
+        }
+    }
+
+    // The equivalent of Rectangle::enlargeIfAdjacent, operating on corners rather than sizes.
+    static std::optional<AABB> mergeIfAdjacent (const AABB& a, const AABB& b)
+    {
+        for (const auto& fields : { Fields { &PointType::x, &PointType::y },
+                                    Fields { &PointType::y, &PointType::x } })
+        {
+            if (   exactlyEqual (a.tl.*(fields.minor), b.tl.*(fields.minor))
+                && exactlyEqual (a.br.*(fields.minor), b.br.*(fields.minor))
+                && a.tl.*(fields.major) <= b.br.*(fields.major)
+                && b.tl.*(fields.major) <= a.br.*(fields.major))
+            {
+                auto merged = a;
+                merged.tl.*(fields.major) = jmin (a.tl.*(fields.major), b.tl.*(fields.major));
+                merged.br.*(fields.major) = jmax (a.br.*(fields.major), b.br.*(fields.major));
+                return merged;
+            }
+        }
+
+        return {};
+    }
+
+    template <typename Rect>
+    static void consolidate (Array<Rect>& rectList)
+    {
+        // Where the vertical edges of two rectangles touch but their horizontal edges don't line
+        // up, split them horizontally so that the merging pass below can combine them.
+        for (int i = 0; i < rectList.size() - 1; ++i)
+        {
+            const AABB r { getTL (rectList.getReference (i)), getBR (rectList.getReference (i)) };
+
+            for (int j = rectList.size(); --j > i;)
+            {
+                const AABB r2 { getTL (rectList.getReference (j)), getBR (rectList.getReference (j)) };
+
+                if (! (exactlyEqual (r2.tl.x, r.br.x) || exactlyEqual (r2.br.x, r.tl.x)))
+                    continue;
+
+                const auto splitIfInside = [&] (int index, const AABB& aabb, ValueType y)
+                {
+                    if (! (aabb.tl.y < y && y < aabb.br.y))
+                        return false;
+
+                    rectList.getReference (index) = { aabb.tl, PointType { aabb.br.x, y } };
+                    rectList.add ({ PointType { aabb.tl.x, y }, aabb.br });
+                    return true;
+                };
+
+                if (   splitIfInside (i, r, r2.tl.y) || splitIfInside (i, r, r2.br.y)
+                    || splitIfInside (j, r2, r.tl.y) || splitIfInside (j, r2, r.br.y))
+                {
+                    i = -1;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < rectList.size() - 1; ++i)
+        {
+            auto& r = rectList.getReference (i);
+
+            for (int j = rectList.size(); --j > i;)
+            {
+                const auto& r2 = rectList.getReference (j);
+
+                if (const auto merged = mergeIfAdjacent ({ getTL (r), getBR (r) }, { getTL (r2), getBR (r2) }))
+                {
+                    r = *merged;
+                    rectList.remove (j);
+                    i = -1;
+                    break;
+                }
+            }
+        }
+    }
+
     //==============================================================================
     Array<RectangleType> rects;
 };

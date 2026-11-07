@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -145,7 +145,7 @@ String File::parseAbsolutePath (const String& p)
         return {};
 
    #if JUCE_WINDOWS
-    // Windows..
+    // Windows
     auto path = normaliseSeparators (removeEllipsis (p.replaceCharacter ('/', '\\')));
 
     if (path.startsWithChar (getSeparatorChar()))
@@ -178,7 +178,7 @@ String File::parseAbsolutePath (const String& p)
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
    #else
-    // Mac or Linux..
+    // Mac or Linux
 
     // Yes, I know it's legal for a unix pathname to contain a backslash, but this assertion is here
     // to catch anyone who's trying to run code that was written on Windows with hard-coded path names.
@@ -228,7 +228,7 @@ String File::parseAbsolutePath (const String& p)
     }
    #endif
 
-    while (path.endsWithChar (getSeparatorChar()) && path != getSeparatorString()) // careful not to turn a single "/" into an empty string.
+    while (path.endsWithChar (getSeparatorChar()) && path != getSeparatorString()) // careful not to turn a single "/" into an empty string
         path = path.dropLastCharacters (1);
 
     return path;
@@ -423,6 +423,7 @@ bool File::isAbsolutePath (StringRef path)
 
     return firstChar == getSeparatorChar()
            #if JUCE_WINDOWS
+            || firstChar == '/'
             || (firstChar != 0 && path.text[1] == ':');
            #else
             || firstChar == '~';
@@ -433,13 +434,34 @@ File File::getChildFile (StringRef relativePath) const
 {
     auto r = relativePath.text;
 
-    if (isAbsolutePath (r))
-        return File (String (r));
-
    #if JUCE_WINDOWS
     if (r.indexOf ((juce_wchar) '/') >= 0)
         return getChildFile (String (r).replaceCharacter ('/', '\\'));
+
+    // A path with a single leading separator names a location on the root of a drive or share
+    // without saying which one, so it is resolved against the drive or share of this file.
+    if (*r == getSeparatorChar() && r[1] != getSeparatorChar())
+    {
+        const auto root = std::invoke ([&]() -> String
+        {
+            if (fullPath[1] == ':')
+                return fullPath.substring (0, 2);
+
+            if (! fullPath.startsWith ("\\\\"))
+                return {};
+
+            const auto serverEnd = fullPath.indexOfChar (2, getSeparatorChar());
+            const auto shareEnd = serverEnd < 0 ? -1 : fullPath.indexOfChar (serverEnd + 1, getSeparatorChar());
+            return shareEnd < 0 ? fullPath : fullPath.substring (0, shareEnd);
+        });
+
+        if (root.isNotEmpty())
+            return File (root + String (r));
+    }
    #endif
+
+    if (isAbsolutePath (r))
+        return File (String (r));
 
     auto path = fullPath;
     auto separatorChar = getSeparatorChar();
@@ -629,7 +651,7 @@ File File::getNonexistentChildFile (const String& suggestedPrefix,
         int number = 1;
         auto prefix = suggestedPrefix;
 
-        // remove any bracketed numbers that may already be on the end..
+        // remove any bracketed numbers that may already be on the end
         if (prefix.trim().endsWithChar (')'))
         {
             putNumbersInBrackets = true;
@@ -941,7 +963,7 @@ String File::getRelativePathFrom (const File& dir) const
         }
     }
 
-    // if the only common bit is the root, then just return the full path..
+    // if the only common bit is the root, then just return the full path
     if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == getSeparatorChar()))
         return fullPath;
 
@@ -1118,7 +1140,7 @@ public:
                 if (roots[i].exists())
                     ++numRootsExisting;
 
-            // (on windows, some of the drives may not contain media, so as long as at least one is ok..)
+            // on windows, some of the drives may not contain media, so as long as at least one is ok
             expect (numRootsExisting > 0);
         }
 
@@ -1162,6 +1184,31 @@ public:
         expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
         expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
+        expect (File::isAbsolutePath (home.getFullPathName()));
+        expect (! File::isAbsolutePath ("xyz"));
+        expect (! File::isAbsolutePath ("xyz/abc"));
+
+       #if JUCE_WINDOWS
+        expect (File::isAbsolutePath ("C:\\xyz"));
+        expect (File::isAbsolutePath ("C:/xyz"));
+        expect (File::isAbsolutePath ("\\xyz"));
+        expect (File::isAbsolutePath ("/xyz"));
+        expect (File::isAbsolutePath ("\\\\server\\share\\xyz"));
+        expect (! File::isAbsolutePath ("xyz\\abc"));
+
+        const File driveFile ("D:\\moose\\fish");
+        expect (driveFile.getChildFile ("\\xyz") == File ("D:\\xyz"));
+        expect (driveFile.getChildFile ("/xyz") == File ("D:\\xyz"));
+        expect (driveFile.getChildFile ("\\xyz\\..\\abc") == File ("D:\\abc"));
+        expect (driveFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+        expect (driveFile.getChildFile ("\\\\server\\share\\xyz") == File ("\\\\server\\share\\xyz"));
+
+        const File shareFile ("\\\\server\\share\\moose\\fish");
+        expect (shareFile.getChildFile ("\\xyz") == File ("\\\\server\\share\\xyz"));
+        expect (shareFile.getChildFile ("/xyz") == File ("\\\\server\\share\\xyz"));
+        expect (shareFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+       #endif
+
         expect (! File().hasReadAccess());
         expect (! File().hasWriteAccess());
 
@@ -1192,9 +1239,12 @@ public:
         expect (demoFolder.containsSubDirectories());
 
         expect (tempFile.hasWriteAccess());
-        tempFile.setReadOnly (true);
-        expect (! tempFile.hasWriteAccess());
-        tempFile.setReadOnly (false);
+        expect (tempFile.setReadOnly (true));
+
+        // If you are running as root you are still able to write to read-only files
+        expect (tempFile.hasWriteAccess() == hasRootFilePermissions());
+
+        expect (tempFile.setReadOnly (false));
         expect (tempFile.hasWriteAccess());
 
         Time t (Time::getCurrentTime());
@@ -1294,6 +1344,15 @@ public:
             expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
             expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
         }
+    }
+
+    static bool hasRootFilePermissions()
+    {
+       #if JUCE_WINDOWS
+        return false;
+       #else
+        return geteuid() == 0;
+       #endif
     }
 };
 

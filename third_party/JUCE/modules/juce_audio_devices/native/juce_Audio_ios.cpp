@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -167,6 +167,10 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 {
     NSUInteger value;
 
+    // The replacement notifications are only available from iOS 27, so the deprecated
+    // interruption notification is still required for all earlier deployment targets.
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
+
     if (juce::getNotificationValueForKey (notification, AVAudioSessionInterruptionTypeKey, value))
     {
         switch ((AVAudioSessionInterruptionType) value)
@@ -182,6 +186,8 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             // No default so the code doesn't compile if this enum is extended.
         }
     }
+
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 }
 
 - (void) handleMediaServicesReset
@@ -371,10 +377,16 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
         {
+           #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (26, 0)
+            constexpr auto bluetoothOption = AVAudioSessionCategoryOptionAllowBluetoothHFP;
+           #else
+            constexpr auto bluetoothOption = AVAudioSessionCategoryOptionAllowBluetooth;
+           #endif
+
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
-                     | AVAudioSessionCategoryOptionAllowBluetooth
                      | AVAudioSessionCategoryOptionAllowAirPlay
-                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP
+                     | bluetoothOption;
         }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
@@ -387,7 +399,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setActive: enabled
                                                                  error: &error]);
 
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
         {
             if (enabled)
             {
@@ -413,7 +425,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
             // Older iOS versions (iOS 12) seem to require that the requested buffer size is a bit
             // larger than the desired buffer size.
             // This breaks on iOS 18, which needs the buffer duration to be as precise as possible.
-            if (@available (ios 18, *))
+            if (@available (iOS 18, *))
                 return 0;
 
             return 1;
@@ -428,7 +440,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         // iOS requires additional effort to observe the actual buffer size
         // change however, it seems the buffer size change will always work
         // so instead we just assume the change will apply eventually
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
             return newBufferSize;
 
         return getBufferSize (currentSampleRate);
@@ -443,7 +455,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
             constexpr auto suggestedMin = 64;
             constexpr auto suggestedMax = 4096;
 
-            if (@available (ios 18, *))
+            if (@available (iOS 18, *))
                 return std::tuple (suggestedMin, suggestedMax);
 
             const auto min = tryBufferSize (sampleRate, suggestedMin);
@@ -535,8 +547,17 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         // On iOS 18 the AVAudioSession sample rate is not always accurate but
         // probing the sample rate via an AudioQueue seems to work reliably
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
+        {
+            // We could verify that things seem to work as expected again
+            // from 18.7.3 and up, so avoid creating an AudioQueue. We
+            // have no way of testing the minor versions 18.7.0 to 18.7.2,
+            // as currently no simulator is available for 18.7.
+            if (@available (iOS 18.7.3, *))
+                return session.sampleRate;
+
             return getSampleRateFromAudioQueue().value_or (session.sampleRate);
+        }
 
         return session.sampleRate;
     }

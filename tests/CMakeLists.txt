@@ -5,6 +5,7 @@ project(CapusynTests LANGUAGES CXX)
 # Do not compile those leaf sources separately, or the linker sees duplicates.
 set(CAPUSYN_TESTS_CPP
     ${CMAKE_SOURCE_DIR}/tests/main.cpp
+    ${CMAKE_SOURCE_DIR}/tests/juce_compatibility_tests.cpp
     ${CMAKE_SOURCE_DIR}/tests/interface_tests.cpp
     ${CMAKE_SOURCE_DIR}/tests/stress_tests.cpp
     ${CMAKE_SOURCE_DIR}/tests/synthesis_tests.cpp

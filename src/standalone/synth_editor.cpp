@@ -49,10 +49,7 @@ SynthEditor::SynthEditor(bool use_gui) : SynthGuiInterface(this, use_gui) {
     }
   }
 
-  current_midi_ins_ = StringArray(MidiInput::getDevices());
-
-  for (const String& midi_in : current_midi_ins_)
-    deviceManager.setMidiInputEnabled(midi_in, true);
+  timerCallback();
 
   deviceManager.addMidiInputCallback("", midi_manager_.get());
 
@@ -123,11 +120,12 @@ void SynthEditor::resized() {
 }
 
 void SynthEditor::timerCallback() {
-  StringArray midi_ins(MidiInput::getDevices());
+  StringArray midi_ins;
 
-  for (int i = 0; i < midi_ins.size(); ++i) {
-    if (!current_midi_ins_.contains(midi_ins[i]))
-      deviceManager.setMidiInputEnabled(midi_ins[i], true);
+  for (const auto& midi_in : MidiInput::getAvailableDevices()) {
+    midi_ins.add(midi_in.identifier);
+    if (!current_midi_ins_.contains(midi_in.identifier))
+      deviceManager.setMidiInputEnabled(midi_in.identifier, true);
   }
 
   current_midi_ins_ = midi_ins;

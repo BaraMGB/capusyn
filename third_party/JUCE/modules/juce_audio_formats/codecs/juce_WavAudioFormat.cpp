@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -34,18 +34,6 @@
 
 namespace juce
 {
-
-using StringMap = std::unordered_map<String, String>;
-
-static auto toMap (const StringPairArray& array)
-{
-    StringMap result;
-
-    for (auto i = 0; i < array.size(); ++i)
-        result[array.getAllKeys()[i]] = array.getAllValues()[i];
-
-    return result;
-}
 
 static auto getValueWithDefault (const StringMap& m, const String& key, const String& fallback = {})
 {
@@ -271,6 +259,8 @@ namespace WavFileHelpers
 {
     constexpr inline int chunkName (const char* name) noexcept         { return (int) ByteOrder::littleEndianInt (name); }
     constexpr inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
+
+    constexpr uint32 maxMetadataChunkSize = 16 * 1024 * 1024;
 
     #if JUCE_MSVC
      #pragma pack (push, 1)
@@ -1270,18 +1260,31 @@ public:
             {
                 auto chunkType = input->readInt();
                 auto length = (uint32) input->readInt();
+                const auto numBytesAvailable = input->getNumBytesRemaining();
+
                 auto chunkEnd = input->getPosition() + length + (length & 1);
+
+                if (numBytesAvailable >= 0)
+                {
+                    if ((int64) length > numBytesAvailable)
+                        return;
+
+                    // We allow the byte padding at the end of the file to be missing as long as
+                    // the chunk length is not greater than the number of bytes available. Programs
+                    // generally seem to parse such malformed wav files.
+                    chunkEnd = jmin (chunkEnd, input->getPosition() + numBytesAvailable);
+                }
 
                 if (chunkType == chunkName ("fmt "))
                 {
                     // read the format chunk
                     auto format = (unsigned short) input->readShort();
-                    numChannels = (unsigned int) input->readShort();
+                    numChannels = (uint16) input->readShort();
                     const auto intSampleRate = (uint32_t) input->readInt();
                     sampleRate = intSampleRate;
                     auto bytesPerSec = (uint32_t) input->readInt();
                     input->skipNextBytes (2);
-                    bitsPerSample = (unsigned int) (int) input->readShort();
+                    bitsPerSample = (uint16) input->readShort();
 
                     if (bitsPerSample > 64 && intSampleRate > 0)
                     {
@@ -1357,125 +1360,153 @@ public:
                     dataChunkStart = input->getPosition();
                     lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
                 }
-                else if (chunkType == chunkName ("bext"))
+                else if (length <= maxMetadataChunkSize)
                 {
-                    bwavChunkStart = input->getPosition();
-                    bwavSize = length;
-
-                    HeapBlock<BWAVChunk> bwav;
-                    bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
-                    input->read (bwav, (int) length);
-                    bwav->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("smpl"))
-                {
-                    HeapBlock<SMPLChunk> smpl;
-                    smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
-                    input->read (smpl, (int) length);
-                    smpl->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
-                {
-                    HeapBlock<InstChunk> inst;
-                    inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
-                    input->read (inst, (int) length);
-                    inst->copyTo (dict);
-                }
-                else if (chunkType == chunkName ("cue "))
-                {
-                    HeapBlock<CueChunk> cue;
-                    cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
-                    input->read (cue, (int) length);
-                    cue->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("axml"))
-                {
-                    MemoryBlock axml;
-                    input->readIntoMemoryBlock (axml, (ssize_t) length);
-                    AXMLChunk::addToMetadata (dict, axml.toString());
-                }
-                else if (chunkType == chunkName ("iXML"))
-                {
-                    MemoryBlock ixml;
-                    input->readIntoMemoryBlock (ixml, (ssize_t) length);
-                    IXMLChunk::addToMetadata (dict, ixml.toString());
-                }
-                else if (chunkType == chunkName ("LIST"))
-                {
-                    auto subChunkType = input->readInt();
-
-                    if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
+                    if (chunkType == chunkName ("bext"))
                     {
-                        ListInfoChunk::addToMetadata (dict, *input, chunkEnd);
+                        bwavChunkStart = input->getPosition();
+                        bwavSize = length;
+
+                        HeapBlock<BWAVChunk> bwav;
+                        bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
+
+                        if (bwav.getData() == nullptr)
+                            break;
+
+                        input->read (bwav, (int) length);
+                        bwav->copyTo (dict, (int) length);
                     }
-                    else if (subChunkType == chunkName ("adtl"))
+                    else if (chunkType == chunkName ("smpl"))
                     {
-                        while (input->getPosition() < chunkEnd)
+                        HeapBlock<SMPLChunk> smpl;
+                        smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
+
+                        if (smpl.getData() == nullptr)
+                            break;
+
+                        input->read (smpl, (int) length);
+                        smpl->copyTo (dict, (int) length);
+                    }
+                    else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
+                    {
+                        HeapBlock<InstChunk> inst;
+                        inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+
+                        if (inst.getData() == nullptr)
+                            break;
+
+                        input->read (inst, (int) length);
+                        inst->copyTo (dict);
+                    }
+                    else if (chunkType == chunkName ("cue "))
+                    {
+                        HeapBlock<CueChunk> cue;
+                        cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
+
+                        if (cue.getData() == nullptr)
+                            break;
+
+                        input->read (cue, (int) length);
+                        cue->copyTo (dict, (int) length);
+                    }
+                    else if (chunkType == chunkName ("axml"))
+                    {
+                        MemoryBlock axml;
+                        input->readIntoMemoryBlock (axml, (ssize_t) length);
+                        AXMLChunk::addToMetadata (dict, axml.toString());
+                    }
+                    else if (chunkType == chunkName ("iXML"))
+                    {
+                        MemoryBlock ixml;
+                        input->readIntoMemoryBlock (ixml, (ssize_t) length);
+                        IXMLChunk::addToMetadata (dict, ixml.toString());
+                    }
+                    else if (chunkType == chunkName ("LIST"))
+                    {
+                        auto subChunkType = input->readInt();
+
+                        if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
                         {
-                            auto adtlChunkType = input->readInt();
-                            auto adtlLength = (uint32) input->readInt();
-                            auto adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
+                            ListInfoChunk::addToMetadata (dict, *input, chunkEnd);
+                        }
+                        else if (subChunkType == chunkName ("adtl"))
+                        {
+                            constexpr uint32 labelHeaderSize = 4;    // the cue identifier
+                            constexpr uint32 regionHeaderSize = 20;  // the cue identifier and the region fields
 
-                            if (adtlChunkType == chunkName ("labl") || adtlChunkType == chunkName ("note"))
+                            while (input->getPosition() < chunkEnd && ! input->isExhausted())
                             {
-                                String prefix;
+                                auto adtlChunkType = input->readInt();
+                                auto adtlLength = (uint32) input->readInt();
 
-                                if (adtlChunkType == chunkName ("labl"))
-                                    prefix << "CueLabel" << cueLabelIndex++;
-                                else if (adtlChunkType == chunkName ("note"))
-                                    prefix << "CueNote" << cueNoteIndex++;
+                                // A sub-chunk can't extend beyond the end of the enclosing LIST chunk
+                                if (chunkEnd - input->getPosition() < (int64) adtlLength)
+                                    break;
 
-                                auto identifier = (uint32) input->readInt();
-                                auto stringLength = (int) adtlLength - 4;
+                                auto adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
 
-                                MemoryBlock textBlock;
-                                input->readIntoMemoryBlock (textBlock, stringLength);
+                                if ((adtlChunkType == chunkName ("labl") || adtlChunkType == chunkName ("note"))
+                                    && labelHeaderSize <= adtlLength)
+                                {
+                                    String prefix;
 
-                                dict[prefix + "Identifier"] = String (identifier);
-                                dict[prefix + "Text"] = textBlock.toString();
+                                    if (adtlChunkType == chunkName ("labl"))
+                                        prefix << "CueLabel" << cueLabelIndex++;
+                                    else if (adtlChunkType == chunkName ("note"))
+                                        prefix << "CueNote" << cueNoteIndex++;
+
+                                    auto identifier = (uint32) input->readInt();
+                                    auto stringLength = (int) (adtlLength - labelHeaderSize);
+
+                                    MemoryBlock textBlock;
+                                    input->readIntoMemoryBlock (textBlock, stringLength);
+
+                                    dict[prefix + "Identifier"] = String (identifier);
+                                    dict[prefix + "Text"] = textBlock.toString();
+                                }
+                                else if (adtlChunkType == chunkName ("ltxt") && regionHeaderSize <= adtlLength)
+                                {
+                                    auto prefix = "CueRegion" + String (cueRegionIndex++);
+                                    auto identifier     = (uint32) input->readInt();
+                                    auto sampleLength   = (uint32) input->readInt();
+                                    auto purpose        = (uint32) input->readInt();
+                                    auto country        = (uint16) input->readShort();
+                                    auto language       = (uint16) input->readShort();
+                                    auto dialect        = (uint16) input->readShort();
+                                    auto codePage       = (uint16) input->readShort();
+                                    auto stringLength   = (int) (adtlLength - regionHeaderSize);
+
+                                    MemoryBlock textBlock;
+                                    input->readIntoMemoryBlock (textBlock, stringLength);
+
+                                    dict[prefix + "Identifier"]   = String (identifier);
+                                    dict[prefix + "SampleLength"] = String (sampleLength);
+                                    dict[prefix + "Purpose"]      = String (purpose);
+                                    dict[prefix + "Country"]      = String (country);
+                                    dict[prefix + "Language"]     = String (language);
+                                    dict[prefix + "Dialect"]      = String (dialect);
+                                    dict[prefix + "CodePage"]     = String (codePage);
+                                    dict[prefix + "Text"]         = textBlock.toString();
+                                }
+
+                                input->setPosition (adtlChunkEnd);
                             }
-                            else if (adtlChunkType == chunkName ("ltxt"))
-                            {
-                                auto prefix = "CueRegion" + String (cueRegionIndex++);
-                                auto identifier     = (uint32) input->readInt();
-                                auto sampleLength   = (uint32) input->readInt();
-                                auto purpose        = (uint32) input->readInt();
-                                auto country        = (uint16) input->readShort();
-                                auto language       = (uint16) input->readShort();
-                                auto dialect        = (uint16) input->readShort();
-                                auto codePage       = (uint16) input->readShort();
-                                auto stringLength   = adtlLength - 20;
-
-                                MemoryBlock textBlock;
-                                input->readIntoMemoryBlock (textBlock, (int) stringLength);
-
-                                dict[prefix + "Identifier"]   = String (identifier);
-                                dict[prefix + "SampleLength"] = String (sampleLength);
-                                dict[prefix + "Purpose"]      = String (purpose);
-                                dict[prefix + "Country"]      = String (country);
-                                dict[prefix + "Language"]     = String (language);
-                                dict[prefix + "Dialect"]      = String (dialect);
-                                dict[prefix + "CodePage"]     = String (codePage);
-                                dict[prefix + "Text"]         = textBlock.toString();
-                            }
-
-                            input->setPosition (adtlChunkEnd);
                         }
                     }
-                }
-                else if (chunkType == chunkName ("acid"))
-                {
-                    AcidChunk (*input, length).addToMetadata (dict);
-                }
-                else if (chunkType == chunkName ("Trkn"))
-                {
-                    MemoryBlock tracktion;
-                    input->readIntoMemoryBlock (tracktion, (ssize_t) length);
-                    dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
-                }
-                else if (chunkEnd <= input->getPosition())
-                {
-                    break;
+                    else if (chunkType == chunkName ("acid"))
+                    {
+                        AcidChunk (*input, length).addToMetadata (dict);
+                    }
+                    else if (chunkType == chunkName ("Trkn"))
+                    {
+                        MemoryBlock tracktion;
+                        input->readIntoMemoryBlock (tracktion, (ssize_t) length);
+                        dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
+                    }
+                    else if (chunkEnd <= input->getPosition())
+                    {
+                        break;
+                    }
                 }
 
                 input->setPosition (chunkEnd);
@@ -1502,11 +1533,18 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        constexpr int stackBufferSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char stackBuffer[stackBufferSize];
+        HeapBlock<char> heapBuffer;
+
+        if (stackBufferSize < bytesPerFrame)
+            heapBuffer.malloc ((size_t) bytesPerFrame);
+
+        auto* tempBuffer = heapBuffer != nullptr ? heapBuffer.getData() : stackBuffer;
+        const auto tempBufSize = jmax (stackBufferSize, bytesPerFrame);
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-            char tempBuffer[tempBufSize];
-
             auto numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             auto bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
@@ -1581,6 +1619,15 @@ public:
         return wavFileChannelLayout;
     }
 
+    bool hasValidFormat() const
+    {
+        const auto hasSupportedBitDepth = bitsPerSample == 8 || bitsPerSample == 16
+                                       || bitsPerSample == 24 || bitsPerSample == 32;
+
+        return sampleRate > 0 && numChannels > 0 && hasSupportedBitDepth
+            && bytesPerFrame == (int) (numChannels * bitsPerSample / 8);
+    }
+
     int64 bwavChunkStart = 0, bwavSize = 0;
     int64 dataChunkStart = 0, dataLength = 0;
     int bytesPerFrame = 0;
@@ -1599,30 +1646,36 @@ class WavAudioFormatWriter final : public AudioFormatWriter
 public:
     WavAudioFormatWriter (OutputStream* const out, const double rate,
                           const AudioChannelSet& channelLayoutToUse, const unsigned int bits,
-                          const StringPairArray& metadataValues)
+                          const StringMap& metadataValues,
+                          AudioFormatWriterOptions::SampleFormat sampleFormat)
         : AudioFormatWriter (out, wavFormatName, rate, channelLayoutToUse, bits)
     {
         using namespace WavFileHelpers;
+        using SampleFormat = AudioFormatWriterOptions::SampleFormat;
 
-        if (metadataValues.size() > 0)
+        // The floating point format is only supported with a bit depth of 32
+        jassert (sampleFormat != SampleFormat::floatingPoint || bits == 32);
+
+        usesFloatingPointData = bits == 32 && sampleFormat != SampleFormat::integral;
+
+        if (! metadataValues.empty())
         {
             // The meta data should have been sanitised for the WAV format.
             // If it was originally sourced from an AIFF file the MetaDataSource
             // key should be removed (or set to "WAV") once this has been done
-            jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
+            jassert (metadataValues.count ("MetaDataSource") == 0
+                     || metadataValues.at ("MetaDataSource") != "AIFF");
 
-            const auto map = toMap (metadataValues);
-
-            bwavChunk     = BWAVChunk::createFrom (map);
-            ixmlChunk     = IXMLChunk::createFrom (map);
-            axmlChunk     = AXMLChunk::createFrom (map);
-            smplChunk     = SMPLChunk::createFrom (map);
-            instChunk     = InstChunk::createFrom (map);
-            cueChunk      = CueChunk ::createFrom (map);
-            listChunk     = ListChunk::createFrom (map);
-            listInfoChunk = ListInfoChunk::createFrom (map);
-            acidChunk     = AcidChunk::createFrom (map);
-            trckChunk     = TracktionChunk::createFrom (map);
+            bwavChunk     = BWAVChunk::createFrom (metadataValues);
+            ixmlChunk     = IXMLChunk::createFrom (metadataValues);
+            axmlChunk     = AXMLChunk::createFrom (metadataValues);
+            smplChunk     = SMPLChunk::createFrom (metadataValues);
+            instChunk     = InstChunk::createFrom (metadataValues);
+            cueChunk      = CueChunk ::createFrom (metadataValues);
+            listChunk     = ListChunk::createFrom (metadataValues);
+            listInfoChunk = ListInfoChunk::createFrom (metadataValues);
+            acidChunk     = AcidChunk::createFrom (metadataValues);
+            trckChunk     = TracktionChunk::createFrom (metadataValues);
         }
 
         headerPosition = out->getPosition();
@@ -1657,9 +1710,9 @@ public:
 
         if (! output->write (tempBlock.getData(), bytes))
         {
-            // failed to write to disk, so let's try writing the header.
+            // Failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a usable file..
+            // to write the header, we'll still have a usable file.
             writeHeader();
             writeFailed = true;
             return false;
@@ -1773,13 +1826,17 @@ private:
         else
         {
             writeChunkHeader (chunkName ("fmt "), 16);
-            output->writeShort (bitsPerSample < 32 ? (short) 1 /*WAVE_FORMAT_PCM*/
-                                                   : (short) 3 /*WAVE_FORMAT_IEEE_FLOAT*/);
+
+            constexpr short waveFormatIeeeFloat = 3;
+            constexpr short waveFormatPcm = 1;
+
+            output->writeShort (usesFloatingPointData ? waveFormatIeeeFloat
+                                                      : waveFormatPcm);
         }
 
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt ((int) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeInt ((int) (uint32) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 
@@ -1789,7 +1846,7 @@ private:
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
             output->writeInt (channelMask);
 
-            const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
+            const ExtensibleWavSubFormat& subFormat = usesFloatingPointData ? IEEEFloatFormat : pcmFormat;
 
             output->writeInt ((int) subFormat.data1);
             output->writeShort ((short) subFormat.data2);
@@ -1809,8 +1866,6 @@ private:
         writeChunk (trckChunk,     chunkName ("Trkn"));
 
         writeChunkHeader (chunkName ("data"), isRF64 ? -1 : (int) (lengthInSamples * bytesPerFrame));
-
-        usesFloatingPointData = (bitsPerSample == 32);
     }
 
     static size_t chunkSize (const MemoryBlock& data) noexcept     { return data.isEmpty() ? 0 : (8 + data.getSize()); }
@@ -1894,7 +1949,7 @@ public:
 
         if (map == nullptr || ! mappedSection.contains (sample))
         {
-            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read
 
             zeromem (result, (size_t) num * sizeof (float));
             return;
@@ -1921,7 +1976,7 @@ public:
 
         if (map == nullptr || numSamples <= 0 || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
-            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read
 
             for (int i = 0; i < numChannelsToRead; ++i)
                 results[i] = {};
@@ -2000,7 +2055,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
     }
    #endif
 
-    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0 && r->bitsPerSample <= 32)
+    if (r->hasValidFormat())
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -2020,68 +2075,68 @@ MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInp
     {
         WavAudioFormatReader reader (fin);
 
-        if (reader.lengthInSamples > 0)
+        if (reader.hasValidFormat() && reader.lengthInSamples > 0)
             return new MemoryMappedWavReader (fin->getFile(), reader);
     }
 
     return nullptr;
 }
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sampleRate,
-                                                    unsigned int numChannels, int bitsPerSample,
-                                                    const StringPairArray& metadataValues, int qualityOptionIndex)
+std::unique_ptr<AudioFormatWriter> WavAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                    const AudioFormatWriterOptions& options)
 {
-    return createWriterFor (out, sampleRate, WavFileHelpers::canonicalWavChannelSet (static_cast<int> (numChannels)),
-                            bitsPerSample, metadataValues, qualityOptionIndex);
-}
+    if (streamToWriteTo == nullptr || ! getPossibleBitDepths().contains (options.getBitsPerSample()))
+        return nullptr;
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
-                                                    double sampleRate,
-                                                    const AudioChannelSet& channelLayout,
-                                                    int bitsPerSample,
-                                                    const StringPairArray& metadataValues,
-                                                    int /*qualityOptionIndex*/)
-{
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample) && isChannelLayoutSupported (channelLayout))
-        return new WavAudioFormatWriter (out, sampleRate, channelLayout,
-                                         (unsigned int) bitsPerSample, metadataValues);
+    const auto numChannels = options.getNumChannels();
+    const auto bytesPerFrame = (int64) numChannels * options.getBitsPerSample() / 8;
+    const auto bytesPerSecond = (double) bytesPerFrame * options.getSampleRate();
 
-    return nullptr;
+    if (numChannels <= 0
+        || std::numeric_limits<uint16>::max() < bytesPerFrame
+        || (double) std::numeric_limits<uint32>::max() < bytesPerSecond)
+        return nullptr;
+
+    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (numChannels));
+
+    if (! isChannelLayoutSupported (layout))
+        return nullptr;
+
+    return std::make_unique<WavAudioFormatWriter> (std::exchange (streamToWriteTo, {}).release(),
+                                                   options.getSampleRate(),
+                                                   layout,
+                                                   (unsigned int) options.getBitsPerSample(),
+                                                   options.getMetadataValues(),
+                                                   options.getSampleFormat());
 }
 
 namespace WavFileHelpers
 {
-    static bool slowCopyWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
+    static bool slowCopyWavFileWithNewMetadata (const File& file, const StringMap& metadata)
     {
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
         std::unique_ptr<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream().release(), true));
 
-        if (reader != nullptr)
-        {
-            std::unique_ptr<OutputStream> outStream (tempFile.getFile().createOutputStream());
+        if (reader == nullptr)
+            return false;
 
-            if (outStream != nullptr)
-            {
-                std::unique_ptr<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
-                                                                                reader->numChannels, (int) reader->bitsPerSample,
-                                                                                metadata, 0));
+        std::unique_ptr<OutputStream> stream = tempFile.getFile().createOutputStream();
+        auto writer = wav.createWriterFor (stream,
+                                           AudioFormatWriter::Options{}.withSampleRate (reader->sampleRate)
+                                                                       .withNumChannels ((int) reader->numChannels)
+                                                                       .withBitsPerSample ((int) reader->bitsPerSample)
+                                                                       .withMetadataValues (metadata));
 
-                if (writer != nullptr)
-                {
-                    outStream.release();
+        if (writer == nullptr)
+            return false;
 
-                    bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer.reset();
-                    reader.reset();
+        bool ok = writer->writeFromAudioReader (*reader, 0, -1);
+        writer.reset();
+        reader.reset();
 
-                    return ok && tempFile.overwriteTargetFileWithTemporary();
-                }
-            }
-        }
-
-        return false;
+        return ok && tempFile.overwriteTargetFileWithTemporary();
     }
 }
 
@@ -2103,7 +2158,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
             if (chunk.getSize() <= (size_t) bwavSize)
             {
-                // the new one will fit in the space available, so write it directly..
+                // the new one will fit in the space available, so write it directly
                 auto oldSize = wavFile.getSize();
 
                 {
@@ -2123,7 +2178,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
         }
     }
 
-    return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
+    return slowCopyWavFileWithNewMetadata (wavFile, toMap (newMetadata));
 }
 
 
@@ -2172,15 +2227,14 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Metadata can be written and read");
 
-            const auto newMetadata = getMetadataAfterReading (format, writeToBlock (format, metadataArray));
+            const auto newMetadata = getMetadataAfterReading (format, writeToBlock (format, metadataValues));
             expect (newMetadata == metadataArray, "Somehow, the metadata is different!");
         }
 
         {
             beginTest ("Files containing a riff info source and an empty ISRC associate the source with the riffInfoSource key");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" },
-                           { WavAudioFormat::internationalStandardRecordingCode, "" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "customsource" },
+                             { WavAudioFormat::internationalStandardRecordingCode, "" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC" });
             checkPatternsNotPresent (mb, { "ISRC:", "<ebucore" });
@@ -2192,8 +2246,7 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing a riff info source and no ISRC associate the source with both keys "
                        "for backwards compatibility");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "customsource" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC", "ISRC:customsource", "<ebucore" });
             const auto a = getMetadataAfterReading (format, mb);
@@ -2204,8 +2257,7 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing an ISRC associate the value with the internationalStandardRecordingCode key "
                        "and the riffInfoSource key for backwards compatibility");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "AABBBCCDDDDD" } });
+            StringMap meta { { WavAudioFormat::internationalStandardRecordingCode, "AABBBCCDDDDD" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "ISRC:AABBBCCDDDDD", "<ebucore" });
             checkPatternsNotPresent (mb, { "INFOISRC" });
@@ -2216,9 +2268,8 @@ struct WaveAudioFormatTests final : public UnitTest
 
         {
             beginTest ("Files containing an ISRC and a riff info source associate the values with the appropriate keys");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "source" } });
-            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "UUVVVXXYYYYY" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "source" },
+                             { WavAudioFormat::internationalStandardRecordingCode, "UUVVVXXYYYYY" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC", "ISRC:UUVVVXXYYYYY", "<ebucore" });
             const auto a = getMetadataAfterReading (format, mb);
@@ -2229,13 +2280,19 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing ASWG metadata read and write correctly");
             MemoryBlock block;
-            StringPairArray meta;
+            StringMap meta;
 
             for (const auto& key : WavFileHelpers::IXMLChunk::aswgMetadataKeys)
-                meta.set (key, "Test123&<>");
+                meta[key] = "Test123&<>";
 
             {
-                auto writer = rawToUniquePtr (WavAudioFormat().createWriterFor (new MemoryOutputStream (block, false), 48000, 1, 32, meta, 0));
+                const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (48000.0)
+                                                                     .withNumChannels (1)
+                                                                     .withBitsPerSample (32)
+                                                                     .withMetadataValues (meta);
+
+                std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (block, false);
+                auto writer = format.createWriterFor (stream, writerOptions);
                 expect (writer != nullptr);
             }
 
@@ -2270,9 +2327,8 @@ struct WaveAudioFormatTests final : public UnitTest
                 auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new MemoryInputStream (block, false), true));
                 expect (reader != nullptr);
 
-                for (const auto& key : meta.getAllKeys())
+                for (const auto& [key, oldValue] : meta)
                 {
-                    const auto oldValue = meta.getValue (key, "!");
                     const auto newValue = reader->metadataValues.getValue (key, "");
                     expectEquals (oldValue, newValue);
                 }
@@ -2280,28 +2336,386 @@ struct WaveAudioFormatTests final : public UnitTest
                 expect (reader->metadataValues.getValue (WavAudioFormat::aswgVersion, "") == "3.01");
             }
         }
+
+        {
+            beginTest ("Writing 32-bit integer samples should work");
+
+            const auto minimum = std::numeric_limits<int>::min();
+            const auto maximum = std::numeric_limits<int>::max();
+
+            std::vector<int> dataIn { minimum,
+                                      minimum + 1,
+                                      minimum + 999,
+                                      0,
+                                      1,
+                                      maximum - 1001,
+                                      maximum - 1,
+                                      maximum };
+
+            const int* ptr = dataIn.data();
+
+            WavFormatWriterTestData integralTestData { &ptr,
+                                                       dataIn.size(),
+                                                       AudioFormatWriterOptions::SampleFormat::integral };
+
+            auto* reader = integralTestData.getReader();
+
+            if (reader == nullptr)
+            {
+                expect (false, "WavFormatReader should be non-null");
+                return;
+            }
+
+            std::vector<int> dataOut ((size_t) reader->lengthInSamples);
+            int* const outPtr = dataOut.data();
+            reader->read (&outPtr, 1, 0, (int) dataOut.size(), false);
+
+            expect (reader->usesFloatingPointData == false);
+            expect (dataIn == dataOut);
+        }
+
+        {
+            beginTest ("Writing 32-bit float samples should work");
+
+            std::vector<float> dataIn { -1.0f,
+                                        -0.8f,
+                                        0.0f,
+                                        0.8f,
+                                        1.0f };
+
+            const int* ptr = (int*) dataIn.data();
+
+            WavFormatWriterTestData floatingPointTestData { &ptr,
+                                                            dataIn.size(),
+                                                            AudioFormatWriterOptions::SampleFormat::floatingPoint };
+
+            auto* reader = floatingPointTestData.getReader();
+
+            if (reader == nullptr)
+            {
+                expect (false, "WavFormatReader should be non-null");
+                return;
+            }
+
+            std::vector<float> dataOut ((size_t) reader->lengthInSamples);
+            float* const outPtr = dataOut.data();
+            reader->read (&outPtr, 1, 0, (int) dataOut.size());
+
+            expect (reader->usesFloatingPointData == true);
+            expect (dataIn.size() == dataOut.size());
+
+            for (auto [index, value] : enumerate (dataOut, size_t{}))
+                expect (approximatelyEqual (value, dataIn[index]));
+        }
+
+        {
+            beginTest ("An odd-length data chunk at the end of the file without a pad byte can be read");
+
+            const auto wav = createPcm8Wav (5, { 0x80, 0x81, 0x7f, 0x80, 0x82 });
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals ((int) reader->sampleRate, 44100);
+                expectEquals (reader->lengthInSamples, (int64) 5);
+            }
+        }
+
+        {
+            beginTest ("A data chunk claiming more bytes than the stream contains is not read");
+
+            const auto wav = createPcm8Wav (1000, { 0x80, 0x81, 0x7f, 0x80, 0x82, 0x83 });
+            const auto reader = createReader (wav);
+            expect (reader == nullptr || reader->lengthInSamples == 0);
+        }
+
+        {
+            beginTest ("A final odd-length LIST chunk without a pad byte can be read");
+
+            const auto wav = createPcm8Wav (6, { 0x80, 0x81, 0x7f, 0x80, 0x82, 0x83 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (19);                                  // 4 + 8 + 7: odd, and no pad byte follows
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (7);                                   // a cue ID plus three bytes of text
+                out.writeInt (1);
+                out.write ("ab\0", 3);
+            });
+
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->lengthInSamples, (int64) 6);
+                expectEquals (reader->metadataValues["CueLabel0Text"], String ("ab"));
+            }
+        }
+
+        {
+            beginTest ("Files declaring an unsupported bit depth are rejected");
+
+            const auto wav = createPcmWav (1, 12, 8, std::vector<uint8> (8, 0x80));
+            expect (createReader (wav) == nullptr);
+        }
+
+        {
+            beginTest ("Files with the maximum channel count can be read");
+
+            // 8-bit is the widest depth for which a frame of the maximum channel count fits the block-align field
+            constexpr auto numChannels = std::numeric_limits<uint16>::max();
+            constexpr int numFrames = 2;
+            const auto dataBytes = createInterleavedPattern (numChannels, numFrames);
+
+            const auto wav = createPcmWav (numChannels, 8, (uint32) dataBytes.size(), dataBytes);
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader == nullptr)
+                return;
+
+            expectEquals ((int) reader->numChannels, (int) numChannels);
+            expectEquals (reader->lengthInSamples, (int64) numFrames);
+
+            AudioBuffer<float> result (numChannels, numFrames);
+            expect (reader->read (&result, 0, numFrames, 0, true, true));
+
+            for (const int channel : { 0, 1, (int) numChannels - 1 })
+                for (int frame = 0; frame < numFrames; ++frame)
+                    expect (approximatelyEqual (result.getSample (channel, frame), expectedUnsigned8BitSample (channel, frame)));
+        }
+
+        {
+            beginTest ("Writers are not created for channel counts or frame sizes that the header cannot describe");
+
+            constexpr auto maxChannels = std::numeric_limits<uint16>::max();
+
+            expect (createWriter (0, 8) == nullptr);
+            expect (createWriter (maxChannels + 1, 8) == nullptr);
+            expect (createWriter (maxChannels, 16) == nullptr);
+            expect (createWriter (maxChannels, 8, 96000.0) == nullptr);
+            expect (createWriter (maxChannels, 8) != nullptr);
+        }
+
+        {
+            beginTest ("Implausibly large metadata chunks are skipped");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("bext"));
+                out.writeInt ((int) 0x80000000);
+            });
+
+            // A stream of unknown length can't reject the chunk for being longer than the stream
+            const auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new UnknownLengthInputStream (wav), true));
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->lengthInSamples, (int64) 2);
+                expect (! reader->metadataValues.containsKey (WavAudioFormat::bwavDescription));
+            }
+        }
+
+        {
+            beginTest ("Malformed cue label sub-chunks are not read beyond their LIST chunk");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (4 + 8 + 2 + 8 + 7 + 1);               // adtl, a truncated label, a valid label and its pad byte
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (2);                                   // too short to hold a cue ID
+                out.writeShort (0);
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (7);
+                out.writeInt (1);
+                out.write ("ab\0", 3);
+                out.writeByte (0);
+
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (4 + 8);                               // adtl and a note header with no body
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("note"));
+                out.writeInt (1000);                                // longer than the enclosing chunk
+            });
+
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->metadataValues["NumCueLabels"], String ("1"));
+                expectEquals (reader->metadataValues["CueLabel0Text"], String ("ab"));
+                expect (! reader->metadataValues.containsKey ("CueNote0Text"));
+            }
+        }
+
+        {
+            beginTest ("A truncated LIST chunk on a stream of unknown length does not hang the reader");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (100);                                 // claims more than the stream holds
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+            });
+
+            const auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new UnknownLengthInputStream (wav), true));
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+                expectEquals (reader->lengthInSamples, (int64) 2);
+        }
     }
 
 private:
-    MemoryBlock writeToBlock (WavAudioFormat& format, StringPairArray meta)
+    struct WavFormatWriterTestData
+    {
+        WavFormatWriterTestData (const int** ptr,
+                                 size_t numSamples,
+                                 AudioFormatWriterOptions::SampleFormat sampleFormat)
+        {
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (48000.0)
+                                                                 .withNumChannels (1)
+                                                                 .withBitsPerSample (32)
+                                                                 .withSampleFormat (sampleFormat);
+
+            WavAudioFormat format;
+
+            {
+                std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (block, false);
+                auto writer = format.createWriterFor (stream, writerOptions);
+
+                writer->write (ptr, (int) numSamples);
+            }
+
+            reader = rawToUniquePtr (format.createReaderFor (new MemoryInputStream (block, false), true));
+        }
+
+        AudioFormatReader* getReader()
+        {
+            return reader.get();
+        }
+
+    private:
+        MemoryBlock block;
+        std::unique_ptr<AudioFormatReader> reader;
+    };
+
+    // Reads from a block without reporting its length, as a network stream might
+    struct UnknownLengthInputStream final : public MemoryInputStream
+    {
+        explicit UnknownLengthInputStream (const MemoryBlock& mb) : MemoryInputStream (mb, true) {}
+
+        int64 getTotalLength() override { return -1; }
+    };
+
+    MemoryBlock writeToBlock (WavAudioFormat& format, const StringMap& meta)
     {
         MemoryBlock mb;
 
         {
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (44100.0)
+                                                                 .withNumChannels ((int) numTestAudioBufferChannels)
+                                                                 .withBitsPerSample (16)
+                                                                 .withMetadataValues (meta);
+
             // The destructor of the writer will modify the block, so make sure that we've
             // destroyed the writer before returning the block!
-            auto writer = rawToUniquePtr (format.createWriterFor (new MemoryOutputStream (mb, false),
-                                                                  44100.0,
-                                                                  numTestAudioBufferChannels,
-                                                                  16,
-                                                                  meta,
-                                                                  0));
+            std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (mb, false);
+            auto writer = format.createWriterFor (stream, writerOptions);
+
             expect (writer != nullptr);
             AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
             expect (writer->writeFromAudioSampleBuffer (buffer, 0, numTestAudioBufferSamples));
         }
 
         return mb;
+    }
+
+    /*  Creates a minimal PCM wav file. The declared length of the data chunk may differ from
+        the number of data bytes actually written, in order to simulate malformed files.
+    */
+    static MemoryBlock createPcmWav (uint16 numChannels,
+                                     uint16 bitsPerSample,
+                                     uint32 declaredDataLength,
+                                     const std::vector<uint8>& dataBytes,
+                                     const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
+    {
+        using namespace WavFileHelpers;
+
+        constexpr int sampleRate = 44100;
+        const auto bytesPerFrame = numChannels * bitsPerSample / 8;
+
+        // The block-align field is 16 bits wide, so this helper can't describe a wider frame
+        jassert (bytesPerFrame <= std::numeric_limits<uint16>::max());
+
+        MemoryOutputStream body;
+        body.writeInt (chunkName ("WAVE"));
+
+        body.writeInt (chunkName ("fmt "));
+        body.writeInt (16);
+        body.writeShort (1);                            // WAVE_FORMAT_PCM
+        body.writeShort ((short) numChannels);
+        body.writeInt (sampleRate);
+        body.writeInt (sampleRate * bytesPerFrame);     // bytes per second
+        body.writeShort ((short) bytesPerFrame);        // block align
+        body.writeShort ((short) bitsPerSample);
+
+        body.writeInt (chunkName ("data"));
+        body.writeInt ((int) declaredDataLength);
+        body.write (dataBytes.data(), dataBytes.size());
+
+        if (appendTrailingChunks != nullptr)
+            appendTrailingChunks (body);
+
+        MemoryOutputStream out;
+        out.writeInt (chunkName ("RIFF"));
+        out.writeInt ((int) body.getDataSize());
+        out.write (body.getData(), body.getDataSize());
+        return out.getMemoryBlock();
+    }
+
+    static MemoryBlock createPcm8Wav (uint32 declaredDataLength,
+                                      const std::vector<uint8>& dataBytes,
+                                      const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
+    {
+        return createPcmWav (1, 8, declaredDataLength, dataBytes, appendTrailingChunks);
+    }
+
+    static std::unique_ptr<AudioFormatReader> createReader (const MemoryBlock& mb)
+    {
+        return rawToUniquePtr (WavAudioFormat().createReaderFor (new MemoryInputStream (mb, true), true));
+    }
+
+    static std::unique_ptr<AudioFormatWriter> createWriter (int numChannels, int bitsPerSample, double sampleRate = 44100.0)
+    {
+        std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream>();
+
+        return WavAudioFormat().createWriterFor (stream, AudioFormatWriterOptions{}.withSampleRate (sampleRate)
+                                                                                   .withNumChannels (numChannels)
+                                                                                   .withBitsPerSample (bitsPerSample));
+    }
+
+    // Interleaved 8-bit sample data in which each sample identifies its channel and frame.
+    static std::vector<uint8> createInterleavedPattern (int numChannels, int numFrames)
+    {
+        std::vector<uint8> bytes;
+
+        for (int frame = 0; frame < numFrames; ++frame)
+            for (int channel = 0; channel < numChannels; ++channel)
+                bytes.push_back ((uint8) (channel + frame));
+
+        return bytes;
+    }
+
+    static float expectedUnsigned8BitSample (int channel, int frame)
+    {
+        return (float) ((uint8) (channel + frame) - 128) / 128.0f;
     }
 
     StringPairArray getMetadataAfterReading (WavAudioFormat& format, const MemoryBlock& mb)

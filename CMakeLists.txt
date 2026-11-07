@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 project(Capusyn VERSION 1.0.6 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
-# JUCE is expected under third_party/JUCE.
+# JUCE 9.0.5 is vendored under third_party/JUCE.
 add_subdirectory(third_party/JUCE)
 
 # Shared include directories for the local targets.

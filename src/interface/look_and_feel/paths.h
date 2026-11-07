@@ -38,7 +38,7 @@ class Paths {
     }
 
     static Path capusynV() {
-      Path path = fromSvgData((const void*)BinaryData::capusyn_v_svg, BinaryData::capusyn_ring_svgSize);
+      Path path = fromSvgData((const void*)BinaryData::capusyn_v_svg, BinaryData::capusyn_v_svgSize);
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(kLogoWidth, kLogoWidth, kLogoWidth, kLogoWidth), 0.2f);
       return path;

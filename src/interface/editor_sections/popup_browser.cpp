@@ -101,7 +101,7 @@ void PopupDisplay::setContent(const std::string& text, Rectangle<int> bounds,
   Font font = Fonts::instance()->proportional_light().withHeight(height * 0.5f * mult);
   int padding = height / 4;
   int buffer = padding * 2 + 2;
-  int width = (font.getStringWidth(text) / getPixelMultiple()) + buffer;
+  int width = (GlyphArrangement::getStringWidthInt(font, text) / getPixelMultiple()) + buffer;
 
   int middle_x = bounds.getX() + bounds.getWidth() / 2;
   int middle_y = bounds.getY() + bounds.getHeight() / 2;
@@ -176,7 +176,8 @@ int PopupList::getBrowseWidth() {
   int max_width = kMinWidth * size_ratio_;
   int buffer = getTextPadding() * 2 + 2;
   for (int i = 0; i < selections_.size(); ++i)
-    max_width = std::max(max_width, font.getStringWidth(selections_.items[i].name) / getPixelMultiple() + buffer);
+    max_width = std::max(max_width, GlyphArrangement::getStringWidthInt(font, selections_.items[i].name) /
+                                    getPixelMultiple() + buffer);
 
   return max_width;
 }
